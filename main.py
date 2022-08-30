@@ -1,8 +1,5 @@
 from caseLoader import CaseLoader
 
-
-
-
 def load():
     loader = CaseLoader()
     tasks = loader.loadAllTestCases()

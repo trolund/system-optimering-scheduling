@@ -3,6 +3,8 @@ import shutil
 import sys
 
 from task import Task
+from taskType import TaskType
+
 
 class CaseLoader:
 
@@ -17,9 +19,11 @@ class CaseLoader:
                 path = os.path.join(root, fileName)
                 file = open(path, "r")
                 lines = file.readlines()
+                lines.pop(0)
                 for line in lines:
                     values = line.split(";")
-                    task = Task(values[1], values[2], values[3], values[4], values[5], values[6])
+                    event_type = TaskType.TIME if values[4] == "TT" else TaskType.EVENT
+                    task = Task(str(values[1]), int(values[2]), int(values[3]), event_type, int(values[5]), int(values[6]))
                     tasks.append(task)
 
         print("Loaded " + str(len(tasks)) + " test cases.")
