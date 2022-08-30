@@ -12,10 +12,11 @@ class CaseLoader:
         print("Searching for test cases at:")
         path = "./test cases"
         print(path)
-        tasks = []
+        cases = {}
 
         for root, dirs, files in os.walk(path):
             for fileName in files:
+                case_name = root.split("/")[2]
                 path = os.path.join(root, fileName)
                 file = open(path, "r")
                 lines = file.readlines()
@@ -24,8 +25,12 @@ class CaseLoader:
                     values = line.split(";")
                     event_type = TaskType.TIME if values[4] == "TT" else TaskType.EVENT
                     task = Task(str(values[1]), int(values[2]), int(values[3]), event_type, int(values[5]), int(values[6]))
-                    tasks.append(task)
 
-        print("Loaded " + str(len(tasks)) + " test cases.")
+                    if cases.get(case_name) is None:
+                        cases[case_name] = []
 
-        return tasks
+                    cases[case_name].append(task)
+
+        print("Loaded " + str(len(cases)) + " test cases.")
+
+        return cases
