@@ -8,9 +8,9 @@ from taskType import TaskType
 
 class CaseLoader:
 
-    def loadAllTestCases(self):
+    def load_test_case(self, test_case_name=""):
         print("Searching for test cases at:")
-        path = "./test cases"
+        path = "./test cases/" + test_case_name if len(test_case_name) > 0 else "./test cases"
         print(path)
         cases = {}
 
@@ -24,13 +24,14 @@ class CaseLoader:
                 for line in lines:
                     values = line.split(";")
                     event_type = TaskType.TIME if values[4] == "TT" else TaskType.EVENT
-                    task = Task(str(values[1]), int(values[2]), int(values[3]), event_type, int(values[5]), int(values[6]))
+                    task = Task(str(values[1]), int(values[2]), int(values[3]), event_type, int(values[5]),
+                                int(values[6]))
 
                     if cases.get(case_name) is None:
                         cases[case_name] = []
 
                     cases[case_name].append(task)
 
-        print("Loaded " + str(len(cases)) + " test cases.")
+        print("Loaded " + str(len(cases)) + " test case(s).")
 
         return cases

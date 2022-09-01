@@ -2,7 +2,7 @@ from caseLoader import CaseLoader
 
 def load():
     loader = CaseLoader()
-    cases = loader.loadAllTestCases()
+    cases = loader.load_test_case()
 
     print("cases loaded:")
     for case in cases.keys():
