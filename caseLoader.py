@@ -14,6 +14,10 @@ class CaseLoader:
         print(path)
         cases = {}
 
+        if not os.path.exists(path):
+            print(path + " does not exist.")
+            return
+
         for root, dirs, files in os.walk(path):
             for fileName in files:
                 case_name = root.split("/")[2]
