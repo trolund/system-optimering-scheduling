@@ -25,15 +25,19 @@ class CaseLoader:
                 file = open(path, "r")
                 lines = file.readlines()
                 lines.pop(0)
+
                 for line in lines:
+                    # map line to a object
                     values = line.split(";")
                     event_type = TaskType.TIME if values[4] == "TT" else TaskType.EVENT
                     task = Task(str(values[1]), int(values[2]), int(values[3]), event_type, int(values[5]),
                                 int(values[6]))
 
+                    # make sure the case array is initialized
                     if cases.get(case_name) is None:
                         cases[case_name] = []
 
+                    # add task to case
                     cases[case_name].append(task)
 
         print("Loaded " + str(len(cases)) + " test case(s).")
