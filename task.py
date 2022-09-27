@@ -10,3 +10,4 @@ class Task:
         self.type = type
         self.priority = priority
         self.deadline = deadline
+        self.release_time = 0
