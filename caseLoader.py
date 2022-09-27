@@ -6,9 +6,19 @@ from taskType import TaskType
 
 class CaseLoader:
 
-    def load_test_case(self, test_case_name=""):
+    def get_filename_id(self, filename):
+        filename_id = filename.split("_")[13]
+        return filename_id
+
+    def safe_lookup(self, a, i):
+        try:
+            return a[i]
+        except:
+            return None
+
+    def load_test_case(self, test_case_name="", id: int = -1):
         print("Searching for test cases at:")
-        path = "./test cases/" + test_case_name if len(test_case_name) > 0 else "./test cases"
+        path = "./test_cases/" + test_case_name if len(test_case_name) > 0 else "./test_cases"
         print(path)
         cases = {}
 
@@ -32,11 +42,23 @@ class CaseLoader:
                                 int(values[6]))
 
                     # make sure the case array is initialized
-                    if cases.get(case_name) is None:
-                        cases[case_name] = []
+                    case_group = cases.get(case_name)
+                    if case_group is None:
+                        cases[case_name] = {}
 
                     # add task to case
-                    cases[case_name].append(task)
+                    file_id = int(self.get_filename_id(fileName))
+
+                    if cases.get(case_name).get(file_id) is None:
+                        cases[case_name][file_id] = []
+
+                    cases[case_name][file_id].append(task)
+
+        # print("Loaded " + str(len(cases)) + " test case(s).")
+
+        if id != -1:
+            print("Loaded case_group: " + str(test_case_name) + " - case: " + str(id) + " test case(s).")
+            return cases[test_case_name][id]
 
         print("Loaded " + str(len(cases)) + " test case(s).")
 
