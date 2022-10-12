@@ -16,9 +16,10 @@ class CaseLoader:
         except:
             return None
 
-    def load_test_case(self, test_case_name="", id: int = -1):
+    def load_test_case(self, test_case_name="", id: int = -1, filePath=""):
         print("Searching for test cases at:")
-        path = "./test_cases/" + test_case_name if len(test_case_name) > 0 else "./test_cases"
+        file_path = filePath if len(filePath) > 0 else "./test_cases"
+        path = file_path + test_case_name if len(test_case_name) > 0 else file_path
         print(path)
         cases = {}
 
