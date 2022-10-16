@@ -70,7 +70,10 @@ class SimulatedAnnealer:
             tmp_solution = tt + tmp_ps # complete task set  
              
             tmp_schedule, tmp_cost, is_schedulable = cost_f(tmp_solution) # apply objective function
-            
+
+            #pss = [t for t in tmp_solution if t.et_subset != None]
+            #print(len(pss))
+
             # compute delta
             delta = tmp_cost - current_cost
             
@@ -98,6 +101,7 @@ class SimulatedAnnealer:
                     self.best_solution = current_solution
                     self.best_schedule = schedule[:]
                     self.best_cost = current_cost
+                    best_cost = current_cost # not so clean having best cost and self.best_cost ...
                     self.best_ps_config = copy.deepcopy(polling_servers)
                     
                     # log to prompt

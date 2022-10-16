@@ -74,8 +74,8 @@ class Neighborhood:
     def get_neighbor(self, polling_servers):
         # num_ps, period, budget, deadline, subset
         
-        # select parameter to change. skip adding/removing ps for now
-        parameter = self.rand.randint(0, 3)
+        # select parameter to change. we rarely generate feasible solutions when including NUM_PS option
+        parameter = self.rand.randint(1, 3)
         
         # select polling server to operate on 
         victim_ps = polling_servers[self.rand.randint(0,len(polling_servers) - 1)] 
@@ -86,7 +86,8 @@ class Neighborhood:
         # if sign positive add a polling server if negative remove one 
         # when adding a polling server take some et tasks from victim 
         if parameter == NUM_PS:
-            if sign == 1:   
+            if sign == 1:
+                print("adding polling server") 
                 new_et_subset = self.create_ps_subset(victim_ps)
                 new_ps = self.create_random_ps(new_et_subset) 
                 polling_servers.append(new_ps)
@@ -97,6 +98,7 @@ class Neighborhood:
                 
             else:
                 if len(polling_servers) > 1: # do not make set of polling servers empty 
+                    print("removing polling server")
                     receiver_ps = polling_servers[self.rand.randint(0, len(polling_servers) - 1)]
                     
                     while receiver_ps == victim_ps: # select a different ps than victim 
@@ -107,14 +109,14 @@ class Neighborhood:
                     polling_servers.remove(victim_ps) # remove victim from set of polling servers
                      
         elif parameter == BUDGET: # change budget of victim 
-            victim_ps.duration = max(1, victim_ps.duration + sign * 10)
+            victim_ps.duration = max(1, victim_ps.duration + sign * 5)
             
         elif parameter == PERIOD: # change period of victim. we do not accept period < deadline, but we could also just let sa handle it  
-            victim_ps.period = max(5, victim_ps.period + sign * 100)
+            victim_ps.period = max(5, victim_ps.period + sign * 50)
             victim_ps.period = max(victim_ps.period, victim_ps.deadline) # do not accept period < deadline for now 
 
         elif parameter == DEADLINE: # change deadline of victim
-            victim_ps.deadline = max(5, victim_ps.deadline + sign * 100)
+            victim_ps.deadline = max(5, victim_ps.deadline + sign * 50)
             victim_ps.deadline = min(victim_ps.period, victim_ps.deadline) # do not accept period < deadline for now 
             
        # TODO implement this ... 
