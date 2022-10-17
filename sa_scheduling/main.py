@@ -68,7 +68,8 @@ if __name__ == "__main__":
     # generates ...good... solution for many cases, but should be random
     #polling_servers_0 = [Task("tTTps00", 500, 1000, TaskType.TIME, 7, 1000, et_tasks)] 
     #polling_servers_0 = [Task("tTTps00", 10, 20, TaskType.TIME, 7, 20, et_tasks)]
-    
+    #polling_servers_0 = [Task("tTTps00", 3, 51, TaskType.TIME, 7, 21, et_tasks)] 
+    #polling_servers_0 = [Task("tTTps00", 2, 1000, TaskType.TIME, 7, 1, et_tasks)] 
     polling_servers_0 = [neighborhood.create_random_ps(et_tasks)]
 
 

@@ -15,14 +15,15 @@ def get_ready(task_set, cycle, ready_list):
     ready_list = sorted(ready_list, key=lambda t: t.deadline) 
     
     return ready_list
-        
 
+# microticks to get to next point at which some task will be relased
+def steps_to_next_release(cycle, task_set):
+    return min([task.period - (cycle % task.period) for task in task_set])
+        
 # ts is set of TT tasks
-def edf(ts):
-    #print("in edf: ", ts[-1].name, ts[-1].duration, ts[-1].period, ts[-1].deadline)
+def edf(ts): 
     periods = [t.period for t in ts]
-    T = math.lcm(*periods) # least common multiple of TT task periods. 2000 mt = 
-    #print(T)
+    T = math.lcm(*periods) # least common multiple of TT task periods 
     s = [] # schedule will be hyperperiod long. 12 000 microticks == 120 000 microsecs == 120 ms
     ready_list = []
     wcrts = {} # worst case response times
@@ -30,10 +31,7 @@ def edf(ts):
     # overvej reset funktioner i task klassen istedet for alle de kopier...
     for t in range(0, T):
         for task in ready_list:
-            if task.duration > 0 and task.deadline <= t:
-                #print(t)
-                #for task in ready_list:
-                #    print("name: ", task.name, " duration: ", task.duration, " deadline: ", task.deadline, " period: ", task.period, " release: ", task.release_time)
+            if task.duration > 0 and task.deadline <= t: 
                 return s, -1
         
             # job done check response time gt wcrt and remove from ready list
@@ -74,7 +72,7 @@ def calculate_schedulabiltiy(polling_server):
     Dp = polling_server.deadline
     Cp = polling_server.duration
     result_dict = {}
-    
+    is_schedulable = True
     #compute delta and alpha accordingly to [2]
     Delta = Tp + Dp - 2*Cp
     alpha = Cp/Tp
@@ -112,16 +110,17 @@ def calculate_schedulabiltiy(polling_server):
             #According to lemma 1 of [1], we are searching for the earliest time, when the supply exceeds the demand
             if supply >= demand:
                 response_time = t
-                result_dict[et_task.name]  = (True, response_time, et_task.deadline) # if actually greater than deadline, set to false later
+                result_dict[et_task.name]  = (response_time, et_task.deadline) # if actually greater than deadline, set to false later
                 break
             
             t = t + 1
         
         if response_time > Di:
-            result_dict[et_task.name] = (False, response_time, et_task.deadline)
+            is_schedulable = False # maybe just return here ... and penalize with 1 
+            result_dict[et_task.name] = (response_time, et_task.deadline)
             
         
-    return result_dict # contains wcrtbool indicating schedulability and deadline for each et
+    return is_schedulable, result_dict # contains wcrtbool indicating schedulability and deadline for each et
 
 
 
@@ -139,16 +138,22 @@ def cost_f(task_set):
     wcrts_et = 0 # use worst case response time for cost metric
     is_schedulable = True # if some ps is not schedulable at some penalty to cost 
     
-    # a little convoluted but add wcrts for ets in each polling server
-    # if not schedulable add some penalty 1 instead of 1 / deadline_et_i
-    # the is schedulable variable is used in sa right now but find better solution
-    for entry in l: 
-        wcrts_et += (sum([(entry[key][1] / entry[key][2]) if entry[key][0] else 1 for key in entry]) / len(entry))
-        is_schedulable = is_schedulable and reduce((lambda a, b : a and b), [entry[key][0] for key in entry]) # https://www.geeksforgeeks.org/reduce-in-python/ 
+    # costs is (sum(wcrt_i/deadline_i) / len(et_subset)) /len(polling_servers)
+    for element in l: 
+        is_schedulable, wcrts = element
+        if is_schedulable:
+            wcrts_et += sum([wcrts[key][0] / wcrts[key][1] for key in wcrts]) / len(wcrts)
+        else:
+            wcrts_et += 1
+        #is_schedulable = is_schedulable and reduce((lambda a, b : a and b), [entry[key][0] for key in entry]) # https://www.geeksforgeeks.org/reduce-in-python/ 
     
-    # normalize such that 0 <= cost <= 1 
+    # normalize such that 0 <= cost <= 1. this check is funny  
     if l != []:
-        wcrts_et *= 1/len(l) 
+        wcrts_et *= 1/len(l)
+
+    # larger penalty maybe, maybe good idea?
+    if not is_schedulable:
+        wcrts_et = 1
 
     # apply earliest deadline first 
     s, wcrts = edf(task_set)
@@ -156,17 +161,17 @@ def cost_f(task_set):
     # if not tt tasks not schedulable (-1) return faulty schedule, 2 (max cost the way we normalize right now)
     # and false (not schedulable)
     if wcrts == -1:
-        return s, 2, False
-    
-    # normalize worst case response time. for each tt task 0 <= wcrt <= 1 by setting it to wcrt/deadline
-    sum_wcrts_tt = sum([wcrts[task.name] / task.deadline for task in task_set])
+        #return s, 2, False
+        #return s, 1 + wcrts_et, False
+        is_schedulable = False
+        sum_wcrts_tt = 1
+    else:
+        # normalize worst case response time. for each tt task 0 <= wcrt <= 1 by setting it to wcrt/deadline
+        sum_wcrts_tt = sum([wcrts[task.name] / task.deadline for task in task_set]) / len(task_set)
      
-
-    # normalize cost of    
-    sum_wcrts_tt = sum_wcrts_tt / len(task_set)
+    print("cost et: ", wcrts_et, " cost tt: ", sum_wcrts_tt) 
     sum_wcrts = (sum_wcrts_tt + wcrts_et)
 
     #alternative 0 <= sum <= 1 by doing sum/2 ..
-    assert 0 <= sum_wcrts and sum_wcrts <= 2
-    
+    assert 0 <= sum_wcrts and sum_wcrts <= 2  
     return s, sum_wcrts, is_schedulable
