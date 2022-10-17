@@ -65,10 +65,11 @@ if __name__ == "__main__":
     tt_tasks = [t for t in all_tasks if t.type == TaskType.TIME]
     et_tasks = [t for t in all_tasks if t.type == TaskType.EVENT]
 
-    # generates good solution for many cases, but should be random
-    polling_servers_0 = [Task("tTTps00", 500, 1000, TaskType.TIME, 7, 1000, et_tasks)]
+    # generates ...good... solution for many cases, but should be random
+    #polling_servers_0 = [Task("tTTps00", 500, 1000, TaskType.TIME, 7, 1000, et_tasks)] 
+    #polling_servers_0 = [Task("tTTps00", 10, 20, TaskType.TIME, 7, 20, et_tasks)]
     
-    #polling_servers_0 = [neighborhood.create_random_ps(et_tasks)]
+    polling_servers_0 = [neighborhood.create_random_ps(et_tasks)]
 
 
     task_set = tt_tasks + polling_servers_0

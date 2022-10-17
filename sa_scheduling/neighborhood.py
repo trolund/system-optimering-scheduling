@@ -26,12 +26,11 @@ class Neighborhood:
         #periods = [1000, 2000,3000,4000]
         #period = periods[rand.randint(0,len(periods)-1)]
         #deadline = max(period, (rand.randint(1, 40) * 100)) # deadline <= period 
+         
+        period = self.rand.randint(1, 30) * 10 # multiple of 10 to avoid hyperperiod exploding??
+        deadline = max(period, (self.rand.randint(1, 30) * 10)) 
+        duration = min(self.rand.randint(1, 100), deadline) # this seems like cheating hardcoding range
         
-        
-        duration = self.rand.randint(1, 500) # this seems like cheating hardcoding range
-        period = self.rand.randint(1, 50) * 100 # multiple of 100 to avoid hyperperiod exploding??
-        deadline = max(period, (self.rand.randint(1, 50) * 100)) 
-
         # naming of polling servers must be unique 
         self.n_polling_servers += 1  
         
@@ -75,7 +74,7 @@ class Neighborhood:
         # num_ps, period, budget, deadline, subset
         
         # select parameter to change. we rarely generate feasible solutions when including NUM_PS option
-        parameter = self.rand.randint(1, 3)
+        parameter = self.rand.randint(0, 3)
         
         # select polling server to operate on 
         victim_ps = polling_servers[self.rand.randint(0,len(polling_servers) - 1)] 
@@ -87,7 +86,7 @@ class Neighborhood:
         # when adding a polling server take some et tasks from victim 
         if parameter == NUM_PS:
             if sign == 1:
-                print("adding polling server") 
+                #print("adding polling server") 
                 new_et_subset = self.create_ps_subset(victim_ps)
                 new_ps = self.create_random_ps(new_et_subset) 
                 polling_servers.append(new_ps)
@@ -98,7 +97,7 @@ class Neighborhood:
                 
             else:
                 if len(polling_servers) > 1: # do not make set of polling servers empty 
-                    print("removing polling server")
+                    #print("removing polling server")
                     receiver_ps = polling_servers[self.rand.randint(0, len(polling_servers) - 1)]
                     
                     while receiver_ps == victim_ps: # select a different ps than victim 
@@ -109,14 +108,16 @@ class Neighborhood:
                     polling_servers.remove(victim_ps) # remove victim from set of polling servers
                      
         elif parameter == BUDGET: # change budget of victim 
-            victim_ps.duration = max(1, victim_ps.duration + sign * 5)
-            
+            victim_ps.duration = max(1, victim_ps.duration + sign * self.rand.randint(1,50))
+            victim_ps.duration = min(victim_ps.duration, victim_ps.deadline) # do not accept duration > deadline 
+        
+        # we add/subtract sum number divisible by 10 and <= 100
         elif parameter == PERIOD: # change period of victim. we do not accept period < deadline, but we could also just let sa handle it  
-            victim_ps.period = max(5, victim_ps.period + sign * 50)
+            victim_ps.period = max(5, victim_ps.period + sign * self.rand.randint(1,100))
             victim_ps.period = max(victim_ps.period, victim_ps.deadline) # do not accept period < deadline for now 
 
         elif parameter == DEADLINE: # change deadline of victim
-            victim_ps.deadline = max(5, victim_ps.deadline + sign * 50)
+            victim_ps.deadline = max(5, victim_ps.deadline + sign * self.rand.randint(1,100))
             victim_ps.deadline = min(victim_ps.period, victim_ps.deadline) # do not accept period < deadline for now 
             
        # TODO implement this ... 

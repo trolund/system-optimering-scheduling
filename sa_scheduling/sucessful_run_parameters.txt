@@ -1,0 +1,32 @@
+python3.9 main.py -l out3.pdf inf_70_10 10 3.5 0.97 900
+python3.9 main.py -l out55.pdf inf_10_10 10 3.5 0.97 900
+
+ran for  900.0  seconds
+number of generated solutions:  1879
+number of visited solutions:  403
+Best polling server configuration: 
+	Name:  tTTps1  Duration:  21  Period:  50  Deadline:  30
+		Name:  tET15
+		Name:  tET16
+		Name:  tET19
+		Name:  tET0
+		Name:  tET17
+		Name:  tET12
+		Name:  tET9
+		Name:  tET10
+		Name:  tET5
+		Name:  tET7
+		Name:  tET18
+		Name:  tET3
+		Name:  tET6
+		Name:  tET13
+		Name:  tET14
+		Name:  tET4
+		Name:  tET2
+		Name:  tET8
+		Name:  tET1
+		Name:  tET11
+
+10_10 90
+Name:  tTTps5  Duration:  10  Period:  20  Deadline:  20
+
