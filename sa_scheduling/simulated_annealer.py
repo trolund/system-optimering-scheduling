@@ -44,8 +44,7 @@ class SimulatedAnnealer:
         sec0 = int(time.time())
 
         # get tt and et tasks
-        tt = [t for t in s0 if t.type == TaskType.TIME and t.et_subset == None]
-        et = [t for t in s0 if t.type == TaskType.EVENT]
+        tt = [t for t in s0 if t.type == TaskType.TIME and t.et_subset == None] 
         polling_servers = [t for t in s0 if t.et_subset != None]
         
         # current and best solution

@@ -92,7 +92,10 @@ class Neighborhood:
         
         # increase or decrease chosen parameter
         sign = 1 if self.rand.randint(0,1) == 0 else -1
-        
+
+        steps = [1, 5, 10, 100]
+        step = steps[self.rand.randint(1, len(steps) - 1)]
+
         # if sign positive add a polling server if negative remove one 
         # when adding a polling server take some et tasks from victim 
         if parameter == NUM_PS:
@@ -126,12 +129,12 @@ class Neighborhood:
         # we add/subtract sum number divisible by 10 and <= 100
         elif parameter == PERIOD: # change period of victim. we do not accept period < deadline, but we could also just let sa handle it  
             #victim_ps.period = max(5, victim_ps.period + sign * self.rand.randint(1,100))
-            victim_ps.period = max(5, victim_ps.period + sign * 10)
+            victim_ps.period = max(1, victim_ps.period + sign * step)
             victim_ps.period = max(victim_ps.period, victim_ps.deadline) # do not accept period < deadline for now 
 
         elif parameter == DEADLINE: # change deadline of victim
             #victim_ps.deadline = max(5, victim_ps.deadline + sign * self.rand.randint(1,100))
-            victim_ps.period = max(5, victim_ps.deadline + sign * 10)
+            victim_ps.deadline = max(1, victim_ps.deadline + sign * step)
             victim_ps.deadline = min(victim_ps.period, victim_ps.deadline) # do not accept period < deadline for now 
             
        # TODO implement this ... 

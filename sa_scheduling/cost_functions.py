@@ -120,7 +120,7 @@ def calculate_schedulabiltiy(polling_server):
         if response_time > Di: 
             is_schedulable = False # TODO maybe just return here ... and penalize with 1 
             result_dict[et_task.name] = (response_time, et_task.deadline)
-            
+            return is_schedulable, result_dict 
         
     return is_schedulable, result_dict # contains wcrtbool indicating schedulability and deadline for each et
 
@@ -152,11 +152,7 @@ def cost_f(task_set):
     # normalize such that 0 <= cost <= 1. this check is funny  
     if l != []:
         wcrts_et *= 1/len(l)
-
-    # larger penalty maybe, maybe good idea?
-    #if not is_schedulable:
-    #    wcrts_et = 1
-
+     
     # apply earliest deadline first 
     s, wcrts = edf(task_set)
     
