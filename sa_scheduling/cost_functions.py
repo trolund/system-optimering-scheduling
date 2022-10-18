@@ -2,6 +2,13 @@ import math
 import copy 
 from functools import reduce
 
+"""
+    TODO do not sort but find min element 
+    TODO skip to next ready job when idle. this is almost done 
+    TODO Extension 1 utilization thing in edf 
+"""
+
+
 def get_ready(task_set, cycle, ready_list):
     for task in task_set:
         if cycle % task.period == 0:
@@ -32,7 +39,7 @@ def edf(ts):
     for t in range(0, T):
         for task in ready_list:
             if task.duration > 0 and task.deadline <= t: 
-                return s, -1
+                return s, -1 # just return 1 here maybe lol? 
         
             # job done check response time gt wcrt and remove from ready list
             if task.duration == 0 and task.deadline >= t:
@@ -46,7 +53,7 @@ def edf(ts):
         # release taks at time t
         ready_list = get_ready(ts, t, ready_list)
 
-        if ready_list == []:
+        if ready_list == []: # TODO add skip to next released 
             s.append("IDLE")
             continue
         else:
@@ -79,14 +86,9 @@ def calculate_schedulabiltiy(polling_server):
     
     #hyperperiod is lcm of all task periods in T_ET (all values must be from the chosen subset of ET tasks from the .csv)
     periods = [t.period for t in et_tasks]
-    #for task in et_tasks:
-    #    (pi, Ci, Ti, Di) = unpack(task)
-    #    periods.append(Ti)
-
-    
+     
     hyperperiod = math.lcm(*periods)
-    #print("hyperperiod ets is ", hyperperiod)
-
+    
     for et_task in et_tasks:
         (pi, Ci, Ti, Di) = unpack(et_task)
         t = 0
@@ -115,8 +117,8 @@ def calculate_schedulabiltiy(polling_server):
             
             t = t + 1
         
-        if response_time > Di:
-            is_schedulable = False # maybe just return here ... and penalize with 1 
+        if response_time > Di: 
+            is_schedulable = False # TODO maybe just return here ... and penalize with 1 
             result_dict[et_task.name] = (response_time, et_task.deadline)
             
         
@@ -152,8 +154,8 @@ def cost_f(task_set):
         wcrts_et *= 1/len(l)
 
     # larger penalty maybe, maybe good idea?
-    if not is_schedulable:
-        wcrts_et = 1
+    #if not is_schedulable:
+    #    wcrts_et = 1
 
     # apply earliest deadline first 
     s, wcrts = edf(task_set)
@@ -174,4 +176,5 @@ def cost_f(task_set):
 
     #alternative 0 <= sum <= 1 by doing sum/2 ..
     assert 0 <= sum_wcrts and sum_wcrts <= 2  
+    
     return s, sum_wcrts, is_schedulable

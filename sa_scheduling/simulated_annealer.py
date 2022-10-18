@@ -76,10 +76,7 @@ class SimulatedAnnealer:
 
             # compute delta
             delta = tmp_cost - current_cost
-            
-            # logging
-            self.n_solutions = self.n_solutions + 1
-            
+         
             # some logging     
             if delta > 0:
                 print("cost: ", tmp_cost, f" delta: {delta:.10f}", f" t: {t:.10f}", f" p(delta, t): {self.p(delta, t):.10f}", " is schedulable: ", is_schedulable, " num_ps: ", len(pss))
@@ -108,10 +105,13 @@ class SimulatedAnnealer:
                     #print("*************************************************")
                     print("************* updated best solution *************")
                     #print("*************************************************")
-                    
+
+            # logging
+            self.n_solutions = self.n_solutions + 1
+
             # update temperature 
             t = t * a 
-        
+ 
         self.print_message(stopcriterion_sec)        
         #return (schedule, best_cost, self.best_ps_config) 
 

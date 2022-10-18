@@ -22,6 +22,7 @@ def generate_plot(cost_log, best_cost, filename, test_case):
     plt.title("Costs " + test_case[0] + " " + str(test_case[1]))
     plt.xlabel("Solution number")
     plt.ylabel("Cost")
+    ax.set_xlim(0, len(cost_log))
     ax.legend()
     fig.set_dpi(300)
     plt.savefig(filename)
@@ -69,7 +70,11 @@ if __name__ == "__main__":
     #polling_servers_0 = [Task("tTTps00", 500, 1000, TaskType.TIME, 7, 1000, et_tasks)] 
     #polling_servers_0 = [Task("tTTps00", 10, 20, TaskType.TIME, 7, 20, et_tasks)]
     #polling_servers_0 = [Task("tTTps00", 3, 51, TaskType.TIME, 7, 21, et_tasks)] 
-    #polling_servers_0 = [Task("tTTps00", 2, 1000, TaskType.TIME, 7, 1, et_tasks)] 
+    #polling_servers_0 = [Task("tTTps00", 2, 1000, TaskType.TIME, 7, 1, et_tasks)]
+    #polling_servers_0 = [Task("tTTps00", 9, 41, TaskType.TIME, 7, 31, et_tasks)]  
+    #polling_servers_0 = [Task("tTTps00", 11, 20, TaskType.TIME, 7, 20, et_tasks)] 
+    
+    #polling_servers_0 = [Task("tTTps00", 5, 25, TaskType.TIME, 7, 5, et_tasks)] 
     polling_servers_0 = [neighborhood.create_random_ps(et_tasks)]
 
 
