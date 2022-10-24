@@ -38,9 +38,9 @@ class Neighborhood:
         #deadline = max(period, (rand.randint(1, 40) * 100)) # deadline <= period 
 
         # TODO try without prime numbers !!  
-        period = self.rand.randint(1, 50) * 10 # multiple of 10 to avoid hyperperiod exploding??
-        deadline = max(period, (self.rand.randint(1, 50) * 10)) 
-        duration = min(self.rand.randint(1, 300), deadline) # this seems like cheating hardcoding range
+        period = self.rand.randint(1, 20) * 10 # multiple of 10 to avoid hyperperiod exploding??
+        deadline = max(period, (self.rand.randint(1, 20) * 10)) 
+        duration = min(self.rand.randint(1, 200), deadline) # this seems like cheating hardcoding range
         
         # naming of polling servers must be unique 
         self.n_polling_servers += 1  
