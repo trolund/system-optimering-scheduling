@@ -3,7 +3,7 @@ from taskType import TaskType
 from cost_functions import *
 import unittest
 
-# 2 feasible 1 infeasible for each. test the last case where ready list not empty??
+# 2 feasible 2 infeasible for each. test the last case where ready list not empty??
 class TestEDF(unittest.TestCase):    
     # feasible
     def test_edf_case_1(self):
@@ -26,7 +26,7 @@ class TestEDF(unittest.TestCase):
         
         self.assertIn(s, schedule_options) 
     
-    # feasible
+    # feasible. from hard real time p. 102
     def test_edf_case_2(self):
         task0 = Task("tTT0", 2, 5, TaskType.TIME, 7, 5) 
         task1 = Task("tTT1", 4, 7, TaskType.TIME, 7, 7)
@@ -50,6 +50,17 @@ class TestEDF(unittest.TestCase):
 
         s, wcrts = edf(task_set)
         self.assertEqual(s, [])
+
+    # not feasible
+    def test_edf_case4(self):
+        task0 = Task("tTT0", 1, 2, TaskType.TIME, 7, 2) 
+        task1 = Task("tTT1", 3, 4, TaskType.TIME, 7, 4)
+        task_set = [task0, task1]
+
+        s, wcrts = edf(task_set)
+        self.assertEqual(s, [])
+
+
         
 if __name__ == "__main__":
     unittest.main()
