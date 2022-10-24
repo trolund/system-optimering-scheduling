@@ -34,12 +34,12 @@ def edf(ts):
     s = [] # schedule will be hyperperiod long. 12 000 microticks == 120 000 microsecs == 120 ms
     ready_list = []
     wcrts = {} # worst case response times
-    
-    # overvej reset funktioner i task klassen istedet for alle de kopier...
+     
+    # return same thing in all failed cases, just empty list fx!! 
     for t in range(0, T):
         for task in ready_list:
             if task.duration > 0 and task.deadline <= t: 
-                return s, -1 # just return 1 here maybe lol? 
+                return [], -1 # just return 1 here maybe lol? 
         
             # job done check response time gt wcrt and remove from ready list
             if task.duration == 0 and task.deadline >= t:
@@ -60,9 +60,10 @@ def edf(ts):
             # EDF get next job to execute 
             s.append(ready_list[0].name)
             ready_list[0].duration = ready_list[0].duration - 1
-    
+
+    # not feasible if ready list is not empty after hyperperiod
     if ready_list != []:
-        return [], wcrts
+        return [], -1
     
     #print("in EDF wcrts is: ", wcrts)
     
@@ -154,13 +155,10 @@ def cost_f(task_set):
         wcrts_et *= 1/len(l)
      
     # apply earliest deadline first 
-    s, wcrts = edf(task_set)
+    s, wcrts = edf(task_set) 
     
-    # if not tt tasks not schedulable (-1) return faulty schedule, 2 (max cost the way we normalize right now)
-    # and false (not schedulable)
-    if wcrts == -1:
-        #return s, 2, False
-        #return s, 1 + wcrts_et, False
+    # if not schedulable set tt cost contribution to 1 (max) and is_schedulable to false 
+    if s == []: 
         is_schedulable = False
         sum_wcrts_tt = 1
     else:
