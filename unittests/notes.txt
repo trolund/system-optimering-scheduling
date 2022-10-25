@@ -1,5 +1,0 @@
-This is notes for unit tests - Should be deleted afterwards
-
-
-
-Test:
