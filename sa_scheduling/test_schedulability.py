@@ -5,8 +5,8 @@ from cost_functions import calculate_schedulabiltiy
 
 class CheckSchedulabilityTests(unittest.TestCase):
     
-    #subset is not schedulable 
-    def testIsNotSchedulable(self):
+    #subset is schedulable 
+    def testIsSchedulable(self):
         
         #name, duration, period, tasktype, priority, deadline
         task0 = Task("tET0", 1, 3, TaskType.EVENT, 7, 3) 
@@ -19,8 +19,8 @@ class CheckSchedulabilityTests(unittest.TestCase):
         is_schedulable, result_dict = calculate_schedulabiltiy(ps0)
         self.assertEqual(is_schedulable, True)
 
-    #subset is schedulable
-    def testIsSchedulable(self):
+    #subset is not schedulable
+    def testIsNotSchedulable(self):
         task0 = Task("tET0", 1, 3, TaskType.EVENT, 8, 1) 
         task1 = Task("tET1", 2, 4, TaskType.EVENT, 7, 4)
         et_subset = [task0, task1]
