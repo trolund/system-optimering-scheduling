@@ -4,7 +4,6 @@ from functools import reduce
 
 """
     TODO do not sort but find min element 
-    TODO skip to next ready job when idle. this is almost done 
     TODO Extension 1 utilization thing in edf 
 """
 
@@ -28,45 +27,55 @@ def steps_to_next_release(cycle, task_set):
     return min([task.period - (cycle % task.period) for task in task_set])
         
 # ts is set of TT tasks
-def edf(ts): 
+def edf(ts):
     periods = [t.period for t in ts]
     T = math.lcm(*periods) # least common multiple of TT task periods 
     s = [] # schedule will be hyperperiod long. 12 000 microticks == 120 000 microsecs == 120 ms
     ready_list = []
     wcrts = {} # worst case response times
-     
-    # return same thing in all failed cases, just empty list fx!! 
-    for t in range(0, T):
+
+    # return same thing in all failed cases, just empty list fx!!
+    # until cycle is greater or equal to hyperperiod
+    t = 0
+    while t < T:
         for task in ready_list:
-            if task.duration > 0 and task.deadline <= t: 
+            if task.duration > 0 and task.deadline <= t:
                 return [], -1 # just return 1 here maybe lol? 
-        
+
             # job done check response time gt wcrt and remove from ready list
             if task.duration == 0 and task.deadline >= t:
                 response_time = t - task.release_time
-                
+
                 if task.name not in wcrts or response_time >= wcrts[task.name]:
                     wcrts[task.name] = response_time
-                
+
                 ready_list.remove(task)
-                
+
         # release taks at time t
         ready_list = get_ready(ts, t, ready_list)
 
-        if ready_list == []: # TODO add skip to next released 
-            s.append("IDLE")
+        if ready_list == []:
+            # increase period to next task's release
+            steps_to_skip = steps_to_next_release(t, ts)
+            t += steps_to_skip
+            # append steps_to_skip amount of IDLEs to schedule
+            s.extend(["IDLE"] * steps_to_skip)
             continue
         else:
             # EDF get next job to execute 
             s.append(ready_list[0].name)
             ready_list[0].duration = ready_list[0].duration - 1
 
+        # increment cycle counter
+        t += 1
+
     # not feasible if ready list is not empty after hyperperiod
     if ready_list != []:
         return [], -1
-    
+
     #print("in EDF wcrts is: ", wcrts)
-    
+
+
     return s, wcrts
 
 # utility function 
