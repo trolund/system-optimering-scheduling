@@ -13,6 +13,7 @@ from functools import reduce
     TODO number of pss also related to separation requirement 
     TODO SEPARATION!!!! 
     TODO steal from subset 
+    TODO multiple polling servers in initial solution
 
 """
 
@@ -85,7 +86,7 @@ class Neighborhood:
         # num_ps, period, budget, deadline, subset
         
         # select parameter to change. we rarely generate feasible solutions when including NUM_PS option
-        parameter = self.rand.randint(NUM_PS, DEADLINE)
+        parameter = self.rand.randint(NUM_PS, SUBSET)
         
         # select polling server to operate on 
         victim_ps = polling_servers[self.rand.randint(0,len(polling_servers) - 1)] 
@@ -152,7 +153,7 @@ class Neighborhood:
             new_ps_et_subset = self.create_ps_subset(other_ps_victim)
 
             # remove other victim from task set if it does not have any et tasks  
-            if victim_ps.et_subset == []:
+            if other_ps_victim.et_subset == []:
                 polling_servers.remove(other_ps_victim) 
 
             # add et tasks to victim ps 
@@ -161,10 +162,19 @@ class Neighborhood:
         return polling_servers
 
 
+
+
+
+
 """
     QUESTIONS:
         neighborhood different approaches 
-        cost make sense???
-
+        cost make sense??? ok but consider this other approach
+        random initial configuration
+        separation requirement: same value same ps, no other value on this ps except 0?
+                                may we have multiple ps on same ps or must they be on same??
+                                or just no two different values on same?
+                                should we generate solutions that do not meet this criterium
+                                and just penalize them? or simply not generate such solutions?
 
 """ 
