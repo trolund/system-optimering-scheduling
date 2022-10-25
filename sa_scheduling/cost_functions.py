@@ -145,9 +145,11 @@ def cost_f(task_set):
     for element in l: 
         is_schedulable, wcrts = element
         if is_schedulable:
-            wcrts_et += sum([wcrts[key][0] / wcrts[key][1] for key in wcrts]) / len(wcrts)
+            #wcrts_et += sum([wcrts[key][0] / wcrts[key][1] for key in wcrts]) / len(wcrts)
+            wcrts_et += sum([wcrts[key][0] for key in wcrts]) / len(wcrts)
         else:
-            wcrts_et += 1
+            #wcrts_et += 1 
+            wcrts_et += sum(wcrts[key][1] for key in wcrts) / len(wcrts) + 1
         #is_schedulable = is_schedulable and reduce((lambda a, b : a and b), [entry[key][0] for key in entry]) # https://www.geeksforgeeks.org/reduce-in-python/ 
     
     # normalize such that 0 <= cost <= 1. this check is funny  
@@ -160,15 +162,62 @@ def cost_f(task_set):
     # if not schedulable set tt cost contribution to 1 (max) and is_schedulable to false 
     if s == []: 
         is_schedulable = False
-        sum_wcrts_tt = 1
+        #sum_wcrts_tt = 1    # sum deadline / len task_set + 1 -> would not occur 
+        sum_wcrts_tt = sum([task.deadline for task in task_set]) / len(task_set) + 1
     else:
         # normalize worst case response time. for each tt task 0 <= wcrt <= 1 by setting it to wcrt/deadline
-        sum_wcrts_tt = sum([wcrts[task.name] / task.deadline for task in task_set]) / len(task_set)
+        #sum_wcrts_tt = sum([wcrts[task.name] / task.deadline for task in task_set]) / len(task_set)
+        sum_wcrts_tt = sum([wcrts[task.name] for task in task_set]) / len(task_set)
+
+    print("cost et: ", wcrts_et, " cost tt: ", sum_wcrts_tt) 
+    sum_wcrts = (sum_wcrts_tt + wcrts_et)
+
+    #alternative 0 <= sum <= 1 by doing sum/2 ..
+    #assert 0 <= sum_wcrts and sum_wcrts <= 2  
+    
+    return s, sum_wcrts, is_schedulable
+
+
+    # (sum wcrt / len task_set) / (sum deadline / len task_set)  
+
+    # original bad maybe bc task with large deadline might not be that costly even though large 
+    # wcrts so maybe not avg response time 
+    """
+    
+    # costs is (sum(wcrt_i/deadline_i) / len(et_subset)) /len(polling_servers)
+    for element in l: 
+        is_schedulable, wcrts = element
+        if is_schedulable:
+            wcrts_et += sum([wcrts[key][0] for key in wcrts]) / len(wcrts)
+        else:
+            wcrts_et += sum(wcrts[key][1] for key in wcrts) / len(wcrts) + 1
+        #is_schedulable = is_schedulable and reduce((lambda a, b : a and b), [entry[key][0] for key in entry]) # https://www.geeksforgeeks.org/reduce-in-python/ 
+    
+    # normalize such that 0 <= cost <= 1. this check is funny  
+    #if l != []:
+        wcrts_et *= 1/len(l)
+     
+    # apply earliest deadline first 
+    s, wcrts = edf(task_set) 
+    
+    # if not schedulable set tt cost contribution to 1 (max) and is_schedulable to false 
+    if s == []: 
+        is_schedulable = False
+        sum_wcrts_tt = 1    # sum deadline / len task_set + 1 -> would not occur 
+    else:
+        # normalize worst case response time. for each tt task 0 <= wcrt <= 1 by setting it to wcrt/deadline
+        sum_wcrts_tt = sum([wcrts[task.name] for task in task_set]) / len(task_set)
      
     print("cost et: ", wcrts_et, " cost tt: ", sum_wcrts_tt) 
     sum_wcrts = (sum_wcrts_tt + wcrts_et)
 
     #alternative 0 <= sum <= 1 by doing sum/2 ..
-    assert 0 <= sum_wcrts and sum_wcrts <= 2  
+    #assert 0 <= sum_wcrts and sum_wcrts <= 2  
     
     return s, sum_wcrts, is_schedulable
+
+
+    # (sum wcrt / len task_set) / (sum deadline / len task_set)  
+    
+    
+    """

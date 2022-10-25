@@ -40,7 +40,7 @@ class Neighborhood:
         # TODO try without prime numbers !!  
         period = self.rand.randint(1, 20) * 10 # multiple of 10 to avoid hyperperiod exploding??
         deadline = max(period, (self.rand.randint(1, 20) * 10)) 
-        duration = min(self.rand.randint(1, 200), deadline) # this seems like cheating hardcoding range
+        duration = min(self.rand.randint(1, 50), deadline) # this seems like cheating hardcoding range
         
         # naming of polling servers must be unique 
         self.n_polling_servers += 1  
@@ -85,7 +85,7 @@ class Neighborhood:
         # num_ps, period, budget, deadline, subset
         
         # select parameter to change. we rarely generate feasible solutions when including NUM_PS option
-        parameter = self.rand.randint(0, 3)
+        parameter = self.rand.randint(NUM_PS, DEADLINE)
         
         # select polling server to operate on 
         victim_ps = polling_servers[self.rand.randint(0,len(polling_servers) - 1)] 
@@ -93,13 +93,14 @@ class Neighborhood:
         # increase or decrease chosen parameter
         sign = 1 if self.rand.randint(0,1) == 0 else -1
 
+        # an argument for doing this is that sometimes we need a big difference to get far neighbor, avoid being stuck?
         steps = [1, 5, 10, 100]
         step = steps[self.rand.randint(1, len(steps) - 1)]
 
         # if sign positive add a polling server if negative remove one 
         # when adding a polling server take some et tasks from victim 
         if parameter == NUM_PS:
-            if sign == 1:  # TODO find some way to determine max num polling servers or if we should even have 
+            if sign == 1 and len(polling_servers) < 7:  # TODO find some way to determine max num polling servers or if we should even have 
                 #print("adding polling server") 
                 new_et_subset = self.create_ps_subset(victim_ps)
                 new_ps = self.create_random_ps(new_et_subset) 
@@ -137,7 +138,7 @@ class Neighborhood:
             victim_ps.deadline = max(1, victim_ps.deadline + sign * step)
             victim_ps.deadline = min(victim_ps.period, victim_ps.deadline) # do not accept period < deadline for now 
             
-       # TODO implement this ... 
+        # not confident that it works  
         elif parameter == SUBSET: # move et tasks from one ps to another
             if len(polling_servers) == 1: # if no one to steal from 
                 return polling_servers 
@@ -146,9 +147,24 @@ class Neighborhood:
 
             while other_ps_victim == victim_ps:
                 other_ps_victim = polling_servers[self.rand.randint(0, len(polling_servers) -1)]
-                
-            new_ps_et_subset = self.get_subset(polling_servers, other_ps_victim)
-            
+
+            # get some et tasks from other ps victim, delete these from this ps    
+            new_ps_et_subset = self.create_ps_subset(other_ps_victim)
+
+            # remove other victim from task set if it does not have any et tasks  
+            if victim_ps.et_subset == []:
+                polling_servers.remove(other_ps_victim) 
+
+            # add et tasks to victim ps 
             victim_ps.et_subset += new_ps_et_subset
             
-        return polling_servers 
+        return polling_servers
+
+
+"""
+    QUESTIONS:
+        neighborhood different approaches 
+        cost make sense???
+
+
+""" 
