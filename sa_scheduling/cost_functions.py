@@ -171,7 +171,7 @@ def cost_f(task_set):
     # if not schedulable set tt cost contribution to 1 (max) and is_schedulable to false 
     if s == []: 
         is_schedulable = False
-        #sum_wcrts_tt = 1    # sum deadline / len task_set + 1 -> would not occur 
+        #sum_wcrts_tt = 1    # sum deadline / len task_set + 1 -> would not occur. consider larger penalty 
         sum_wcrts_tt = sum([task.deadline for task in task_set]) / len(task_set) + 1
     else:
         # normalize worst case response time. for each tt task 0 <= wcrt <= 1 by setting it to wcrt/deadline

@@ -171,10 +171,21 @@ class Neighborhood:
         neighborhood different approaches 
         cost make sense??? ok but consider this other approach
         random initial configuration
+        
+        
+        
         separation requirement: same value same ps, no other value on this ps except 0?
                                 may we have multiple ps on same ps or must they be on same??
                                 or just no two different values on same?
                                 should we generate solutions that do not meet this criterium
                                 and just penalize them? or simply not generate such solutions?
+
+            emjn@dtu.dk
+            se
+
+            do not consider solutions that do not meet separation criteria! 
+
+
+
 
 """ 
