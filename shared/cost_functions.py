@@ -8,6 +8,7 @@ from functools import reduce
 """
 
 
+# not used anymore 
 def get_ready(task_set, cycle, ready_list):
     for task in task_set:
         if cycle % task.period == 0:
@@ -21,6 +22,17 @@ def get_ready(task_set, cycle, ready_list):
     ready_list = sorted(ready_list, key=lambda t: t.deadline) 
     
     return ready_list
+
+# processor demand. see section 4.6 of hard real time 
+def processor_demand_criterion(t1, t2, task_set):
+
+    # phase or capital phi is 0 for all task in our case
+    # for some task demand = duration*number_of_instances_interval 
+    demand = sum([max(0, (t2 + task.period - task.deadline) / task.period - t1 / task.period) * task.duration for task in task_set])
+    
+    # task set is schedulable if processor demand does not exceed available time  
+    return demand <= (t2 - t1)
+
 
 def create_job(cycle, task): 
     new_job = copy.deepcopy(task)
@@ -41,8 +53,11 @@ def edf(ts):
     ready_list = [] 
     wcrts = {} # worst case response times
 
-    # return same thing in all failed cases, just empty list fx!!
-    # until cycle is greater or equal to hyperperiod
+    # total amount of computation time needed exceeding available time -> not schedulable
+    if not processor_demand_criterion(0, T, ts): 
+        return [], -1 
+
+    # return same thing in all failed cases, just empty list fx!! 
     t = 0
     while t < T:
         for task in ready_list:
@@ -142,14 +157,8 @@ def calculate_schedulabiltiy(polling_server):
         
     return is_schedulable, result_dict # contains wcrtbool indicating schedulability and deadline for each et
 
-
-
-# cost is sum of worst case response times of tt tasks + sum worst case respone times for et tasks
-# the wcrt of tt/et task i is multiplied by 1/deadline_i to normalize it
-# the sum of wcrts tt is multiplied by 1/len(tt_task_set) and 1/len(et_task_set) for wcrts of et tasks
-# this gives us a number betwen 0 and 1 for both tt and et 
-# add these two together and get a number between 0 and 2
-# use this as cost 
+# sum of average worst case response time for tt tasks and et tasks. penality for not schedulable
+# also returns the schedule and boolean indicating schedulability 
 def cost_f(task_set):
     polling_servers = [ps for ps in task_set if ps.et_subset != None] # get set of polling servers from task set 
     

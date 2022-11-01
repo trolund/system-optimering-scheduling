@@ -135,7 +135,7 @@ class Neighborhood:
                     polling_servers) < 7:  # TODO find some way to determine max num polling servers or if we should even have
                 # print("adding polling server")
                 new_et_subset = self.create_ps_subset(victim_ps)
-                new_ps = self.create_random_ps(new_et_subset)
+                new_ps = self.create_random_ps1(new_et_subset)
                 polling_servers.append(new_ps)
 
                 # remove victim from task set if it does not have any et tasks  

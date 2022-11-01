@@ -60,6 +60,18 @@ class TestEDF(unittest.TestCase):
         s, wcrts = edf(task_set)
         self.assertEqual(s, [])
 
+    # not feasible 
+    def test_edf_case5(self):
+        task0 = Task("tTT0", 1, 2, TaskType.TIME, 7, 2) 
+        task1 = Task("tTT1", 1, 3, TaskType.TIME, 7, 3) 
+        task2 = Task("tTT2", 3, 4, TaskType.TIME, 7, 4) 
+        
+        task_set = [task0, task1, task2]
+
+        s, wcrts = edf(task_set)
+
+        self.assertEqual(s, [])
+
 
         
 if __name__ == "__main__":
