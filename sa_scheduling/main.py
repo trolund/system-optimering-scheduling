@@ -7,6 +7,7 @@ from shared.neighborhood import Neighborhood
 from shared.cost_functions import *
 import matplotlib.pyplot as plt 
 import numpy as np 
+import random
 
 def usage(argv):
     print("python3.9 ", argv[0], " [-l/--log <filename>] <inf_X_Y N> <temperature0> <alpha> <stopcriterion_sec>", )
@@ -74,8 +75,9 @@ if __name__ == "__main__":
     #polling_servers_0 = [Task("tTTps00", 4, 5, TaskType.TIME, 7, 5, et_tasks)] 
     
     #polling_servers_0 = [Task("tTTps00", 5, 25, TaskType.TIME, 7, 5, et_tasks)] 
-    polling_servers_0 = [neighborhood.create_random_ps(et_tasks)]
-
+     
+    #polling_servers_0 = [neighborhood.create_random_ps(et_tasks)]
+    polling_servers_0 = neighborhood.create_n_random_ps(random.randint(1,4), et_tasks) 
 
     task_set = tt_tasks + polling_servers_0
 
