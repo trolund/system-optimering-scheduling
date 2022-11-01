@@ -1,6 +1,6 @@
 from numpy.random import randint, rand
 
-from mess.taskType import TaskType
+from sa_scheduling.taskType import TaskType
 from sa_scheduling.cost_functions import cost_f
 from sa_scheduling.neighborhood import Neighborhood
 
