@@ -32,21 +32,25 @@ def mutation(bitstring, r_mut):
             # flip the bit
             bitstring[i] = 1 - bitstring[i]
 
+def crossover(p1, p2, r_cross):
+    # children are copies of parents by default
+    c1, c2 = p1.copy(), p2.copy()
+    # check for recombination
+    if rand() < r_cross:
+        # select crossover point that is not on the end of the string
+        pt = randint(1, len(p1) - 2)
+        # perform crossover
+        c1 = p1[:pt] + p2[pt:]
+        c2 = p2[:pt] + p1[pt:]
+    return [c1, c2]
 
-
-def crossover(parent_1, parent_2, r_cross):
+def recombine(parent_1, parent_2, r_cross):
     # children are copies of parents by default
     child_1, child_2 = deepcopy(parent_1), deepcopy(parent_2)
     # check for recombination
     if rand() < r_cross:
        n_attributes = randint(1, 3)
 
-
-
-        
-        
-        
-        
     return [child_1, child_2]
 
 
