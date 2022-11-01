@@ -3,7 +3,7 @@ from shared.models.taskType import TaskType
 
 class Task:
     
-    def __init__(self, name: str, duration: int, period: int, type: TaskType, priority: int, deadline: int, et_subset=None):
+    def __init__(self, name: str, duration: int, period: int, type: TaskType, priority: int, deadline: int, et_subset=None, separation = 0):
         self.name = name
         self.duration = duration
         self.period = period

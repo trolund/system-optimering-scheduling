@@ -75,8 +75,8 @@ if __name__ == "__main__":
     #polling_servers_0 = [Task("tTTps00", 4, 5, TaskType.TIME, 7, 5, et_tasks)] 
     
     #polling_servers_0 = [Task("tTTps00", 5, 25, TaskType.TIME, 7, 5, et_tasks)] 
-    polling_servers_0 = neighborhood.create_random_ps(et_tasks)
-
+    #polling_servers_0 = neighborhood.create_random_ps(et_tasks)
+    polling_servers_0 = neighborhood.create_n_random_ps(random.randint(1,4), et_tasks)
     task_set = tt_tasks + polling_servers_0
 
     simulated_annealer.sa(task_set, temperature, alpha, stopcriterion_sec, cost_f=cost_f, log_costs=True)

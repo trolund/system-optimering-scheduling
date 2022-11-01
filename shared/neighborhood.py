@@ -63,6 +63,33 @@ class Neighborhood:
         ps.et_subset = et_subset
         return ps
 
+    # hardcode mins and max duration,period, deadline for now
+    def create_random_ps1(self, et_subset):
+        # TODO try without prime numbers !!
+        # period = self.rand.choice([2, 4, 8]) * self.rand.choice([1, 3]) * self.rand.choice([5, 25])
+        period = self.rand.randint(1, 20) * 10  # multiple of 10 to avoid hyperperiod exploding??
+        deadline = min(period, (self.rand.randint(1, 20) * 10)) # do not allow deadline > period 
+        duration = min(self.rand.randint(1, 50), deadline)  # this seems like cheating hardcoding range
+
+        # naming of polling servers must be unique 
+        self.n_polling_servers += 1
+
+        # find naming scheme,have to b unique, requires counting or sth, some state 
+        return Task("tTTps" + str(self.n_polling_servers), duration, period, TaskType.TIME, 7, deadline, et_subset)
+
+    def partition_et_tasks(self, n, et_tasks):
+        num_tasks = int(len(et_tasks)/n)
+        polling_servers = [et_tasks[i*num_tasks:(i+1)*num_tasks] for i in range(n-1)] 
+        polling_servers += [et_tasks[(n-1)*num_tasks:]]
+
+        return  polling_servers 
+
+    def create_n_random_ps(self, n, et_tasks):
+        # consider
+        et_subsets = self.partition_et_tasks(n, et_tasks)
+        return [self.create_random_ps1(et_subset) for et_subset in et_subsets]
+
+
     # get a subset of pses from victim and delete these from victim 
     def create_ps_subset(self, victim_ps):
         num_et_tasks = self.rand.randint(1, max(1, len(victim_ps.et_subset) - 1))
