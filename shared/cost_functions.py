@@ -22,6 +22,13 @@ def get_ready(task_set, cycle, ready_list):
     
     return ready_list
 
+def create_job(cycle, task): 
+    new_job = copy.deepcopy(task)
+    new_job.deadline = new_job.deadline + cycle
+    new_job.release_time = cycle
+
+    return new_job 
+
 # microticks to get to next point at which some task will be relased
 def steps_to_next_release(cycle, task_set):
     return min([task.period - (cycle % task.period) for task in task_set])
@@ -31,7 +38,7 @@ def edf(ts):
     periods = [t.period for t in ts]
     T = math.lcm(*periods) # least common multiple of TT task periods
     s = [] # schedule will be hyperperiod long. 12 000 microticks == 120 000 microsecs == 120 ms
-    ready_list = []
+    ready_list = [] 
     wcrts = {} # worst case response times
 
     # return same thing in all failed cases, just empty list fx!!
@@ -41,38 +48,31 @@ def edf(ts):
         for task in ready_list:
             if task.duration > 0 and task.deadline <= t:
                 return [], -1 # just return 1 here maybe lol? 
-
-            # job done check response time gt wcrt and remove from ready list
-            #if task.duration == 0 and task.deadline >= t:
-            #    response_time = t - task.release_time
-
-            #    if task.name not in wcrts or response_time >= wcrts[task.name]:
-            #        wcrts[task.name] = response_time
-
-            #    ready_list.remove(task)
-
         # release taks at time t
-        ready_list = get_ready(ts, t, ready_list)
+        ready_list = ready_list + [create_job(t, task) for task in ts if t % task.period == 0]     
 
         if ready_list == []:
             # increase period to next task's release
             steps_to_skip = steps_to_next_release(t, ts)
             t += steps_to_skip
+            
             # append steps_to_skip amount of IDLEs to schedule
             s.extend(["IDLE"] * steps_to_skip)
             continue
         else:
-            # EDF get next job to execute 
-            s.append(ready_list[0].name)
-            ready_list[0].duration = ready_list[0].duration - 1
+            # EDF get next job to execute  
+            ed_job = min(ready_list,key=lambda x: x.deadline)
+            s.append(ed_job.name)
+            ed_job.duration = ed_job.duration - 1
+
             # 31 october addition to assignment
-            if ready_list[0].duration == 0 and ready_list[0].deadline >= t:
-                if ready_list[0].name in wcrts:
-                    if t - ready_list[0].release_time >= wcrts[ready_list[0].name]:
-                        wcrts[ready_list[0].name] = t - ready_list[0].release_time
-                else:
-                    wcrts[ready_list[0].name] = t - ready_list[0].release_time
-                ready_list.remove(ready_list[0])
+            if ed_job.duration == 0 and ed_job.deadline >= t:
+                response_time = t - ed_job.release_time 
+                
+                if ed_job.name not in wcrts or response_time >= wcrts[ed_job.name]: 
+                    wcrts[ed_job.name] = response_time 
+                 
+                ready_list.remove(ed_job)
 
         # increment cycle counter
         t += 1

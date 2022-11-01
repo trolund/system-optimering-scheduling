@@ -1,9 +1,10 @@
+import sys
+sys.path.insert(1, '../')
 from shared.caseLoader import CaseLoader
 from shared.models.taskType import TaskType
 from simulated_annealer import SimulatedAnnealer
 from shared.neighborhood import Neighborhood
 from shared.cost_functions import *
-import sys 
 import matplotlib.pyplot as plt 
 import numpy as np 
 
@@ -60,7 +61,7 @@ if __name__ == "__main__":
     simulated_annealer = SimulatedAnnealer(neighborhood)
 
     loader = CaseLoader()
-    all_tasks = loader.load_test_case(test_case[0], test_case[1])
+    all_tasks = loader.load_test_case(test_case[0], test_case[1]) 
     tt_tasks = [t for t in all_tasks if t.type == TaskType.TIME]
     et_tasks = [t for t in all_tasks if t.type == TaskType.EVENT]
 
