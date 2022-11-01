@@ -1,4 +1,4 @@
-from taskType import TaskType
+from sa_scheduling.taskType import TaskType
 
 
 class Task:
