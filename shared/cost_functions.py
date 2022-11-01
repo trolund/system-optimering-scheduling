@@ -194,9 +194,9 @@ def cost_f(task_set):
         # normalize worst case response time. for each tt task 0 <= wcrt <= 1 by setting it to wcrt/deadline
         #sum_wcrts_tt = sum([wcrts[task.name] / task.deadline for task in task_set]) / len(task_set)
         sum_wcrts_tt = sum([wcrts[task.name] for task in task_set]) / len(task_set)
-
-    print("cost et: ", wcrts_et, " cost tt: ", sum_wcrts_tt) 
+    
     sum_wcrts = (sum_wcrts_tt + wcrts_et)
+    print("cost et: ", wcrts_et, " cost tt: ", sum_wcrts_tt, "total cost: ", sum_wcrts, " is schedulable: ", is_schedulable) 
 
     #alternative 0 <= sum <= 1 by doing sum/2 ..
     #assert 0 <= sum_wcrts and sum_wcrts <= 2  
