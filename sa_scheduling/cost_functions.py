@@ -65,6 +65,13 @@ def edf(ts):
             # EDF get next job to execute 
             s.append(ready_list[0].name)
             ready_list[0].duration = ready_list[0].duration - 1
+            # 31 october addition to assignment
+            if ready_list[0].duration == 0 and ready_list[0].deadline >= t:
+                if ready_list[0].name in wcrts:
+                    if t - ready_list[0].release_time >= wcrts[ready_list[0].name]:
+                        wcrts[ready_list[0].name] = t - ready_list[0].release_time
+                else:
+                    wcrts[ready_list[0].name] = t - ready_list[0].release_time
 
         # increment cycle counter
         t += 1
