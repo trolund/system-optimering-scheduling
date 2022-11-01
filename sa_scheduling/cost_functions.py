@@ -29,7 +29,7 @@ def steps_to_next_release(cycle, task_set):
 # ts is set of TT tasks
 def edf(ts):
     periods = [t.period for t in ts]
-    T = math.lcm(*periods) # least common multiple of TT task periods 
+    T = math.lcm(*periods) # least common multiple of TT task periods
     s = [] # schedule will be hyperperiod long. 12 000 microticks == 120 000 microsecs == 120 ms
     ready_list = []
     wcrts = {} # worst case response times
@@ -43,13 +43,13 @@ def edf(ts):
                 return [], -1 # just return 1 here maybe lol? 
 
             # job done check response time gt wcrt and remove from ready list
-            if task.duration == 0 and task.deadline >= t:
-                response_time = t - task.release_time
+            #if task.duration == 0 and task.deadline >= t:
+            #    response_time = t - task.release_time
 
-                if task.name not in wcrts or response_time >= wcrts[task.name]:
-                    wcrts[task.name] = response_time
+            #    if task.name not in wcrts or response_time >= wcrts[task.name]:
+            #        wcrts[task.name] = response_time
 
-                ready_list.remove(task)
+            #    ready_list.remove(task)
 
         # release taks at time t
         ready_list = get_ready(ts, t, ready_list)
@@ -72,6 +72,7 @@ def edf(ts):
                         wcrts[ready_list[0].name] = t - ready_list[0].release_time
                 else:
                     wcrts[ready_list[0].name] = t - ready_list[0].release_time
+                ready_list.remove(ready_list[0])
 
         # increment cycle counter
         t += 1
