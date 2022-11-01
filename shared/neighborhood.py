@@ -37,16 +37,18 @@ class Neighborhood:
 
         # TODO try without prime numbers !!
         # period = self.rand.choice([2, 4, 8]) * self.rand.choice([1, 3]) * self.rand.choice([5, 25])
-        period = self.rand.randint(1, 20) * 10  # multiple of 10 to avoid hyperperiod exploding??
-        deadline = max(period, (self.rand.randint(1, 20) * 10))
-        duration = min(self.rand.randint(1, 50), deadline)  # this seems like cheating hardcoding range
+        server_list = []
+        for task in et_subset:
 
-        # naming of polling servers must be unique 
-        self.n_polling_servers += 1
-
-        # find naming scheme,have to b unique, requires counting or sth, some state 
-        return Task("tTTps" + str(self.n_polling_servers), duration, period, TaskType.TIME, 7, deadline, et_subset)
-
+            period = self.rand.randint(1, 20) * 10  # multiple of 10 to avoid hyperperiod exploding??
+            deadline = max(period, (self.rand.randint(1, 20) * 10))
+            duration = min(self.rand.randint(1, 50), deadline)  # this seems like cheating hardcoding range
+            if task.separation not in [ps.separation for ps in server_list]:
+                server_list.append(Task("tTTps" + str(task.separation), duration, period, TaskType.TIME, 7, deadline, [task], task.separation))
+            else:
+                server_list[task.separation].et_subset.append(task)
+        # find naming scheme,have to b unique, requires counting or sth, some state
+        return server_list
     # not even guaranteed to return...
     def create_random_schedulable_ps(self, et_subset):
 
@@ -98,8 +100,9 @@ class Neighborhood:
         step = steps[self.rand.randint(1, len(steps) - 1)]
 
         # if sign positive add a polling server if negative remove one 
-        # when adding a polling server take some et tasks from victim 
-        if parameter == NUM_PS:
+        # when adding a polling server take some et tasks from victim
+        if False: # TODO refactor PS neighbour function
+        #if parameter == NUM_PS:
             if sign == 1 and len(
                     polling_servers) < 7:  # TODO find some way to determine max num polling servers or if we should even have
                 # print("adding polling server")

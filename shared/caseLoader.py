@@ -38,8 +38,12 @@ class CaseLoader:
                     # map line to a object
                     values = line.split(";")
                     event_type = TaskType.TIME if values[4] == "TT" else TaskType.EVENT
-                    task = Task(str(values[1]), int(values[2]), int(values[3]), event_type, int(values[5]),
-                                int(values[6]))
+                    if len(values) == 7:
+                        task = Task(str(values[1]), int(values[2]), int(values[3]), event_type, int(values[5]),
+                                    int(values[6]), None, 0)
+                    elif len(values) == 8:
+                        task = Task(str(values[1]), int(values[2]), int(values[3]), event_type, int(values[5]),
+                                    int(values[6]), None, int(values[7]))
 
                     # make sure the case array is initialized
                     case_group = cases.get(case_name)

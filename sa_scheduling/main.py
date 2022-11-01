@@ -74,7 +74,7 @@ if __name__ == "__main__":
     #polling_servers_0 = [Task("tTTps00", 4, 5, TaskType.TIME, 7, 5, et_tasks)] 
     
     #polling_servers_0 = [Task("tTTps00", 5, 25, TaskType.TIME, 7, 5, et_tasks)] 
-    polling_servers_0 = [neighborhood.create_random_ps(et_tasks)]
+    polling_servers_0 = neighborhood.create_random_ps(et_tasks)
 
 
     task_set = tt_tasks + polling_servers_0

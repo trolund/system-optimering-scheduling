@@ -12,3 +12,4 @@ class Task:
         self.deadline = deadline
         self.release_time = 0
         self.et_subset = et_subset
+        self.separation = separation
