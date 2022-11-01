@@ -1,14 +1,9 @@
-import math
 import copy
-from re import S
-from task import Task
-from caseLoader import CaseLoader
-from taskType import TaskType
+from shared.models.taskType import TaskType
 import random
 import time
 import numpy as np
-import matplotlib.pyplot as plt
-from functools import reduce
+
 
 class SimulatedAnnealer:
 

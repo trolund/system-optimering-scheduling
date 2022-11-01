@@ -1,10 +1,8 @@
-from asyncore import poll
-from task import Task
-from caseLoader import CaseLoader
-from taskType import TaskType
+from shared.caseLoader import CaseLoader
+from shared.models.taskType import TaskType
 from simulated_annealer import SimulatedAnnealer
-from neighborhood import Neighborhood
-from cost_functions import *
+from shared.neighborhood import Neighborhood
+from shared.cost_functions import *
 import sys 
 import matplotlib.pyplot as plt 
 import numpy as np 

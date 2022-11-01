@@ -1,9 +1,10 @@
 import random
 import matplotlib.pyplot as plt
 from sortedcontainers import SortedSet
-from caseLoader import CaseLoader
-from sa_scheduling.cost_functions import edf
-from taskType import TaskType
+
+from shared.caseLoader import CaseLoader
+from shared.cost_functions import edf
+from shared.models.taskType import TaskType
 
 
 def get_bounds(solution):
@@ -58,7 +59,7 @@ class SchedulingVisualizer:
         gnt.set_ylabel('Polling servers')
 
         # Setting ticks on y-axis
-        def y_ticks(servers):
+        def y_ticks(s):
             list = []
             dic = {}
 
@@ -102,15 +103,3 @@ class SchedulingVisualizer:
         #                                  facecolors =('tab:red'))
 
         plt.savefig(f"{name}.png")
-
-
-if __name__ == '__main__':
-    loader = CaseLoader()
-    cases = loader.load_test_case("inf_30_30", 0, filePath="../test_cases/")
-    cases = [c for c in cases if c.type == TaskType.TIME]
-    s, wcrts = edf(cases)
-
-    viz = SchedulingVisualizer()
-
-    viz.draw_plot(s, "first")
-
