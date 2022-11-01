@@ -29,7 +29,7 @@ class Neighborhood:
         self.n_polling_servers = 0
 
     # hardcode mins and max duration,period, deadline for now
-    def create_random_ps1(self, et_subset):
+    def create_random_ps(self, et_subset):
         # try like this bc hyperperiod thing if very long we visit very few solutions 
         # periods = [1000, 2000,3000,4000]
         # period = periods[rand.randint(0,len(periods)-1)]
@@ -37,29 +37,19 @@ class Neighborhood:
 
         # TODO try without prime numbers !!
         # period = self.rand.choice([2, 4, 8]) * self.rand.choice([1, 3]) * self.rand.choice([5, 25])
-        period = self.rand.randint(1, 20) * 10  # multiple of 10 to avoid hyperperiod exploding??
-        deadline = min(period, (self.rand.randint(1, 20) * 10)) # do not allow deadline > period 
-        duration = min(self.rand.randint(1, 50), deadline)  # this seems like cheating hardcoding range
+        server_list = []
+        for task in et_subset:
 
-        # naming of polling servers must be unique 
-        self.n_polling_servers += 1
-
-        # find naming scheme,have to b unique, requires counting or sth, some state 
-        return Task("tTTps" + str(self.n_polling_servers), duration, period, TaskType.TIME, 7, deadline, et_subset)
-
-    def partition_et_tasks(self, n, et_tasks):
-        num_tasks = int(len(et_tasks)/n)
-        polling_servers = [et_tasks[i*num_tasks:(i+1)*num_tasks] for i in range(n-1)] 
-        polling_servers += [et_tasks[(n-1)*num_tasks:]]
-
-        return  polling_servers 
-
-    def create_n_random_ps(self, n, et_tasks):
-        # consider
-        et_subsets = self.partition_et_tasks(n, et_tasks)
-        return [self.create_random_ps1(et_subset) for et_subset in et_subsets]
-         
-
+            period = self.rand.randint(1, 20) * 10  # multiple of 10 to avoid hyperperiod exploding??
+            deadline = max(period, (self.rand.randint(1, 20) * 10))
+            duration = min(self.rand.randint(1, 50), deadline)  # this seems like cheating hardcoding range
+            if task.separation not in [ps.separation for ps in server_list]:
+                server_list.append(Task("tTTps" + str(task.separation), duration, period, TaskType.TIME, 7, deadline, [task], task.separation))
+            else:
+                server_list[task.separation].et_subset.append(task)
+        # find naming scheme,have to b unique, requires counting or sth, some state
+        return server_list
+    
     # not even guaranteed to return...
     def create_random_schedulable_ps(self, et_subset):
 
@@ -111,13 +101,14 @@ class Neighborhood:
         step = steps[self.rand.randint(1, len(steps) - 1)]
 
         # if sign positive add a polling server if negative remove one 
-        # when adding a polling server take some et tasks from victim 
-        if parameter == NUM_PS:
+        # when adding a polling server take some et tasks from victim
+        if False: # TODO refactor PS neighbour function
+        #if parameter == NUM_PS:
             if sign == 1 and len(
                     polling_servers) < 7:  # TODO find some way to determine max num polling servers or if we should even have
                 # print("adding polling server")
                 new_et_subset = self.create_ps_subset(victim_ps)
-                new_ps = self.create_random_ps1(new_et_subset)
+                new_ps = self.create_random_ps(new_et_subset)
                 polling_servers.append(new_ps)
 
                 # remove victim from task set if it does not have any et tasks  
