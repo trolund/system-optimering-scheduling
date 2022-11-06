@@ -73,7 +73,7 @@ def selection(pop_and_costs, k=3):
 def check_solution(solution): 
     sign = 1 if randint(0, 2) == 0 else -1 # increment or decrement till not prime
     while isprime(solution[PERIOD]):
-        solution += sign
+        solution[PERIOD] += sign
 
     solution[DEADLINE] = min(solution[DEADLINE], solution[PERIOD])
     solution[DURATION] = min(solution[DEADLINE], solution[DURATION])
@@ -89,12 +89,12 @@ def mutate(solution, r_mut):
         if random_sample() < r_mut:
             #print("boing")
             # mutate solution
-            solution[i] = max(1, solution[i] + sign * randint(1, 20))
+            solution[i] = max(1, solution[i] + sign * randint(1, 30))
 
             # consider just calling check solution but worried this degrades things to random search
             if i == PERIOD and isprime(solution[i]): 
-                solution[i] += 1 # 2 3 prime and adjacent but ok
-
+                solution[i] += sign # 2 3 prime and adjacent but ok
+    #check_solution(solution)
 
 # a bit of freestyling but we use one of three possible crossovers here
 # so we have one or two crossover points but fine fine 
@@ -127,6 +127,7 @@ def genetic_algorithm(task_set, fitness_func, number_of_generations, population_
     # Initialise the entire population
     population = create_population(population_size)
     pool = concurrent.futures.ThreadPoolExecutor(cpu_count()) # do not use "with" bc we want to hold on to pool
+    #pool = concurrent.futures.ThreadPoolExecutor(population_size) # do not use "with" bc we want to hold on to pool
     t0 = time.time()
     
     # keep track of best solution. TODO only if schedulable? or just rely on penalty and many generations. could get min in same function but ok two iterations
@@ -141,52 +142,44 @@ def genetic_algorithm(task_set, fitness_func, number_of_generations, population_
     for gen in range(number_of_generations): 
         print("gen is: ", gen)
         print("population is: ", population)
-        print("best cost: ", best_solution[1][1])
+        print("best cost: ", best_solution[1][1], best_solution[1][2])   
+        for p in pop_and_costs:
+            print("\t", p[1][1], p[1][1])
          
         mating_pool = [selection(pop_and_costs) for _ in range(population_size)]
         population = [] # we can reset population at this point its ok 
         shuffle(mating_pool)
+        #population.append(best_solution[0]) # always let best solution pass try?? pop of size size_pop + 1 then... considered again next round ...? 
         
         # recombine, mutate. two individuals handled per iteration
         for i in range(0, population_size, 2):
            population += recombine(mating_pool[i], mating_pool[i+1], crossover_rate) 
            mutate(population[i], mutation_rate)
            mutate(population[i+1], mutation_rate)
-           
+           check_solution(population[i]) # removeeee
+           check_solution[i+1] 
         pop_and_costs = []
-        
-        # keep track of best solution. TODO only if schedulable? or just rely on penalty and many generations
-        #pop_and_costs = [fitness_func(solution, tt_tasks, et_tasks) for solution in population]
 
+        #pop_and_costs = [fitness_func(solution, tt_tasks, et_tasks) for solution in population]
         # https://docs.python.org/3/library/concurrent.futures.html 
         # https://stackoverflow.com/questions/20838162/how-does-threadpoolexecutor-map-differ-from-threadpoolexecutor-submit 
         # use pool but when this with is inside loop do we create pool on each it or is one kept?
         # few threads and chunks or thread per solution?
-        
-        #with concurrent.futures.ThreadPoolExecutor(cpu_count()) as executor: # not exactly sure how tasks are distributed amongst threads, chunks etc. b
-            # but num cores as threads sooo much better than len(pop)
-            # do not use map bc we use as_completed
-            #results = executor.map(cost, population, itertools.repeat(tt_tasks), itertools.repeat(et_tasks))
-        #future_to_cost = [pool.submit(fitness_func, solution, tt_tasks, et_tasks)for  solution in population]
+         
         for result in pool.map(fitness_func, population, repeat(tt_tasks), repeat(et_tasks)):
             pop_and_costs.append(result)
-        #i = 0
-        #for future in concurrent.futures.as_completed(future_to_cost):
-        #    try:
-        #        pop_and_costs.append(future.result())
-        #        i = i + 1
-        #        print(i)
-        #    except Exception as exc:
-        #        print(exc)
-        #pool.
-        #print(i) 
-        
+            #print("boing") 
         tmp_best_solution = min(pop_and_costs, key=lambda t: t[1][1]) # index 1 is tuple, index 1 of tuple is cost 
-         
+        # keep track of best solution. TODO only if schedulable? or just rely on penalty and many generations 
         if tmp_best_solution[1][1] < best_solution[1][1]:
             best_solution = tmp_best_solution
-        
-        
+
+        # replace worst with best a couple of times 
+        for i in range(2):
+            worst_solution = max(pop_and_costs, key=lambda t: t[1][1]) # index 1 is tuple, index 1 of tuple is cost 
+            pop_and_costs.remove(worst_solution)
+            pop_and_costs.append(best_solution)
+
     print(time.time() - t0)
     return best_solution
         
@@ -207,7 +200,7 @@ if __name__ == "__main__":
     # instantiate simulated annealer
 
     loader = CaseLoader()
-    all_tasks = loader.load_test_case("inf_10_10", 0, filePath="../test_cases/") 
+    all_tasks = loader.load_test_case("inf_70_20", 99, filePath="../test_cases/") 
      
     tt_tasks = [t for t in all_tasks if t.type == TaskType.TIME]
     et_tasks = [t for t in all_tasks if t.type == TaskType.EVENT]
@@ -221,11 +214,11 @@ if __name__ == "__main__":
     # bits
     n_bits = 20
     # define the population size
-    n_pop = 10
+    n_pop = 100
     # crossover rate
     r_cross = 0.9
     # mutation rate
-    r_mut = 0.05
+    r_mut = 0.1
 
     # perform the genetic algorithm search
     best = genetic_algorithm(all_tasks, cost, n_iter, n_pop, r_cross, r_mut)
