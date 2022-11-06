@@ -11,7 +11,7 @@ from sympy import isprime
 import concurrent.futures
 import time
 from os import cpu_count
-#import itertools.repeat
+from itertools import repeat
 
 # Do not consider multiple polling servers 
 # represent a solution (a polling server) as [duration, period, deadline]
@@ -126,21 +126,23 @@ def genetic_algorithm(task_set, fitness_func, number_of_generations, population_
     
     # Initialise the entire population
     population = create_population(population_size)
-    #pool = concurrent.futures.ThreadPoolExecutor(cpu_count()) # do not use "with" bc we want to hold on to pool
+    pool = concurrent.futures.ThreadPoolExecutor(cpu_count()) # do not use "with" bc we want to hold on to pool
     t0 = time.time()
     
     # keep track of best solution. TODO only if schedulable? or just rely on penalty and many generations. could get min in same function but ok two iterations
-    pop_and_costs = [fitness_func(solution, tt_tasks, et_tasks) for solution in population]
-    #best_solution = min(pop_and_costs, key=lambda t: t[1][1]) # index 1 is tuple, index 1 of tuple is cost 
-    best_solution = pop_and_costs[0] 
+    #pop_and_costs = [fitness_func(solution, tt_tasks, et_tasks) for solution in population]
+    pop_and_costs = [] 
+    for result in pool.map(fitness_func, population, repeat(tt_tasks), repeat(et_tasks)):
+            pop_and_costs.append(result) 
+    
+    best_solution = min(pop_and_costs, key=lambda t: t[1][1]) # index 1 is tuple, index 1 of tuple is cost 
+    
     # enumerate generations (repeat)
     for gen in range(number_of_generations): 
-        #print("gen is: ", gen)
-        #print("population is: ", population)
-        tmp_best_solution = min(pop_and_costs, key=lambda t: t[1][1]) # index 1 is tuple, index 1 of tuple is cost 
-        if tmp_best_solution[1][1] < best_solution[1][1]:
-            best_solution = tmp_best_solution
-            print("ayo")
+        print("gen is: ", gen)
+        print("population is: ", population)
+        print("best cost: ", best_solution[1][1])
+         
         mating_pool = [selection(pop_and_costs) for _ in range(population_size)]
         population = [] # we can reset population at this point its ok 
         shuffle(mating_pool)
@@ -150,7 +152,7 @@ def genetic_algorithm(task_set, fitness_func, number_of_generations, population_
            population += recombine(mating_pool[i], mating_pool[i+1], crossover_rate) 
            mutate(population[i], mutation_rate)
            mutate(population[i+1], mutation_rate)
-
+           
         pop_and_costs = []
         
         # keep track of best solution. TODO only if schedulable? or just rely on penalty and many generations
@@ -161,27 +163,30 @@ def genetic_algorithm(task_set, fitness_func, number_of_generations, population_
         # use pool but when this with is inside loop do we create pool on each it or is one kept?
         # few threads and chunks or thread per solution?
         
-        with concurrent.futures.ThreadPoolExecutor(cpu_count()) as executor: # not exactly sure how tasks are distributed amongst threads, chunks etc. b
+        #with concurrent.futures.ThreadPoolExecutor(cpu_count()) as executor: # not exactly sure how tasks are distributed amongst threads, chunks etc. b
             # but num cores as threads sooo much better than len(pop)
             # do not use map bc we use as_completed
             #results = executor.map(cost, population, itertools.repeat(tt_tasks), itertools.repeat(et_tasks))
-            future_to_cost = [executor.submit(cost, solution, tt_tasks, et_tasks)for  solution in population]
-
-            for future in concurrent.futures.as_completed(future_to_cost):
-                try:
-                    pop_and_costs.append(future.result())
-                except Exception as exc:
-                    print(exc)
+        #future_to_cost = [pool.submit(fitness_func, solution, tt_tasks, et_tasks)for  solution in population]
+        for result in pool.map(fitness_func, population, repeat(tt_tasks), repeat(et_tasks)):
+            pop_and_costs.append(result)
+        #i = 0
+        #for future in concurrent.futures.as_completed(future_to_cost):
+        #    try:
+        #        pop_and_costs.append(future.result())
+        #        i = i + 1
+        #        print(i)
+        #    except Exception as exc:
+        #        print(exc)
+        #pool.
+        #print(i) 
         
         tmp_best_solution = min(pop_and_costs, key=lambda t: t[1][1]) # index 1 is tuple, index 1 of tuple is cost 
-        #print("gen: ", gen)
-        #print(tmp_best_solution[0])
-        #print(tmp_best_solution[1][1])
+         
         if tmp_best_solution[1][1] < best_solution[1][1]:
             best_solution = tmp_best_solution
-            #print("generation ", gen, "new best cost: ", best_solution[1][1]) 
-        #print(best_solution[0], best_solution[1][1])
-
+        
+        
     print(time.time() - t0)
     return best_solution
         
@@ -216,7 +221,7 @@ if __name__ == "__main__":
     # bits
     n_bits = 20
     # define the population size
-    n_pop = 20
+    n_pop = 10
     # crossover rate
     r_cross = 0.9
     # mutation rate
