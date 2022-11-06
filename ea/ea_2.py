@@ -144,7 +144,7 @@ def genetic_algorithm(task_set, fitness_func, number_of_generations, population_
         print("population is: ", population)
         print("best cost: ", best_solution[1][1], best_solution[1][2])   
         for p in pop_and_costs:
-            print("\t", p[1][1], p[1][1])
+            print("\t", p[1][1], p[1][2])
          
         mating_pool = [selection(pop_and_costs) for _ in range(population_size)]
         population = [] # we can reset population at this point its ok 
