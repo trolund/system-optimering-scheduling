@@ -157,7 +157,7 @@ def genetic_algorithm(task_set, fitness_func, number_of_generations, population_
            mutate(population[i], mutation_rate)
            mutate(population[i+1], mutation_rate)
            check_solution(population[i]) # removeeee
-           check_solution[i+1] 
+           check_solution[population(i+1)] 
         pop_and_costs = []
 
         #pop_and_costs = [fitness_func(solution, tt_tasks, et_tasks) for solution in population]
