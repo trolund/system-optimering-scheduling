@@ -1,0 +1,191 @@
+import sys
+sys.path.insert(1, '../')
+from numpy.random import randint, random_sample # remember numpy randint is [a, b), meaning excluding b
+from random import shuffle
+from shared.caseLoader import CaseLoader
+from shared.models.taskType import TaskType
+from shared.models.task import Task
+from shared.cost_functions import cost_f
+from shared.neighborhood import Neighborhood
+from sympy import isprime 
+
+# Do not consider multiple polling servers 
+# represent a solution (a polling server) as [duration, period, deadline]
+# do 1 point crossover 
+# create 2nd ctor for task taking such a list - use for getting cost
+
+DURATION = 0
+PERIOD = 1
+DEADLINE = 2
+
+# TODO: terminate when n genrations or all members of population is same i.e. population has converged 
+
+# generate a solution
+def create_solution():
+    period = randint(1, 500)
+    while isprime(period): # avoid explosion of hyper period? and enforce period >= deadline 
+        period = randint(1, 500)
+
+    deadline = randint(1, period + 1) # set deadline to some random int <= period
+
+    duration = randint(1, deadline + 1)    
+ 
+    return [duration, period, deadline] # representation of a solution 
+
+def create_population(population_size): 
+    return [create_solution() for _ in range(population_size)]
+
+def to_task(solution, et_set):
+    # decide whether we want to uniquely name these. we only use task class to evaluate but none the less
+    return Task("tTTps", solution[DURATION], solution[PERIOD], TaskType.TIME, 7, solution[DEADLINE], et_set)
+
+# get cost of each solution in population
+def evaluate_population(population, tt_task_set, et_task_set):
+    return [[solution, cost_f(tt_task_set + [to_task(solution, et_task_set)])] for solution in population] 
+
+# tournament selection, compete k-1 other solutions 
+def selection(pop_and_costs, k=3): 
+    #print(pop_and_costs[0][1][1]) 
+    # first random selection
+    selection_ix = randint(len(pop_and_costs))
+    #print("in selection")
+    #print("population is: ")
+    #for i in range(len(pop_and_costs)):
+    #    print(pop_and_costs[i][0])
+    #print("pop[selection_ix]: ", pop_and_costs[selection_ix][0])
+    for ix in randint(0, len(pop_and_costs), k - 1):  # k-1 ix generated, all between 0 and lengh of scores
+        # check if better ('cheaper')
+        #print("pop[ix]: ", pop_and_costs[ix][0])
+        if pop_and_costs[ix][1][1] < pop_and_costs[selection_ix][1][1]:
+            selection_ix = ix
+
+    # pop_and_costs is list of [solution, (return value from cost_f)]    
+    return pop_and_costs[selection_ix][0]
+
+
+# check and "fix" solution in order to not generate too many infeasible solutions. many infeasible solutions generated anyway
+def check_solution(solution): 
+    sign = 1 if randint(0, 2) == 0 else -1 # increment or decrement till not prime
+    while isprime(solution[PERIOD]):
+        solution += sign
+
+    solution[DEADLINE] = min(solution[DEADLINE], solution[PERIOD])
+    solution[DURATION] = min(solution[DEADLINE], solution[DURATION])
+    
+    # list is mutable and pass by reference etc -- we do not have to return solution
+
+# mutation operator. hardcoded for this problem and representation of problem... well ... 
+def mutate(solution, r_mut):
+    sign = 1 if randint(0, 2) == 0 else -1
+    #print("in mutate. solution is: ", solution)
+    for i in range(len(solution)):
+        # check for a mutation
+        if random_sample() < r_mut:
+            # mutate solution
+            solution[i] = max(1, solution[i] + sign * randint(1, 20))
+
+            # consider just calling check solution but worried this degrades things to random search
+            if i == PERIOD and isprime(solution[i]): 
+                solution[i] += 1 # 2 3 prime and adjacent but ok
+
+
+# a bit of freestyling but we use one of three possible crossovers here
+# so we have one or two crossover points but fine fine 
+# l1[0] + l1[1] + l2[2],  l2[0] + l2[1] + l1[2]
+# l1[0] + l2[1] + l2[2], l2[0] + l1[1] + l1[2]   
+# l1[0] + l2[1] + l1[2], l2[0] + l1[1] + l2[2]   
+def recombine(p1, p2, r_cross):
+ 
+    # check for recombination
+    if random_sample() < r_cross:
+        # select crossover point 
+        pt = randint(0, len(p1))
+
+        # consider slicing but whatever
+        if pt == 0:
+             p1, p2 = [p1[0]] + [p2[1]] + [p1[2]], [p2[0]] + [p1[1]] + [p2[2]]  
+        else:
+            p1, p2 = p1[:pt] + p2[pt:], p2[:pt] + p1[pt:] 
+    
+    # we could just return nothing but conceptually cleaner maybe this 
+    return [p1, p2]
+
+# genetic algorithm
+def genetic_algorithm(task_set, fitness_func, number_of_generations, population_size, crossover_rate,
+                      mutation_rate):
+     
+    tt_tasks = [t for t in task_set if t.type == TaskType.TIME]
+    et_tasks = [t for t in task_set if t.type == TaskType.EVENT]
+    
+    # Initialise the entire population
+    population = create_population(population_size)
+
+    
+    
+    # keep track of best solution. TODO only if schedulable? or just rely on penalty and many generations. could get min in same function but ok two iterations
+    pop_and_costs = fitness_func(population, tt_tasks, et_tasks)
+    best_solution = min(pop_and_costs, key=lambda t: t[1][1]) # index 1 is tuple, index 1 of tuple is cost 
+    
+    # enumerate generations (repeat)
+    for gen in range(number_of_generations): 
+        mating_pool = [selection(pop_and_costs) for _ in range(population_size)]
+        population = [] # we can reset population at this point its ok 
+        shuffle(mating_pool)
+        
+        # recombine, mutate. two individuals handled per iteration
+        for i in range(0, population_size, 2):
+           population += recombine(mating_pool[i], mating_pool[i+1], crossover_rate) 
+           mutate(population[i], mutation_rate)
+           mutate(population[i+1], mutation_rate)
+
+        
+        # keep track of best solution. TODO only if schedulable? or just rely on penalty and many generations
+        pop_and_costs = fitness_func(population, tt_tasks, et_tasks) 
+        tmp_best_solution = min(pop_and_costs, key=lambda t: t[1][1]) # index 1 is tuple, index 1 of tuple is cost 
+
+        if tmp_best_solution[1][1] < best_solution[1][1]:
+            best_solution = tmp_best_solution
+            print("generation ", gen, "new best cost: ", best_solution[1][1]) 
+
+    return best_solution
+        
+# fitness function
+def cost(population, tt_tasks, et_tasks):
+    return [[solution, cost_f(tt_tasks + [to_task(solution, et_tasks)])] for solution in population]
+
+
+def eval(population, tt_tasks):
+    return min(cost(population, tt_tasks), key=lambda t: t[1])
+
+
+if __name__ == "__main__":
+    neighborhood = Neighborhood()
+    # instantiate simulated annealer
+
+    loader = CaseLoader()
+    all_tasks = loader.load_test_case("inf_10_10", 0, filePath="../test_cases/") 
+     
+    tt_tasks = [t for t in all_tasks if t.type == TaskType.TIME]
+    et_tasks = [t for t in all_tasks if t.type == TaskType.EVENT]
+
+    #polling_servers_0 = [neighborhood.create_random_ps(et_tasks)]
+    
+    #task_set = tt_tasks + polling_servers_0
+
+    # define the total iterations
+    n_iter = 10
+    # bits
+    n_bits = 20
+    # define the population size
+    n_pop = 30
+    # crossover rate
+    r_cross = 0.9
+    # mutation rate
+    r_mut = 0.05
+
+    # perform the genetic algorithm search
+    best = genetic_algorithm(all_tasks, cost, n_iter, n_pop, r_cross, r_mut)
+
+    print('Done!')
+    print('f(%s) = %f' % (best[0], best[1][1]))
+    print("is schedulable: ", best[1][2])

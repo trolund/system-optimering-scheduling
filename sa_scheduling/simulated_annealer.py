@@ -45,8 +45,7 @@ class SimulatedAnnealer:
         # current and best solution
         current_solution = tt + polling_servers
         schedule, current_cost, is_schedulable = cost_f(current_solution)
-        self.best_solution = copy.deepcopy(current_solution)
-        best_cost = current_cost
+        self.best_solution = copy.deepcopy(current_solution) 
         self.best_cost = current_cost
         self.best_ps_config = polling_servers
          
@@ -72,10 +71,10 @@ class SimulatedAnnealer:
             delta = tmp_cost - current_cost
          
             # some logging     
-            if delta > 0:
-                print("cost: ", tmp_cost, f" delta: {delta:.10f}", f" t: {t:.10f}", f" p(delta, t): {self.p(delta, t):.10f}", " is schedulable: ", is_schedulable, " num_ps: ", len(pss))
-            else:
-                print("cost: ", tmp_cost, " delta: ", delta, " t: ", t, " is schedulable: ", is_schedulable, " num ps: ", len(pss))
+            #if delta > 0:
+            #    print("cost: ", tmp_cost, f" delta: {delta:.10f}", f" t: {t:.10f}", f" p(delta, t): {self.p(delta, t):.10f}", " is schedulable: ", is_schedulable, " num_ps: ", len(pss))
+            #else:
+            #    print("cost: ", tmp_cost, " delta: ", delta, " t: ", t, " is schedulable: ", is_schedulable, " num ps: ", len(pss))
                  
             # accept randomly drawn solution from current neighborhood if better or with some probability
             if delta <= 0 or self.p(delta, t) > self.rand.uniform(0.0, 1.0): 
@@ -88,24 +87,24 @@ class SimulatedAnnealer:
                     self.cost_log.append(current_cost)
                 
                 # keep track of the best solution. save all the things..
-                if current_cost < best_cost and is_schedulable:
+                if current_cost < self.best_cost and is_schedulable:
                     self.best_solution = current_solution
                     self.best_schedule = schedule[:]
-                    self.best_cost = current_cost
-                    best_cost = current_cost # not so clean having best cost and self.best_cost ...
+                    self.best_cost = current_cost 
                     self.best_ps_config = copy.deepcopy(polling_servers)
                     
-                    # log to prompt
-                    #print("*************************************************")
+                    # log to prompt 
                     print("************* updated best solution *************")
-                    #print("*************************************************")
+                    print("************", self.best_cost, "*****************")
+                    
 
             # logging
             self.n_solutions = self.n_solutions + 1
 
             # update temperature 
             t = t * a 
- 
+        
+        print("final t: ", t)
         self.print_message(stopcriterion_sec)        
         #return (schedule, best_cost, self.best_ps_config) 
 

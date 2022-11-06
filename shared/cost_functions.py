@@ -96,9 +96,6 @@ def edf(ts):
     if ready_list != []:
         return [], -1
 
-    #print("in EDF wcrts is: ", wcrts)
-
-
     return s, wcrts
 
 # utility function 
@@ -196,7 +193,7 @@ def cost_f(task_set):
         sum_wcrts_tt = sum([wcrts[task.name] for task in task_set]) / len(task_set)
     
     sum_wcrts = (sum_wcrts_tt + wcrts_et)
-    print("cost et: ", wcrts_et, " cost tt: ", sum_wcrts_tt, "total cost: ", sum_wcrts, " is schedulable: ", is_schedulable) 
+    #print("cost et: ", wcrts_et, " cost tt: ", sum_wcrts_tt, "total cost: ", sum_wcrts, " is schedulable: ", is_schedulable) 
 
     #alternative 0 <= sum <= 1 by doing sum/2 ..
     #assert 0 <= sum_wcrts and sum_wcrts <= 2  

@@ -41,7 +41,7 @@ class Neighborhood:
         for task in et_subset:
 
             period = self.rand.randint(1, 20) * 10  # multiple of 10 to avoid hyperperiod exploding??
-            deadline = max(period, (self.rand.randint(1, 20) * 10))
+            deadline = min(period, (self.rand.randint(1, 20) * 10))
             duration = min(self.rand.randint(1, 50), deadline)  # this seems like cheating hardcoding range
             if task.separation not in [ps.separation for ps in server_list]:
                 server_list.append(Task("tTTps" + str(task.separation), duration, period, TaskType.TIME, 7, deadline, [task], task.separation))
@@ -115,7 +115,7 @@ class Neighborhood:
         # num_ps, period, budget, deadline, subset
 
         # select parameter to change. we rarely generate feasible solutions when including NUM_PS option
-        parameter = self.rand.randint(NUM_PS, SUBSET)
+        parameter = self.rand.randint(NUM_PS+1, SUBSET)
 
         # select polling server to operate on 
         victim_ps = polling_servers[self.rand.randint(0, len(polling_servers) - 1)]
@@ -124,7 +124,7 @@ class Neighborhood:
         sign = 1 if self.rand.randint(0, 1) == 0 else -1
 
         # an argument for doing this is that sometimes we need a big difference to get far neighbor, avoid being stuck?
-        steps = [1, 5, 10, 100]
+        steps = [1, 2, 10, 10, 10, 20]#, 100]
         step = steps[self.rand.randint(1, len(steps) - 1)]
 
         # if sign positive add a polling server if negative remove one 
@@ -156,7 +156,7 @@ class Neighborhood:
 
         elif parameter == BUDGET:  # change budget of victim
             # victim_ps.duration = max(1, victim_ps.duration + sign * self.rand.randint(1,50))
-            victim_ps.duration = max(1, victim_ps.duration + sign)
+            victim_ps.duration = max(1, victim_ps.duration + sign * step)
             victim_ps.duration = min(victim_ps.duration, victim_ps.deadline)  # do not accept duration > deadline
 
         # we add/subtract sum number divisible by 10 and <= 100
