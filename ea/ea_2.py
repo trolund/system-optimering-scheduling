@@ -24,13 +24,20 @@ DEADLINE = 2
 
 # TODO: terminate when n genrations or all members of population is same i.e. population has converged 
 # TODO: threads when generating and evaluating solutions. really just evaluating this is the most time consuming
-
-
+# TODO: try instantiating solutions as in sa and mutating as in sa
+# TODO: check solution after crossover and mating -> bias discussed in modern heuristics p. 158
+# TODO: try with num threads = size of population
+# TODO: try context manager 
+# TODO: find out what % of execution time we spend in objective function would be nice for report maybe
+# 20*10 and steps seems to make evaluating solutions better.... 
+  
 # generate a solution
 def create_solution():
-    period = randint(1, 500)
+    period = randint(1, 20) * 10
+    #period = randint(1, 500)
     while isprime(period): # avoid explosion of hyper period? and enforce period >= deadline 
-        period = randint(1, 500)
+        period = randint(1, 20) * 10
+        #period = randint(1, 500)
 
     deadline = randint(1, period + 1) # set deadline to some random int <= period
 
@@ -76,21 +83,27 @@ def check_solution(solution):
         solution[PERIOD] += sign
 
     solution[DEADLINE] = min(solution[DEADLINE], solution[PERIOD])
-    solution[DURATION] = min(solution[DEADLINE], solution[DURATION])
+    solution[DURATION] = min(solution[DEADLINE], solution[DURATION]) # minus one to enforce allcaps below??
     
+    if solution[DURATION] == solution[PERIOD] == solution[DEADLINE]:
+        solution[DURATION] -= 1
+    # IF PERIOD == DEADLINE, DURATION MAY NOT ALSO == DEADLINE 
     # list is mutable and pass by reference etc -- we do not have to return solution
 
 # mutation operator. hardcoded for this problem and representation of problem... well ... 
 def mutate(solution, r_mut):
     sign = 1 if randint(0, 2) == 0 else -1
     #print("in mutate. solution is: ", solution)
+
+    steps = [1, 5, 10, 10, 10, 10]
     for i in range(len(solution)):
         # check for a mutation
         if random_sample() < r_mut:
             #print("boing")
             # mutate solution
-            solution[i] = max(1, solution[i] + sign * randint(1, 30))
-
+            #solution[i] = max(1, solution[i] + sign * randint(1, 50))
+            
+            solution[i] = max(1, solution[i] + sign * steps[randint(1, len(steps)-1)])
             # consider just calling check solution but worried this degrades things to random search
             if i == PERIOD and isprime(solution[i]): 
                 solution[i] += sign # 2 3 prime and adjacent but ok
@@ -126,16 +139,22 @@ def genetic_algorithm(task_set, fitness_func, number_of_generations, population_
     
     # Initialise the entire population
     population = create_population(population_size)
-    pool = concurrent.futures.ThreadPoolExecutor(cpu_count()) # do not use "with" bc we want to hold on to pool
+
+    # create pool and keep it to minimize overhead of creating threads 
+    #pool = concurrent.futures.ThreadPoolExecutor(cpu_count()) # do not use "with" bc we want to hold on to pool
     #pool = concurrent.futures.ThreadPoolExecutor(population_size) # do not use "with" bc we want to hold on to pool
     t0 = time.time()
     
     # keep track of best solution. TODO only if schedulable? or just rely on penalty and many generations. could get min in same function but ok two iterations
     #pop_and_costs = [fitness_func(solution, tt_tasks, et_tasks) for solution in population]
     pop_and_costs = [] 
-    for result in pool.map(fitness_func, population, repeat(tt_tasks), repeat(et_tasks)):
-            pop_and_costs.append(result) 
-    
+    #for result in pool.map(fitness_func, population, repeat(tt_tasks), repeat(et_tasks)):
+    #        pop_and_costs.append(result) 
+
+    with concurrent.futures.ThreadPoolExecutor(cpu_count()) as executor:
+        for result in executor.map(fitness_func, population, repeat(tt_tasks), repeat(et_tasks)):
+            pop_and_costs.append(result)
+
     best_solution = min(pop_and_costs, key=lambda t: t[1][1]) # index 1 is tuple, index 1 of tuple is cost 
     
     # enumerate generations (repeat)
@@ -153,11 +172,12 @@ def genetic_algorithm(task_set, fitness_func, number_of_generations, population_
         
         # recombine, mutate. two individuals handled per iteration
         for i in range(0, population_size, 2):
-           population += recombine(mating_pool[i], mating_pool[i+1], crossover_rate) 
+           population += recombine(mating_pool[i], mating_pool[i+1], crossover_rate) # pop must be of even number size
            mutate(population[i], mutation_rate)
            mutate(population[i+1], mutation_rate)
            check_solution(population[i]) # removeeee
            check_solution(population[i+1]) 
+        
         pop_and_costs = []
 
         #pop_and_costs = [fitness_func(solution, tt_tasks, et_tasks) for solution in population]
@@ -165,10 +185,16 @@ def genetic_algorithm(task_set, fitness_func, number_of_generations, population_
         # https://stackoverflow.com/questions/20838162/how-does-threadpoolexecutor-map-differ-from-threadpoolexecutor-submit 
         # use pool but when this with is inside loop do we create pool on each it or is one kept?
         # few threads and chunks or thread per solution?
-         
-        for result in pool.map(fitness_func, population, repeat(tt_tasks), repeat(et_tasks)):
-            pop_and_costs.append(result)
+
+        # should block 
+        #for result in pool.map(fitness_func, population, repeat(tt_tasks), repeat(et_tasks)):
+        #    pop_and_costs.append(result)
             #print("boing") 
+        
+        with concurrent.futures.ThreadPoolExecutor(cpu_count()) as executor:
+            for result in executor.map(fitness_func, population, repeat(tt_tasks), repeat(et_tasks)):
+                pop_and_costs.append(result)
+        
         tmp_best_solution = min(pop_and_costs, key=lambda t: t[1][1]) # index 1 is tuple, index 1 of tuple is cost 
         # keep track of best solution. TODO only if schedulable? or just rely on penalty and many generations 
         if tmp_best_solution[1][1] < best_solution[1][1]:
@@ -180,8 +206,9 @@ def genetic_algorithm(task_set, fitness_func, number_of_generations, population_
             pop_and_costs.remove(worst_solution)
             pop_and_costs.append(best_solution)
 
-    print(time.time() - t0)
-    return best_solution
+    #pool.shutdown()
+    print("seconds: ", time.time() - t0)
+    return [best_solution, (time.time() - t0)]
         
 # fitness function applied to list of solutions
 def cost_list(population, tt_tasks, et_tasks):
@@ -196,33 +223,37 @@ def eval(population, tt_tasks):
 
 
 if __name__ == "__main__":
-    neighborhood = Neighborhood()
-    # instantiate simulated annealer
-
     loader = CaseLoader()
-    all_tasks = loader.load_test_case("inf_70_20", 99, filePath="../test_cases/") 
+    all_tasks = loader.load_test_case("inf_40_20", 30, filePath="../test_cases/") 
      
     tt_tasks = [t for t in all_tasks if t.type == TaskType.TIME]
     et_tasks = [t for t in all_tasks if t.type == TaskType.EVENT]
 
-    #polling_servers_0 = [neighborhood.create_random_ps(et_tasks)]
-    
-    #task_set = tt_tasks + polling_servers_0
-
     # define the total iterations
-    n_iter = 10
+    n_iter = 15
     # bits
     n_bits = 20
     # define the population size
-    n_pop = 100
+    n_pop = 26
     # crossover rate
     r_cross = 0.9
     # mutation rate
-    r_mut = 0.1
+    r_mut = 1/3
 
     # perform the genetic algorithm search
-    best = genetic_algorithm(all_tasks, cost, n_iter, n_pop, r_cross, r_mut)
+    results = [genetic_algorithm(all_tasks, cost, n_iter, n_pop, r_cross, r_mut) for _ in range(2)]
+    sum_t = 0
+    sum_cost = 0
 
-    print('Done!')
-    print('f(%s) = %f' % (best[0], best[1][1]))
-    print("is schedulable: ", best[1][2])
+    for i in range(len(results)):
+        t = results[i][1]
+        sum_t += t
+        #sum_cost += c
+
+    print("avg t: ", sum_t / len(results))
+    #print("avg costs: ", sum_cost / len(results))
+
+
+    #print('Done!')
+    #print('f(%s) = %f' % (best[0], best[1][1]))
+    #print("is schedulable: ", best[1][2])
