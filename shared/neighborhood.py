@@ -49,19 +49,7 @@ class Neighborhood:
                 server_list[task.separation].et_subset.append(task)
         # find naming scheme,have to b unique, requires counting or sth, some state
         return server_list
-    
-    # not even guaranteed to return...
-    def create_random_schedulable_ps(self, et_subset):
 
-        is_schedulable = False
-        while not is_schedulable:
-            is_schedulable = True
-            ps = self.create_random_ps(et_subset)
-            d = calculate_schedulabiltiy(ps)
-            is_schedulable = is_schedulable and reduce((lambda a, b: a and b), [d[key][0] for key in d])
-
-        ps.et_subset = et_subset
-        return ps
 
     # hardcode mins and max duration,period, deadline for now
     def create_random_ps1(self, et_subset):
