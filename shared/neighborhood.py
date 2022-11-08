@@ -201,6 +201,29 @@ class Neighborhood:
 
         return polling_servers
 
+    # true if only contains ets of one sep type 
+    def verify_separation_req(polling_server):
+        non_zeros = [et.separation for et in polling_server.et_subset if et.separation != 0]
+
+        return len(set(non_zeros)) <= 1 #https://stackoverflow.com/questions/3844801/check-if-all-elements-in-a-list-are-identical
+
+    # precondition: both polling servers satisfy separation requirements 
+    def swap_ets(ps1, ps2):
+        et_sep1 = [et for et in ps1.et_subset if et.separataion != 0]
+        et_sep2 = [et for et in ps2.et_subset if et.separataion != 0]   
+
+        for et in et_sep1:
+            ps1.et_subset.remove(et)
+
+        for et in et_sep2:
+            ps2.et_subset.remove(et)
+
+        ps1.et_subset += et_sep2
+        ps2.et_subset += et_sep1
+
+        assert verify_separation_req(ps1) and verify_separation_req(ps2)
+
+       # lists are mutable and passed by reference, we do not need to pass anything       
 
 """
     QUESTIONS:
