@@ -136,13 +136,13 @@ class Neighborhood:
 
         # if sign positive add a polling server if negative remove one 
         # when adding a polling server take some et tasks from victim
-        if False: # TODO refactor PS neighbour function
-        #if parameter == NUM_PS:
+        #if False: # TODO refactor PS neighbour function
+        if parameter == NUM_PS:
             if sign == 1 and len(
                     polling_servers) < 7:  # TODO find some way to determine max num polling servers or if we should even have
                 # print("adding polling server")
                 new_et_subset = self.create_ps_subset(victim_ps)
-                if len(new_ps) != 0:
+                if len(new_et_subset) != 0:
                     new_ps = self.create_random_ps1(new_et_subset)
                     polling_servers.append(new_ps)
 
@@ -158,7 +158,9 @@ class Neighborhood:
                     while receiver_ps == victim_ps:  # select a different ps than victim
                         receiver_ps = polling_servers[self.rand.randint(0, len(polling_servers) - 1)]
 
-                    if victim_ps.et_subset[0].separation == receiver_ps.et_subset[0].separation:
+                    victim_separation = [ps.separation for ps in victim_ps if ps.separation != 0]
+                    receiver_separation = [ps.separation for ps in receiver_ps if ps.separation != 0]
+                    if len(victim_separation) == 0 or len(receiver_separation) == 0 or victim_separation[0].separation == receiver_separation[0].separation:
                         self.merge_ps_subsets(victim_ps, receiver_ps)  # transfer et tasks to other ps
 
                         polling_servers.remove(victim_ps)  # remove victim from set of polling servers
