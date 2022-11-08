@@ -63,7 +63,7 @@ class Neighborhood:
         self.n_polling_servers += 1
 
         # find naming scheme,have to b unique, requires counting or sth, some state 
-        return Task("tTTps" + str(self.n_polling_servers), duration, period, TaskType.TIME, 7, deadline, et_subset)
+        return Task("tTTps" + str(self.n_polling_servers), duration, period, TaskType.TIME, 7, deadline, et_subset, et_subset[0].separation)
 
     def partition_et_tasks(self, n, et_tasks):
         num_tasks = int(len(et_tasks)/n)
@@ -84,11 +84,13 @@ class Neighborhood:
         new_ps_et_subset = []
 
         for task in victim_ps.et_subset[0:num_et_tasks]:
-            new_ps_et_subset.append(task)
+            if task.separation == 0:
+                new_ps_et_subset.append(task)
 
         # do not know how removing and iterating at same time works so do like this 
         for task in victim_ps.et_subset[0:num_et_tasks]:
-            victim_ps.et_subset.remove(task)
+            if task.separation == 0:
+                victim_ps.et_subset.remove(task)
 
         return new_ps_et_subset
 
@@ -123,8 +125,9 @@ class Neighborhood:
                     polling_servers) < 7:  # TODO find some way to determine max num polling servers or if we should even have
                 # print("adding polling server")
                 new_et_subset = self.create_ps_subset(victim_ps)
-                new_ps = self.create_random_ps1(new_et_subset)
-                polling_servers.append(new_ps)
+                if len(new_ps) != 0:
+                    new_ps = self.create_random_ps1(new_et_subset)
+                    polling_servers.append(new_ps)
 
                 # remove victim from task set if it does not have any et tasks  
                 if victim_ps.et_subset == []:
@@ -138,9 +141,10 @@ class Neighborhood:
                     while receiver_ps == victim_ps:  # select a different ps than victim
                         receiver_ps = polling_servers[self.rand.randint(0, len(polling_servers) - 1)]
 
-                    self.merge_ps_subsets(victim_ps, receiver_ps)  # transfer et tasks to other ps
+                    if victim_ps.et_subset[0].separation == receiver_ps.et_subset[0].separation:
+                        self.merge_ps_subsets(victim_ps, receiver_ps)  # transfer et tasks to other ps
 
-                    polling_servers.remove(victim_ps)  # remove victim from set of polling servers
+                        polling_servers.remove(victim_ps)  # remove victim from set of polling servers
 
         elif parameter == BUDGET:  # change budget of victim
             # victim_ps.duration = max(1, victim_ps.duration + sign * self.rand.randint(1,50))
