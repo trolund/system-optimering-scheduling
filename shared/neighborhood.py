@@ -94,6 +94,23 @@ class Neighborhood:
 
         # move the polling server subset from one ps to another
 
+    # get a subset of pses from victim and delete these from victim 
+    def create_et_subset1(self, victim_ps):
+        num_et_tasks = self.rand.randint(1, max(1, len(victim_ps.et_subset) - 1))
+        new_ps_et_subset = []
+
+        for task in victim_ps.et_subset[0:num_et_tasks]:
+            new_ps_et_subset.append(task)
+
+        # do not know how removing and iterating at same time works so do like this 
+        for task in victim_ps.et_subset[0:num_et_tasks]:
+            victim_ps.et_subset.remove(task)
+
+        return new_ps_et_subset
+
+        # move the polling server subset from one ps to another
+
+
     def merge_ps_subsets(self, ps_giver, ps_receiver):
         ps_receiver.et_subset += ps_giver.et_subset
 

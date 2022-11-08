@@ -2,12 +2,6 @@ import math
 import copy 
 from functools import reduce
 
-"""
-    TODO do not sort but find min element 
-    TODO Extension 1 utilization thing in edf 
-"""
-
-
 # not used anymore 
 def get_ready(task_set, cycle, ready_list):
     for task in task_set:
@@ -17,9 +11,8 @@ def get_ready(task_set, cycle, ready_list):
             new_job.release_time = cycle
             ready_list.append(new_job)
     
-    # sort on deadline
-    # https://www.geeksforgeeks.org/sorting-objects-of-user-defined-class-in-python/
-    ready_list = sorted(ready_list, key=lambda t: t.deadline) 
+    # sort on deadline 
+    ready_list = sorted(ready_list, key=lambda t: t.deadline) # https://www.geeksforgeeks.org/sorting-objects-of-user-defined-class-in-python/ 
     
     return ready_list
 
@@ -33,7 +26,7 @@ def processor_demand_criterion(t1, t2, task_set):
     # task set is schedulable if processor demand does not exceed available time  
     return demand <= (t2 - t1)
 
-
+# release new task instance
 def create_job(cycle, task): 
     new_job = copy.deepcopy(task)
     new_job.deadline = new_job.deadline + cycle
@@ -97,8 +90,6 @@ def edf(ts):
         return [], -1
 
     #print("in EDF wcrts is: ", wcrts)
-
-
     return s, wcrts
 
 # utility function 
@@ -172,12 +163,11 @@ def cost_f(task_set):
         if is_schedulable:
             #wcrts_et += sum([wcrts[key][0] / wcrts[key][1] for key in wcrts]) / len(wcrts)
             wcrts_et += sum([wcrts[key][0] for key in wcrts]) / len(wcrts)
-        else:
-            #wcrts_et += 1 
-            wcrts_et += sum(wcrts[key][1] for key in wcrts) / len(wcrts) + 1
-        #is_schedulable = is_schedulable and reduce((lambda a, b : a and b), [entry[key][0] for key in entry]) # https://www.geeksforgeeks.org/reduce-in-python/ 
+        else: 
+            wcrts_et += sum(wcrts[key][1] for key in wcrts) / len(wcrts) + 100
+        
     
-    # normalize such that 0 <= cost <= 1. this check is funny  
+    # this check is funny  
     if l != []:
         wcrts_et *= 1/len(l)
      
@@ -186,18 +176,12 @@ def cost_f(task_set):
     
     # if not schedulable set tt cost contribution to 1 (max) and is_schedulable to false 
     if s == []: 
-        is_schedulable = False
-        #sum_wcrts_tt = 1    # sum deadline / len task_set + 1 -> would not occur. consider larger penalty 
-        sum_wcrts_tt = sum([task.deadline for task in task_set]) / len(task_set) + 1
-    else:
-        # normalize worst case response time. for each tt task 0 <= wcrt <= 1 by setting it to wcrt/deadline
-        #sum_wcrts_tt = sum([wcrts[task.name] / task.deadline for task in task_set]) / len(task_set)
+        is_schedulable = False 
+        sum_wcrts_tt = sum([task.deadline for task in task_set]) / len(task_set) + 100
+    else: 
         sum_wcrts_tt = sum([wcrts[task.name] for task in task_set]) / len(task_set)
 
-    print("cost et: ", wcrts_et, " cost tt: ", sum_wcrts_tt) 
+    #print("cost et: ", wcrts_et, " cost tt: ", sum_wcrts_tt) 
     sum_wcrts = (sum_wcrts_tt + wcrts_et)
-
-    #alternative 0 <= sum <= 1 by doing sum/2 ..
-    #assert 0 <= sum_wcrts and sum_wcrts <= 2  
-    
+ 
     return s, sum_wcrts, is_schedulable
