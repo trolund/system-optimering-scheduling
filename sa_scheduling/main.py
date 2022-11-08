@@ -6,8 +6,7 @@ from simulated_annealer import SimulatedAnnealer
 from shared.neighborhood import Neighborhood
 from shared.cost_functions import *
 import matplotlib.pyplot as plt 
-import numpy as np 
-import random
+import numpy as np
 
 def usage(argv):
     print("python3.9 ", argv[0], " [-l/--log <filename>] <inf_X_Y N> <temperature0> <alpha> <stopcriterion_sec>", )

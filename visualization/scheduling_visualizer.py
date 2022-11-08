@@ -1,31 +1,33 @@
 import random
+
 import matplotlib.pyplot as plt
 from sortedcontainers import SortedSet
 
-from shared.caseLoader import CaseLoader
-from shared.cost_functions import edf
-from shared.models.taskType import TaskType
 
+def sortBy(s):
+  num = int(s.replace('tTT', ''))
+  return num
 
 def get_bounds(solution):
-    curr_task = ""
+    curr_task = "IDLE"
+    prev_task = "IDLE"
     start_point = -1
     end_point = -1
     bounds = []
     max_end = 0
+    first = True
 
     for idx, x in enumerate(solution):
         if x != curr_task:
-            prev_task = curr_task
-            curr_task = x
-
             if start_point == -1:
+                curr_task = x
                 start_point = idx
             elif end_point == -1:
                 end_point = idx
-            else:
-                time = end_point - start_point
+                time = end_point - start_point + (0 if first else 1)
+                prev_task = curr_task
                 bounds.append((prev_task, (start_point, end_point), time))
+                first = False
 
                 if end_point > max_end:
                     max_end = end_point
@@ -36,14 +38,19 @@ def get_bounds(solution):
     return [c for c in bounds if c[0] != "IDLE"], max_end
 
 
+
+
 class SchedulingVisualizer:
     """Returns a list of boundaries of each task execution and 'biggest' x cor"""
 
-    def draw_plot(self, sol, name="plot", grid=False):
-        servers = SortedSet([c for c in sol if c.__contains__("TT")])
+    def draw_plot(self, sol, name="plot", grid: bool = False, height_of_jobs: int = 70):
+        servers = SortedSet([c for c in sol if c.__contains__("TT")], key=sortBy)
         data, max_end = get_bounds(sol)
 
-        # print(len(servers), data, max_end)
+        print(sol)
+        print(data)
+
+        #print(len(servers), data, max_end)
 
         # Declaring a figure "gnt"
         fig, gnt = plt.subplots()
@@ -64,7 +71,7 @@ class SchedulingVisualizer:
             dic = {}
 
             for idx, x in enumerate(s):
-                placement = (idx + 1) * 70
+                placement = idx * height_of_jobs
                 list.append(placement)
                 dic[x] = placement
 
@@ -74,12 +81,10 @@ class SchedulingVisualizer:
 
         gnt.set_yticks(y)
         # Labelling tickes of y-axis
-        gnt.set_yticklabels(servers)
+        z = gnt.set_yticklabels(servers)
 
         # Setting graph attribute
         gnt.grid(grid)
-
-        height_of_jobs = 70
 
         # iterate servers
         for sol in servers:
@@ -89,7 +94,9 @@ class SchedulingVisualizer:
                 job_dif = (e[1][0], e[2])
                 to_print.append(job_dif)
 
-            gnt.broken_barh(to_print, (dic[sol] - height_of_jobs, height_of_jobs),
+            y_pos = dic[sol]
+
+            gnt.broken_barh(to_print, (y_pos, height_of_jobs),
                             facecolors=(random.uniform(0, 1), random.uniform(0, 1), 0.5))
 
         # Declaring a bar in schedule
