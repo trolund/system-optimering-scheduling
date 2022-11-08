@@ -63,7 +63,7 @@ class Neighborhood:
         self.n_polling_servers += 1
 
         # find naming scheme,have to b unique, requires counting or sth, some state 
-        return Task("tTTps" + str(self.n_polling_servers), duration, period, TaskType.TIME, 7, deadline, et_subset)
+        return Task("tTTps" + str(self.n_polling_servers), duration, period, TaskType.TIME, 7, deadline, et_subset, et_subset[0].separation)
 
     def partition_et_tasks(self, n, et_tasks):
         num_tasks = int(len(et_tasks)/n)
@@ -84,6 +84,24 @@ class Neighborhood:
         new_ps_et_subset = []
 
         for task in victim_ps.et_subset[0:num_et_tasks]:
+            if task.separation == 0:
+                new_ps_et_subset.append(task)
+
+        # do not know how removing and iterating at same time works so do like this 
+        for task in victim_ps.et_subset[0:num_et_tasks]:
+            if task.separation == 0:
+                victim_ps.et_subset.remove(task)
+
+        return new_ps_et_subset
+
+        # move the polling server subset from one ps to another
+
+    # get a subset of pses from victim and delete these from victim 
+    def create_et_subset1(self, victim_ps):
+        num_et_tasks = self.rand.randint(1, max(1, len(victim_ps.et_subset) - 1))
+        new_ps_et_subset = []
+
+        for task in victim_ps.et_subset[0:num_et_tasks]:
             new_ps_et_subset.append(task)
 
         # do not know how removing and iterating at same time works so do like this 
@@ -93,6 +111,7 @@ class Neighborhood:
         return new_ps_et_subset
 
         # move the polling server subset from one ps to another
+
 
     def merge_ps_subsets(self, ps_giver, ps_receiver):
         ps_receiver.et_subset += ps_giver.et_subset
@@ -123,8 +142,9 @@ class Neighborhood:
                     polling_servers) < 7:  # TODO find some way to determine max num polling servers or if we should even have
                 # print("adding polling server")
                 new_et_subset = self.create_ps_subset(victim_ps)
-                new_ps = self.create_random_ps1(new_et_subset)
-                polling_servers.append(new_ps)
+                if len(new_ps) != 0:
+                    new_ps = self.create_random_ps1(new_et_subset)
+                    polling_servers.append(new_ps)
 
                 # remove victim from task set if it does not have any et tasks  
                 if victim_ps.et_subset == []:
@@ -138,9 +158,10 @@ class Neighborhood:
                     while receiver_ps == victim_ps:  # select a different ps than victim
                         receiver_ps = polling_servers[self.rand.randint(0, len(polling_servers) - 1)]
 
-                    self.merge_ps_subsets(victim_ps, receiver_ps)  # transfer et tasks to other ps
+                    if victim_ps.et_subset[0].separation == receiver_ps.et_subset[0].separation:
+                        self.merge_ps_subsets(victim_ps, receiver_ps)  # transfer et tasks to other ps
 
-                    polling_servers.remove(victim_ps)  # remove victim from set of polling servers
+                        polling_servers.remove(victim_ps)  # remove victim from set of polling servers
 
         elif parameter == BUDGET:  # change budget of victim
             # victim_ps.duration = max(1, victim_ps.duration + sign * self.rand.randint(1,50))
@@ -180,6 +201,29 @@ class Neighborhood:
 
         return polling_servers
 
+    # true if only contains ets of one sep type 
+    def verify_separation_req(polling_server):
+        non_zeros = [et.separation for et in polling_server.et_subset if et.separation != 0]
+
+        return len(set(non_zeros)) <= 1 #https://stackoverflow.com/questions/3844801/check-if-all-elements-in-a-list-are-identical
+
+    # precondition: both polling servers satisfy separation requirements 
+    def swap_ets(ps1, ps2):
+        et_sep1 = [et for et in ps1.et_subset if et.separataion != 0]
+        et_sep2 = [et for et in ps2.et_subset if et.separataion != 0]   
+
+        for et in et_sep1:
+            ps1.et_subset.remove(et)
+
+        for et in et_sep2:
+            ps2.et_subset.remove(et)
+
+        ps1.et_subset += et_sep2
+        ps2.et_subset += et_sep1
+
+        assert verify_separation_req(ps1) and verify_separation_req(ps2)
+
+       # lists are mutable and passed by reference, we do not need to pass anything       
 
 """
     QUESTIONS:
