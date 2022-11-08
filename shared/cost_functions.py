@@ -116,7 +116,7 @@ def calculate_schedulabiltiy(polling_server):
     #compute delta and alpha accordingly to [2]
     Delta = Tp + Dp - 2*Cp
     alpha = Cp/Tp
-    
+
     #hyperperiod is lcm of all task periods in T_ET (all values must be from the chosen subset of ET tasks from the .csv)
     periods = [t.period for t in et_tasks]
      
@@ -160,8 +160,7 @@ def calculate_schedulabiltiy(polling_server):
 # sum of average worst case response time for tt tasks and et tasks. penality for not schedulable
 # also returns the schedule and boolean indicating schedulability 
 def cost_f(task_set):
-    polling_servers = [ps for ps in task_set if ps.et_subset != None] # get set of polling servers from task set 
-    
+    polling_servers = [ps for ps in task_set if ps.et_subset != None] # get set of polling servers from task set
     l = [calculate_schedulabiltiy(ps) for ps in polling_servers] # check schedulability for each polling server
     
     wcrts_et = 0 # use worst case response time for cost metric
@@ -202,48 +201,3 @@ def cost_f(task_set):
     #assert 0 <= sum_wcrts and sum_wcrts <= 2  
     
     return s, sum_wcrts, is_schedulable
-
-
-    # (sum wcrt / len task_set) / (sum deadline / len task_set)  
-
-    # original bad maybe bc task with large deadline might not be that costly even though large 
-    # wcrts so maybe not avg response time 
-    """
-    
-    # costs is (sum(wcrt_i/deadline_i) / len(et_subset)) /len(polling_servers)
-    for element in l: 
-        is_schedulable, wcrts = element
-        if is_schedulable:
-            wcrts_et += sum([wcrts[key][0] for key in wcrts]) / len(wcrts)
-        else:
-            wcrts_et += sum(wcrts[key][1] for key in wcrts) / len(wcrts) + 1
-        #is_schedulable = is_schedulable and reduce((lambda a, b : a and b), [entry[key][0] for key in entry]) # https://www.geeksforgeeks.org/reduce-in-python/ 
-    
-    # normalize such that 0 <= cost <= 1. this check is funny  
-    #if l != []:
-        wcrts_et *= 1/len(l)
-     
-    # apply earliest deadline first 
-    s, wcrts = edf(task_set) 
-    
-    # if not schedulable set tt cost contribution to 1 (max) and is_schedulable to false 
-    if s == []: 
-        is_schedulable = False
-        sum_wcrts_tt = 1    # sum deadline / len task_set + 1 -> would not occur 
-    else:
-        # normalize worst case response time. for each tt task 0 <= wcrt <= 1 by setting it to wcrt/deadline
-        sum_wcrts_tt = sum([wcrts[task.name] for task in task_set]) / len(task_set)
-     
-    print("cost et: ", wcrts_et, " cost tt: ", sum_wcrts_tt) 
-    sum_wcrts = (sum_wcrts_tt + wcrts_et)
-
-    #alternative 0 <= sum <= 1 by doing sum/2 ..
-    #assert 0 <= sum_wcrts and sum_wcrts <= 2  
-    
-    return s, sum_wcrts, is_schedulable
-
-
-    # (sum wcrt / len task_set) / (sum deadline / len task_set)  
-    
-    
-    """
