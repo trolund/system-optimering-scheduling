@@ -102,8 +102,10 @@ def mutate(solution, r_mut):
             #print("boing")
             # mutate solution
             #solution[i] = max(1, solution[i] + sign * randint(1, 50))
-            
+            if i == PERIOD:
+                sign = -1
             solution[i] = max(1, solution[i] + sign * steps[randint(1, len(steps)-1)])
+            
             # consider just calling check solution but worried this degrades things to random search
             if i == PERIOD and isprime(solution[i]): 
                 solution[i] += sign # 2 3 prime and adjacent but ok
@@ -123,7 +125,7 @@ def recombine(p1, p2, r_cross):
 
         # consider slicing but whatever
         if pt == 0:
-             p1, p2 = [p1[0]] + [p2[1]] + [p1[2]], [p2[0]] + [p1[1]] + [p2[2]]  
+            p1, p2 = [p1[0]] + [p2[1]] + [p1[2]], [p2[0]] + [p1[1]] + [p2[2]]  
         else:
             p1, p2 = p1[:pt] + p2[pt:], p2[:pt] + p1[pt:] 
     
@@ -159,13 +161,13 @@ def genetic_algorithm(task_set, fitness_func, number_of_generations, population_
     
     # enumerate generations (repeat)
     for gen in range(number_of_generations): 
-        print("gen is: ", gen)
-        print("population is: ", population)
-        print("best cost: ", best_solution[1][1], best_solution[1][2])   
+        #print("gen is: ", gen)
+        #print("population is: ", population)
+        #print("best cost: ", best_solution[1][1], best_solution[1][2])   
         for p in pop_and_costs:
-            print("\t", p[1][1], p[1][2])
+            print("\t", p[0], p[1][1], p[1][2])
          
-        mating_pool = [selection(pop_and_costs) for _ in range(population_size)]
+        mating_pool = [selection(pop_and_costs, k=4) for _ in range(population_size)]
         population = [] # we can reset population at this point its ok 
         shuffle(mating_pool)
         #population.append(best_solution[0]) # always let best solution pass try?? pop of size size_pop + 1 then... considered again next round ...? 
@@ -201,7 +203,7 @@ def genetic_algorithm(task_set, fitness_func, number_of_generations, population_
             best_solution = tmp_best_solution
 
         # replace worst with best a couple of times 
-        for i in range(2):
+        for i in range(1):
             worst_solution = max(pop_and_costs, key=lambda t: t[1][1]) # index 1 is tuple, index 1 of tuple is cost 
             pop_and_costs.remove(worst_solution)
             pop_and_costs.append(best_solution)
