@@ -51,35 +51,16 @@ def crossover(p1, p2, r_cross):
     l1 = list(vars(p1[0]).values())
     l2 = list(vars(p2[0]).values())
 
-    if p == 1:
-        print(1)
-        return list_to_task([l1[1], l1[2], l2[5]], c1), list_to_task([l2[1], l2[2], l1[5]], c2)
-    if p == 2:
-        print(2)
-        return list_to_task([l1[1], l2[2], l2[5]], c1), list_to_task([l2[1], l1[2], l1[5]], c2)
-    if p == 3:
-        print(3)
-        return list_to_task([l1[1], l2[2], l1[5]], c1), list_to_task([l2[1], l1[2], l2[5]], c2)
+    if rand() < r_cross:
 
-    # children are copies of parents by default
-    # c1, c2 = copy.deepcopy(p1[0]), copy.deepcopy(p2[0])
-    #
-    # for key, value in c1.items():
-    #     if key is "name" or key is "et_subset":
-    #         continue
-    #
-    #     p = randint(0, 1)
-
-    # p1_et_subset, p2_et_subset = p1[0].et_subset, p2[0].et_subset
-    #
-    # # check for recombination (et subset)
-    # if rand() < r_cross:
-    #     # select crossover point that is not on the end of the string
-    #     pt = randint(1, len(p1[0].et_subset) - 2)
-    #     # perform crossover
-    #     c1.et_subset = p1_et_subset[:pt] + p2_et_subset[pt:]
-    #     c2.et_subset = p2_et_subset[:pt] + p1_et_subset[pt:]
-
+        if p == 1:
+            return list_to_task([l1[1], l1[2], l2[5]], c1), list_to_task([l2[1], l2[2], l1[5]], c2)
+        if p == 2:
+            return list_to_task([l1[1], l2[2], l2[5]], c1), list_to_task([l2[1], l1[2], l1[5]], c2)
+        if p == 3:
+            return list_to_task([l1[1], l2[2], l1[5]], c1), list_to_task([l2[1], l1[2], l2[5]], c2)
+    else:
+        return c1, c2
 
 def create_pop(population_size, task_set):
     population = []
@@ -108,6 +89,8 @@ def genetic_algorithm(task_set, fitness_func, number_of_generations, population_
 
     best, all_solutions = fitness_func(pop, tt_tasks)
 
+    print("Starting best: ", best[1][1])
+
     # enumerate generations (repeat)
     for gen in range(number_of_generations):
         print("----------------- (" + str(gen) + ")--------------------")
@@ -116,11 +99,14 @@ def genetic_algorithm(task_set, fitness_func, number_of_generations, population_
         # scores = [fitness_func(c, init_tt_tasks) for c in pop]
         gen_best, gen_solutions = fitness_func(pop, tt_tasks)
 
+        print("Best of gen (" + str(gen) + "): ", gen_best[1][1])
+
         if gen_best[1][1] < best[1][1]:
             print(best[1][1], "-->", gen_best[1][1])
             best = gen_best
 
         selected = [selection(gen_solutions) for _ in range(population_size)]
+
         # create the next generation
         children = list()
         for i in range(0, population_size, 2):
@@ -135,12 +121,15 @@ def genetic_algorithm(task_set, fitness_func, number_of_generations, population_
         # replace population
         pop = children
 
+        # always keep det best in the population
+        pop.append(best[0])
+
     return [best]
 
 
 # fitness function
 def cost(population, tt_tasks):
-    return [(solution, cost_f(tt_tasks + [solution], True)) for solution in population]
+    return [(solution, cost_f(tt_tasks + [solution])) for solution in population]
 
 
 def eval(population, tt_tasks):
@@ -164,11 +153,11 @@ if __name__ == "__main__":
     # task_set = tt_tasks + polling_servers_0
 
     # define the total iterations
-    n_iter = 25
+    n_iter = 40
     # bits
     n_bits = 2
     # define the population size
-    n_pop = 40
+    n_pop = 26
     # crossover rate
     r_cross = 0.9
     # mutation rate
@@ -178,4 +167,4 @@ if __name__ == "__main__":
     best = genetic_algorithm(all_tasks, eval, n_iter, n_pop, r_cross, r_mut)
 
     print('Done!')
-    print('f(%s)' % (best[0][1][1]))
+    print("Best: ",  best[0][1][1])
