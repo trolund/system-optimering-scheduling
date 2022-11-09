@@ -93,7 +93,7 @@ def genetic_algorithm(task_set, fitness_func, number_of_generations, population_
 
     # enumerate generations (repeat)
     for gen in range(number_of_generations):
-        print("----------------- (" + str(gen) + ")--------------------")
+        print("--------------------------- (" + str(gen) + ")-----------------------------")
 
         # evaluate all candidates in the population
         # scores = [fitness_func(c, init_tt_tasks) for c in pop]
@@ -153,15 +153,15 @@ if __name__ == "__main__":
     # task_set = tt_tasks + polling_servers_0
 
     # define the total iterations
-    n_iter = 40
+    n_iter = 50
     # bits
     n_bits = 2
     # define the population size
-    n_pop = 26
+    n_pop = 50
     # crossover rate
-    r_cross = 0.9
+    r_cross = 0.7
     # mutation rate
-    r_mut = 1.0 / float(n_bits)
+    r_mut = 0.2
 
     # perform the genetic algorithm search
     best = genetic_algorithm(all_tasks, eval, n_iter, n_pop, r_cross, r_mut)
