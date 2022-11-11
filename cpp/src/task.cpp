@@ -7,6 +7,10 @@ Task::Task(std::vector<std::string> values) {
     this->type = values[3].compare("TT") == 0 ? TT : ET;
     this->priority = stoi(values[4]);
     this->deadline = stoi(values[5]);
+    if(values.size() == 7) {
+        this->separation = stoi(values[6]);
+    }
+
     this->release_time = 0;
 }
 
