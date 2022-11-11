@@ -33,6 +33,12 @@ int main() {
     }
 
     assert(equals);
+    double cost = cost_function(task_set);
+
+    std::cout << cost << std::endl;
+
+    assert(cost == 4.0);
+
     delete(task_set);  
     tt0 = Task("tTT0", 2, 3, TT, 7, 3, 0); 
     tt1 = Task("tTT1", 2, 4, TT, 7, 4, 0);

@@ -7,58 +7,57 @@
 
 */
 
-/*
-double cost_function(std::vector<Task> *taskSet) {
+
+double cost_function(std::vector<Task> *task_set) {
     std::list<Task> polling_servers; 
-    std::map<std::string, int> wcrts_tt;
-    std::tuple<bool, std::map<std::string, int>> is_schedulable_cost = is_schedulable_cost;
-    double cost_tt = 0, cost_et = 0, cost = 0;
+    std::map<std::string, double> wcrts_tt; // doubles because we want to take an average
+    std::map<std::string, double> wcrts_et; // reassigned when iterating over polling servers
+    std::tuple<bool, std::map<std::string, double>, std::vector<std::string>> is_schedulable_cost_tt;
+    std::tuple<bool, std::map<std::string, double>> is_schedulable_cost_et; 
+    double cost_tt = 0.0, cost_et = 0.0, cost = 0.0, wcrts_et_sum = 0.0, wcrts_tt_sum = 0.0;
     bool is_schedulable;
 
-    for (auto it : *taskSet) { 
+    for (auto it : *task_set) { 
         if (it.et_subset != NULL) { polling_servers.push_back(it); };        
     }
 
+    // get cost contribution of polling servers 
     for(auto it : polling_servers) {
-        is_schedulable_cost = is_polling_server_schedulable(&it);
-        double wcrts_et_sum = 0;
+        is_schedulable_cost_et = is_polling_server_schedulable(&it);
+        is_schedulable = std::get<0>(is_schedulable_cost_et);
+        wcrts_et_sum = 0;
+        wcrts_et = std::get<1>(is_schedulable_cost_et);
         
-        if ( std::get<0>(is_schedulable_cost) ) {
-            std::map<std::string, int> wcrts = std::get<1>(is_schedulable_cost);
-            for (auto it : polling_servers) {
-                for(int i = 0; i < it.et_subset->size(); i = i + 1) {// it.et_subset) { 
-                    
-                    wcrts_et_sum += double(wcrts[it.et_subset->at(i).name]); 
-                    } 
-                } 
-        } else {
-            cost_et = double(1);
-            is_schedulable = false; 
-        } 
-    }
-
-    wcrts_tt = edf(taskSet);
-    
-    if (wcrts_tt.contains("NO")) {
-        cost_tt = double(1);
-        //std::cout << " helllllooo" << std::endl;
-        is_schedulable = false;
-    } else {
-        for (auto it : *taskSet) { 
-            cost_tt +=  double(wcrts_tt[it.name]) / double(it.deadline); 
+        // if polling server is schedulable sum wcrts if not sum deadline + a penalty for each
+        for (auto et_task : *it.et_subset) {
+            if (is_schedulable) { wcrts_et_sum += wcrts_et[et_task.name]; }
+            else { wcrts_et_sum += et_task.deadline + 100; }
         }
-        cost_tt *= 1/double(taskSet->size());
+
+        cost_et += wcrts_et_sum / it.et_subset->size();
     }
 
-    //std::cout << "NORMAL: " << cost_tt / taskSet->size() << std::endl;
+    // do not divide by zero
+    cost_et = polling_servers.size() > 0 ? cost_et / polling_servers.size() : 0; 
+        
+    is_schedulable_cost_tt = edf(task_set);
+    is_schedulable = std::get<0>(is_schedulable_cost_tt);
+    wcrts_tt = std::get<1>(is_schedulable_cost_tt);
 
-    cost_et *= 1.0  / double(polling_servers.size());
+    // same approach as for ets in a ps. wcrt or deadline + penalty
+    for(auto it : *task_set) {
+        if(is_schedulable) { wcrts_tt_sum += wcrts_tt[it.name]; }
+        else {wcrts_tt_sum += it.deadline + 100; }
+    }
+
+    cost_tt = wcrts_tt_sum / task_set->size();
+     
     cost = cost_tt + cost_et;
-    std::cout << "cost function cost is: " << cost << " et: " << cost_et << " tt: " << cost_tt << std::endl;
+    //std::cout << "cost function cost is: " << cost << " et: " << cost_et << " tt: " << cost_tt << std::endl;
     return cost; 
 }
 
-*/
+
 
 // release jobs 
 void get_ready_list(std::vector<Task> *taskSet, std::list<Task> *readyList, int cycle) {  
@@ -159,11 +158,17 @@ std::tuple<bool, std::map<std::string, double>> is_polling_server_schedulable(Ta
     int period = polling_server->period;
     int deadline = polling_server->deadline;
     std::vector<Task>* et_set = polling_server->et_subset;  
+    std::map<std::string, double> response_times;
+
+    // does not matter what we return in this case 
+    if (et_set == NULL) {
+        return std::tuple(true, response_times);
+    }
 
     int delta = period + deadline - 2*budget;
     double alpha = double(budget) / double(period);
     double supply, demand, cur_response_time; 
-    std::map<std::string, double> response_times;
+    
     
 
     int hyperperiod = et_set->front().period;

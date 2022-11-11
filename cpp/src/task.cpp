@@ -19,15 +19,28 @@ Task::Task(std::string name, std::string duration, std::string period, std::stri
     this->priority = stoi(priority);
     this->deadline = stoi(deadline);
     this->release_time = 0;
+    this->et_subset = NULL;
 }
 
 
-Task::Task(std::string name, int duration, int period, int type, int priority, int deadline, int releaseTime) {
+Task::Task(std::string name, int duration, int period, int type, int priority, int deadline, int release_time) {
     this->name = name;
     this->duration = duration;
     this->period = period;
     this->type = type;
     this->priority = priority;
     this->deadline = deadline;
-    this->release_time = releaseTime;
+    this->release_time = release_time;
+    this->et_subset = NULL;
+}
+
+Task::Task(std::string name, int duration, int period, int type, int priority, int deadline, std::vector<Task>* et_subset) {
+    this->name = name;
+    this->duration = duration;
+    this->period = period;
+    this->type = type;
+    this->priority = priority;
+    this->deadline = deadline;
+    this->release_time = 0;
+    this->et_subset = et_subset;
 }

@@ -22,14 +22,15 @@ class Task {
         int priority;
         int deadline;
         int release_time;
-        std::vector<Task> *et_subset;
+        std::vector<Task> *et_subset; // maybe should be pointer to vector of pointers. so we only need to instantiate actual et tasks 
 
         Task(std::vector<std::string>);
         
         Task(std::string name, std::string duration, std::string period, std::string type, std::string priority, std::string deadline);
         
         Task(std::string name, int duration, int period, int type, int priority, int deadline, int releaseTime);
-
+        
+        Task(std::string name, int duration, int period, int type, int priority, int deadline, std::vector<Task> *et_subset);
         // t1 less than t2. compare on deadline
         struct ByDeadline {
             bool operator() (const Task& t1, const Task& t2) const {
