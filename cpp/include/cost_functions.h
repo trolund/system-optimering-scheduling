@@ -12,7 +12,9 @@
 
 #include "task.h"
 
-std::map<std::string, int> edf(std::vector<Task>*);
-std::tuple<bool, std::map<std::string, double>> isPollingServerSchedulable(Task*);
-double costFunction(std::vector<Task>*);
-void getReadyList(std::vector<Task>*, std::list<Task>*, int cycle);
+std::tuple<bool, std::map<std::string, double>, std::vector<std::string>> edf(std::vector<Task>*); 
+void get_ready_list(std::vector<Task>*, std::list<Task>*, int cycle);
+int processor_demand(int t2, std::vector<Task>* periodic_tasks);
+std::tuple<bool, std::map<std::string, double>> is_polling_server_schedulable(Task*);
+double cost_function(std::vector<Task>*);
+

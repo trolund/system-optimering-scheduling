@@ -7,7 +7,7 @@ Task::Task(std::vector<std::string> values) {
     this->type = values[3].compare("TT") == 0 ? TT : ET;
     this->priority = stoi(values[4]);
     this->deadline = stoi(values[5]);
-    this->releaseTime = 0;
+    this->release_time = 0;
 }
 
 
@@ -18,7 +18,7 @@ Task::Task(std::string name, std::string duration, std::string period, std::stri
     this->type = type.compare("TT") == 0 ? TT : ET;
     this->priority = stoi(priority);
     this->deadline = stoi(deadline);
-    this->releaseTime = 0;
+    this->release_time = 0;
 }
 
 
@@ -29,5 +29,5 @@ Task::Task(std::string name, int duration, int period, int type, int priority, i
     this->type = type;
     this->priority = priority;
     this->deadline = deadline;
-    this->releaseTime = releaseTime;
+    this->release_time = releaseTime;
 }

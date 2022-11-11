@@ -7,8 +7,8 @@
 
 */
 
-
-double costFunction(std::vector<Task> *taskSet) {
+/*
+double cost_function(std::vector<Task> *taskSet) {
     std::list<Task> polling_servers; 
     std::map<std::string, int> wcrts_tt;
     std::tuple<bool, std::map<std::string, int>> is_schedulable_cost = is_schedulable_cost;
@@ -20,7 +20,7 @@ double costFunction(std::vector<Task> *taskSet) {
     }
 
     for(auto it : polling_servers) {
-        is_schedulable_cost = isPollingServerSchedulable(&it);
+        is_schedulable_cost = is_polling_server_schedulable(&it);
         double wcrts_et_sum = 0;
         
         if ( std::get<0>(is_schedulable_cost) ) {
@@ -58,94 +58,102 @@ double costFunction(std::vector<Task> *taskSet) {
     return cost; 
 }
 
-// release jobs 
-void getReadyList(std::vector<Task> *taskSet, std::list<Task> *readyList, int cycle) {
-    
-    for(auto task : *taskSet) {
-        if (cycle % task.deadline == 0) {
-            readyList->push_back(Task(task.name, task.duration, task.period, task.type, task.priority, task.deadline + cycle, cycle));
+*/
 
+// release jobs 
+void get_ready_list(std::vector<Task> *taskSet, std::list<Task> *readyList, int cycle) {  
+    for(auto task : *taskSet) {
+        if (cycle % task.period == 0) {
+            // release new instance of task with deadline = Di + t and release time = t
+            readyList->push_back(Task(task.name, task.duration, task.period, task.type, task.priority, task.deadline + cycle, cycle));
         }
+    }    
+}
+
+/* deadline used here is relative deadline. section 4.6 hard real time 
+   only for t1 = 0 not general case. also assumes that Di <= Ti
+*/
+int processor_demand(int t2, std::vector<Task> *periodic_tasks) {
+    int n = periodic_tasks->size(); 
+    int processor_demand=0; 
+    double eta_i, period_i, deadline_i;
+
+    // demand for some task is number of times scheduled * duration
+    for(int i=0; i<n; i=i+1) {
+        period_i = (double) periodic_tasks->at(i).period;
+        deadline_i = (double) periodic_tasks->at(i).deadline; // line would be really long if we did this in line below
+        eta_i = (t2 + period_i - deadline_i) /  period_i; // we could do without 2nd term but more general here
+
+        processor_demand +=  ((int) eta_i) * periodic_tasks->at(i).duration;
     }
 
-    // sort on deadline
-    readyList->sort();
-    // do not sort and get min element how bout dat !!! linear time instead of whatever sorting is 
-    //return readyList;
+    return processor_demand;
 }
 
 //https://www.wolframalpha.com/input?i=lcm%28a%2Cb%2Cc%29+%3D%3D+lcm%28lcm%28a%2Cb%29%2C+c%29
 //https://en.cppreference.com/w/cpp/numeric/lcm
 //https://www.geeksforgeeks.org/lcm-of-given-array-elements/ 
-//std::tuple<std::vector<std::string>, int, bool> 
-std::map<std::string, int> edf(std::vector<Task> *taskSet) { 
-    int hyperperiod = taskSet->front().period;//.period;
-    // https://stackoverflow.com/questions/4210470/looping-on-c-iterators-starting-with-second-or-nth-item
+std::tuple<bool, std::map<std::string, double>, std::vector<std::string>> edf(std::vector<Task> *tt_tasks) { 
+    int hyperperiod = tt_tasks->front().period;
     
-    for(auto it = std::next(taskSet->begin()); it != taskSet->end(); ++it) {
+    // https://stackoverflow.com/questions/4210470/looping-on-c-iterators-starting-with-second-or-nth-item 
+    for(auto it = std::next(tt_tasks->begin()); it != tt_tasks->end(); ++it) {
         hyperperiod = std::lcm(hyperperiod, it->period);
     }
-
+    
     //std::cout << "hyperperiod is: " << hyperperiod << std::endl;
-    
+    std::map<std::string, double> wcrts;
     std::vector<std::string> schedule;
-    std::list<Task> readyList; // (taskSet.begin(), taskSet.end()); 
-    std::map<std::string, int> wcrts;
 
-    //std::cout << "Hyperperiod: " << hyperperiod << std::endl; 
-    //std::cout << &taskSet << " " << &readyList << std::endl; 
-    
-    for(int t = 0; t < hyperperiod; t = t + 1) {
-        getReadyList(taskSet, &readyList, t);
+    if (processor_demand(hyperperiod, tt_tasks) > hyperperiod) {
+        return std::tuple(false, wcrts, schedule);
+    }  
 
-        // iterate like this to erase while iterating 
-        for (auto it = readyList.begin(); it != readyList.end();) {
+    std::list<Task> ready_list; 
+    int t = 0;
 
-            // return and indicate not feasible if some job is not done but exceeded deadline 
-            if (it->duration > 0 && it->deadline <= t) {
-                
-                wcrts["NO"] = -1;
-                return wcrts;
-                
-            }
-
-            if(it->duration == 0 && it->deadline >= t) {
-                int responseTime = t - it->releaseTime;
-
-                if (!wcrts.contains(it->name) || responseTime > wcrts[it->name]) {
-                    wcrts[it->name] = responseTime;
-                    //std::cout << "HELLO: " << responseTime << std::endl; 
-                }
-
-                // erase returns iterator pointing to element that followed erased item
-                it = readyList.erase(it);
-            } else {
-                ++it;
+    // TODO: skip if none ready
+    while (t < hyperperiod) {
+        
+        // check for deadline miss
+        for (auto job : ready_list) {
+            if (job.duration > 0 and job.deadline <= t) {
+                return std::tuple(false, wcrts, schedule); 
             }
         }
 
-        if (readyList.size() == 0) {
-            schedule.push_back("IDLE");
-            continue;
+        // release new task instances 
+        get_ready_list(tt_tasks, &ready_list, t);
+
+        // execute task instance with earliest deadline, if there are any ready tasks
+        if (ready_list.size() == 0) {
+            schedule.push_back("IDLE"); // no tasks instantiated, nothing to do 
         } else {
-            schedule.push_back(readyList.front().name);
-            readyList.front().duration -= 1; 
+
+            // get task instance with earliest deadline https://stackoverflow.com/questions/26766136/how-to-get-min-or-max-element-in-a-vector-of-objects-in-c-based-on-some-field 
+            auto ed_task = std::min_element(ready_list.begin(), ready_list.end(), Task::ByDeadline());  
+            schedule.push_back(ed_task->name);
+            ed_task->duration -= 1;
+
+            // check if current response time larger than than current maximum
+            if (ed_task->duration == 0 && ed_task->deadline >= t) {
+                ready_list.erase(ed_task); // remove from ready list 
+                if (!wcrts.contains(ed_task->name) || t - ed_task->release_time >= wcrts[ed_task->name]) {
+                    wcrts[ed_task->name] = t - ed_task->release_time;
+                }
+            } else if(ed_task->duration == 0 && ed_task->deadline < t) { // this check should be redundant but to be safe. should be caught above if this is the case 
+                return std::tuple(false, wcrts, schedule);  
+            }
         }
+
+        t = t + 1;
     }
 
-    if (readyList.size() > 0) {         
-        wcrts["false"] = -1;
-        return wcrts;
-        
-       
-    }  
-    return wcrts;
-
- 
+    return std::tuple(true, wcrts, schedule); 
 }
 
 // determine if some polling server with a given budget, period, deadline and set of et tasks is schedulable
-std::tuple<bool, std::map<std::string, double>> isPollingServerSchedulable(Task* polling_server) {
+std::tuple<bool, std::map<std::string, double>> is_polling_server_schedulable(Task* polling_server) {
     
     int budget = polling_server->duration;
     int period = polling_server->period;
@@ -154,8 +162,8 @@ std::tuple<bool, std::map<std::string, double>> isPollingServerSchedulable(Task*
 
     int delta = period + deadline - 2*budget;
     double alpha = double(budget) / double(period);
-    double supply, demand, curResponseTime; 
-    std::map<std::string, double> responseTimes;
+    double supply, demand, cur_response_time; 
+    std::map<std::string, double> response_times;
     
 
     int hyperperiod = et_set->front().period;
@@ -168,7 +176,7 @@ std::tuple<bool, std::map<std::string, double>> isPollingServerSchedulable(Task*
 
     for(auto et_it : *et_set) {
         // initialize response time of current et task to a value exceeding its deadline
-        curResponseTime = et_it.deadline + 1;
+        cur_response_time = et_it.deadline + 1;
         
         for(int t = 0; t <= hyperperiod; t = t + 1) {
             supply = alpha * (double(t) - double(delta));
@@ -183,18 +191,18 @@ std::tuple<bool, std::map<std::string, double>> isPollingServerSchedulable(Task*
             } // end of traversal of other ets
 
             if (supply >= demand) { 
-                curResponseTime = t;
-                responseTimes[et_it.name] = curResponseTime; 
+                cur_response_time = t;
+                response_times[et_it.name] = cur_response_time; 
                 break; 
             }
         } // end of inner for
 
-        if (curResponseTime >= et_it.deadline) { 
-            return std::tuple<bool, std::map<std::string, double>>(false, responseTimes);
+        if (cur_response_time >= et_it.deadline) { 
+            return std::tuple<bool, std::map<std::string, double>>(false, response_times);
         }    
 
     } // end of outer for
 
-    return std::tuple<bool, std::map<std::string, double>>(true, responseTimes);
+    return std::tuple<bool, std::map<std::string, double>>(true, response_times);
 
 }
