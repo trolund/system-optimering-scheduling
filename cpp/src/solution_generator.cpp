@@ -9,6 +9,7 @@ SolutionGenerator::SolutionGenerator(std::vector<Task> *task_set) {
             else { et_tasks.push_back(it); } 
         }
 
+        separate_et_tasks();
 
     }
 
