@@ -65,6 +65,7 @@ class SimulatedAnnealer:
              
             tmp_schedule, tmp_cost, is_schedulable = cost_f(tmp_solution) # apply objective function
 
+            # just for debugging
             pss = [t for t in tmp_solution if t.et_subset != None]
             #print(len(pss))
 
@@ -107,7 +108,7 @@ class SimulatedAnnealer:
             t = t * a 
  
         self.print_message(stopcriterion_sec)        
-        #return (schedule, best_cost, self.best_ps_config) 
+        
 
     def print_message(self, stopcriterion_sec):
         print("\n")

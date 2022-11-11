@@ -33,33 +33,33 @@ class CaseLoader:
             for fileName in files:
                 case_name = root.split("/")[2]
                 path = os.path.join(root, fileName)
-                file = open(path, "r")
-                lines = file.readlines()
-                lines.pop(0)
+                with open(path, "r") as file:
+                    lines = file.readlines()
+                    lines.pop(0)
 
-                for line in lines:
-                    # map line to a object
-                    values = line.split(";")
-                    event_type = TaskType.TIME if values[4] == "TT" else TaskType.EVENT
-                    if len(values) == 7:
-                        task = Task(str(values[1]), int(values[2]), int(values[3]), event_type, int(values[5]),
-                                    int(values[6]), None, 0)
-                    elif len(values) == 8:
-                        task = Task(str(values[1]), int(values[2]), int(values[3]), event_type, int(values[5]),
-                                    int(values[6]), None, int(values[7]))
+                    for line in lines:
+                        # map line to a object
+                        values = line.split(";")
+                        event_type = TaskType.TIME if values[4] == "TT" else TaskType.EVENT
+                        if len(values) == 7:
+                            task = Task(str(values[1]), int(values[2]), int(values[3]), event_type, int(values[5]),
+                                        int(values[6]), None, 0)
+                        elif len(values) == 8:
+                            task = Task(str(values[1]), int(values[2]), int(values[3]), event_type, int(values[5]),
+                                        int(values[6]), None, int(values[7]))
 
-                    # make sure the case array is initialized
-                    case_group = cases.get(case_name)
-                    if case_group is None:
-                        cases[case_name] = {}
+                        # make sure the case array is initialized
+                        case_group = cases.get(case_name)
+                        if case_group is None:
+                            cases[case_name] = {}
 
-                    # add task to case
-                    file_id = int(self.get_filename_id(fileName))
+                        # add task to case
+                        file_id = int(self.get_filename_id(fileName))
 
-                    if cases.get(case_name).get(file_id) is None:
-                        cases[case_name][file_id] = []
+                        if cases.get(case_name).get(file_id) is None:
+                            cases[case_name][file_id] = []
 
-                    cases[case_name][file_id].append(task)
+                        cases[case_name][file_id].append(task)
 
         # print("Loaded " + str(len(cases)) + " test case(s).")
 

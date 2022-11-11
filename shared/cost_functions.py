@@ -187,7 +187,7 @@ def cost_f(task_set):
     else: 
         sum_wcrts_tt = sum([wcrts[task.name] for task in task_set]) / len(task_set)
 
-    #print("cost et: ", wcrts_et, " cost tt: ", sum_wcrts_tt) 
+    print("cost et: ", wcrts_et, " cost tt: ", sum_wcrts_tt) 
     sum_wcrts = (sum_wcrts_tt + wcrts_et)
  
     return s, sum_wcrts, is_schedulable

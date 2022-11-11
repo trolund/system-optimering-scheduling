@@ -40,7 +40,7 @@ class TestEDF(unittest.TestCase):
 
         s, wcrts = edf(task_set)
 
-        self.assertEqual(s, schedule)
+        self.assertListEqual(s, schedule)
 
     # not feasible
     def test_edf_case_3(self): 
@@ -49,7 +49,7 @@ class TestEDF(unittest.TestCase):
         task_set = [task0, task1]
 
         s, wcrts = edf(task_set)
-        self.assertEqual(s, [])
+        self.assertListEqual(s, [])
 
     # not feasible
     def test_edf_case4(self):
@@ -70,7 +70,7 @@ class TestEDF(unittest.TestCase):
 
         s, wcrts = edf(task_set)
 
-        self.assertEqual(s, [])
+        self.assertListEqual(s, [])
 
 
         

@@ -27,12 +27,13 @@ def generate_plot(cost_log, best_cost, filename, test_case):
     fig.set_dpi(300)
     plt.savefig(filename)
 
-def print_best_ps_config(best_ps_config):
+def print_best_ps_config(best_ps_config, best_cost):
     print("Best polling server configuration: ")
+    print("Cost: ", best_cost)
     for polling_server in best_ps_config:
         print("\tName: ", polling_server.name, " Duration: ", polling_server.duration, " Period: ", polling_server.period, " Deadline: ", polling_server.deadline)
         for et in polling_server.et_subset:
-            print("\t\tName: ", et.name)
+            print("\t\tName: ", et.name, "Separation type: ", et.separation)
         # add print ets for each ps 
 
 
@@ -75,14 +76,17 @@ if __name__ == "__main__":
     #polling_servers_0 = [Task("tTTps00", 4, 5, TaskType.TIME, 7, 5, et_tasks)] 
     
     #polling_servers_0 = [Task("tTTps00", 5, 25, TaskType.TIME, 7, 5, et_tasks)] 
-    polling_servers_0 = neighborhood.create_random_ps(et_tasks)
+    #polling_servers_0 = neighborhood.create_random_ps(et_tasks)
+
+    polling_servers_0 = neighborhood.create_random_pss_sep(et_tasks)
+    print_best_ps_config(polling_servers_0, 0)
     #polling_servers_0 = neighborhood.create_n_random_ps(random.randint(1,4), et_tasks)
     task_set = tt_tasks + polling_servers_0
 
     simulated_annealer.sa(task_set, temperature, alpha, stopcriterion_sec, cost_f=cost_f, log_costs=True)
 
-    print_best_ps_config(simulated_annealer.get_best_ps_config())
-
+    print_best_ps_config(simulated_annealer.get_best_ps_config(), simulated_annealer.get_best_cost())
+    print("same as: ", cost_f(tt_tasks + simulated_annealer.get_best_ps_config())[1])
     if is_logging:
         generate_plot(simulated_annealer.get_cost_log(), simulated_annealer.get_best_cost(), filename, test_case)
 
