@@ -17,8 +17,10 @@ add_library(CSVReader src/csv_reader.cpp)
 add_library(CostFunctions src/cost_functions.cpp)
 #add_library(City src/city.cpp)
 add_library(Task src/task.cpp)
+add_library(Solutions src/solution_generator.cpp)
 #set_property(TARGET SimulatedAnnealing PROPERTY CXX_STANDARD 20)
 set_property(TARGET CostFunctions PROPERTY CXX_STANDARD 20)
+set_property(TARGET Solutions PROPERTY CXX_STANDARD 20)
 
 # add the executable
 #add_executable(test src/main.cpp)
@@ -26,6 +28,10 @@ set_property(TARGET CostFunctions PROPERTY CXX_STANDARD 20)
 
 add_executable(test_edf src/test_edf.cpp)
 target_link_libraries(test_edf PUBLIC CSVReader Task CostFunctions)
+
+add_executable(test_solution src/test_solution_generator.cpp)
+target_link_libraries(test_solution PUBLIC CSVReader Task Solutions)
+
 
 # add the binary tree to the search path for include files
 # so that we will find TutorialConfig.h
