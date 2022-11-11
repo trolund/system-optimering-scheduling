@@ -22,11 +22,14 @@ class Task {
         int priority;
         int deadline;
         int release_time;
+        int separation;
         std::vector<Task> *et_subset; // maybe should be pointer to vector of pointers. so we only need to instantiate actual et tasks 
 
         Task(std::vector<std::string>);
         
         Task(std::string name, std::string duration, std::string period, std::string type, std::string priority, std::string deadline);
+          
+        Task(std::string name, std::string duration, std::string period, std::string type, std::string priority, std::string deadline, std::string separation);
         
         Task(std::string name, int duration, int period, int type, int priority, int deadline, int releaseTime);
         
