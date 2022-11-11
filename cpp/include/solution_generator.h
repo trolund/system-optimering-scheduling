@@ -1,6 +1,8 @@
 #include <vector>
 #include <random> 
 #include <map>
+#include <set>
+#include <iostream>
 #include "task.h"
 
 typedef struct solution {
@@ -24,12 +26,14 @@ class SolutionGenerator {
         std::uniform_int_distribution<std::mt19937::result_type> uni_dist; // uniform distribution in range [1, 6] 
         std::vector<Task> tt_tasks;
         std::vector<Task> et_tasks;
-        std::map<int, std::vector<Task>> separation_map;
-    
+        
+        // these two do the same thing but trying to make things work here
+        std::map<int, std::vector<Task>*> separation_map; 
+
     public:
         SolutionGenerator(std::vector<Task>*); 
 
         void separate_et_tasks();
         solution generate_solution();
-        std::vector<solution> generate_population(); 
+        std::vector<solution> generate_population(int sz);
 };

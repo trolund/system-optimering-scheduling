@@ -24,5 +24,25 @@ int main() {
 
     solution s = sg.generate_solution();
 
+    for (auto it : s.polling_servers) {
+        std::cout << it.name << " " << it.duration << " " << it.period << " " << " " << it.deadline << " " << std::endl;
+        for(auto et : *it.et_subset) {
+            std::cout << et.name << " " << et.separation << " ";
+        }
+        std::cout << std::endl << std::endl;
+    }
+
+    std::vector<solution> population = sg.generate_population(10);
+
+    for(auto sol : population) {
+        for (auto it : sol.polling_servers) {
+            std::cout << it.name << " " << it.duration << " " << it.period << " " << " " << it.deadline << " " << std::endl;
+            for(auto et : *it.et_subset) {
+                std::cout << et.name << " " << et.separation << " ";
+            }
+            std::cout << std::endl << std::endl;
+        }
+        std::cout << "__________" << std::endl << std::endl << std::endl;
+    } 
     int x = 0; 
 }

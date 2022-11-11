@@ -14,13 +14,17 @@ SolutionGenerator::SolutionGenerator(std::vector<Task> *task_set) {
     }
 
 void SolutionGenerator::separate_et_tasks(){
+    std::set<int> separation_set;
+    
     for (auto it : this->et_tasks) {
         if(!separation_map.contains(it.separation)) {
-            separation_map[it.separation] = std::vector<Task> {it};
-        } else {
-            separation_map[it.separation].push_back(it);
+            std::vector<Task> *et_separated = new std::vector<Task>(); // we would like to only instantiate these tasks once keep on heap. wont work if 0s that we swap around present though... 
+            et_separated->push_back(it);
+            separation_map.insert({it.separation, et_separated});
+        } else { 
+            separation_map.at(it.separation)->push_back(it);
         }
-    }
+    } 
 }
 
 // generate a solution
@@ -30,18 +34,25 @@ solution SolutionGenerator::generate_solution() {
     int period;
     int deadline;
     std::string name; // naming not that important, but we give one for debugging purposes
-    std::vector<Task> *et_subset;    
-    
+     
     for(auto it : separation_map) {
         duration = uni_dist(rng);
         period = uni_dist(rng) * 10;
         deadline = uni_dist(rng) * 10;
-        name = "ttPS" + std::to_string(it.first);
-        
-        et_subset = &it.second;
-        Task polling_server =  Task(name, duration, period, TT, 7, deadline, et_subset);
-        polling_servers.push_back(polling_server);
+        while(deadline > period) { deadline = uni_dist(rng) * 10; }; // deadlines may not be greater than period. if so create instance t_i+1 before t_i has finished possibly  
+        Task polling_server =  Task(name, duration, period, TT, 7, deadline, it.second);
+        polling_servers.push_back(Task(name, duration, period, TT, 7, deadline, it.second));
     }
 
     return (solution) {.polling_servers = polling_servers, .tt_tasks = &this->tt_tasks, .cost = 0.0};
+}
+
+// generate a population of size sz
+std::vector<solution> SolutionGenerator::generate_population(int sz) {
+    std::vector<solution> population;
+    for(int i = 0; i < sz; i = i + 1) {
+        population.push_back(generate_solution());
+    }
+
+    return population;
 }
