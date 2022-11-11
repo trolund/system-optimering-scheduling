@@ -1,8 +1,10 @@
 import copy
-from shared.models.taskType import TaskType
 import random
 import time
+
 import numpy as np
+
+from shared.models.taskType import TaskType
 
 
 class SimulatedAnnealer:

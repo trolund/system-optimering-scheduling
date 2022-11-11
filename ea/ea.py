@@ -1,47 +1,66 @@
+import copy
+
 from numpy.random import randint, rand
 
 from shared.caseLoader import CaseLoader
-from shared.models.taskType import TaskType
 from shared.cost_functions import cost_f
+from shared.models.taskType import TaskType
 from shared.neighborhood import Neighborhood
 
 max_number_of_polling_servers = 10
 
 
 # tournament selection
-def selection(pop, scores, k=3):
+def selection(pop_scores, k=3):
     # first random selection
-    selection_ix = randint(len(pop))
+    selection_ix = randint(len(pop_scores))
 
-    for ix in randint(0, len(pop), k - 1):
+    for ix in randint(0, len(pop_scores), k - 1):
         # check if better (e.g. perform a tournament)
-        if scores[ix] < scores[selection_ix]:
+        if pop_scores[ix][1] < pop_scores[selection_ix][1]:
             selection_ix = ix
 
-    return pop[selection_ix]
+    return pop_scores[selection_ix]
 
 
 # mutation operator
-def mutation(bitstring, r_mut):
-    for i in range(len(bitstring)):
-        # check for a mutation
-        if rand() < r_mut:
-            # flip the bit
-            bitstring[i] = 1 - bitstring[i]
+def mutation(obj, r_mut):
+        for attr, value in obj.__dict__.items():
+            # do mutation if rand less then r_mut
+            if attr == "duration" or attr == "period" or attr == "deadline":
+                if rand() < r_mut:
+                    p = randint(-1, 1)
+                    setattr(obj, attr, int(value) + (1 * p))
+def list_to_task(l, obj):
+    for idx, ele in enumerate(l):
+        if idx == 0:
+            obj.duration = ele
+        elif idx == 1:
+            obj.period = ele
+        else:
+            obj.deadline = ele
+
+    return obj
 
 
 def crossover(p1, p2, r_cross):
-    # children are copies of parents by default
-    c1, c2 = p1.copy(), p2.copy()
-    # check for recombination
-    if rand() < r_cross:
-        # select crossover point that is not on the end of the string
-        pt = randint(1, len(p1) - 2)
-        # perform crossover
-        c1 = p1[:pt] + p2[pt:]
-        c2 = p2[:pt] + p1[pt:]
-    return [c1, c2]
+    p = randint(1, 4)
 
+    c1, c2 = copy.deepcopy(p1[0]), copy.deepcopy(p2[0])
+
+    l1 = list(vars(p1[0]).values())
+    l2 = list(vars(p2[0]).values())
+
+    if rand() < r_cross:
+
+        if p == 1:
+            return list_to_task([l1[1], l1[2], l2[5]], c1), list_to_task([l2[1], l2[2], l1[5]], c2)
+        if p == 2:
+            return list_to_task([l1[1], l2[2], l2[5]], c1), list_to_task([l2[1], l1[2], l1[5]], c2)
+        if p == 3:
+            return list_to_task([l1[1], l2[2], l1[5]], c1), list_to_task([l2[1], l1[2], l2[5]], c2)
+    else:
+        return c1, c2
 
 def create_pop(population_size, task_set):
     population = []
@@ -52,7 +71,7 @@ def create_pop(population_size, task_set):
     et_tasks = [t for t in task_set if t.type == TaskType.EVENT]
 
     for x in range(population_size):
-        population.append(neighborhood.create_random_ps(et_tasks))
+        population.append(neighborhood.create_random_ps(copy.deepcopy(et_tasks))[0])
 
     return population
 
@@ -62,24 +81,32 @@ def genetic_algorithm(task_set, fitness_func, number_of_generations, population_
                       mutation_rate):
     tt_tasks = [t for t in task_set if t.type == TaskType.TIME]
 
+    print("----------------- Initialise population --------------------")
     # Initialise the entire population
     pop = create_pop(population_size, task_set)
 
     # keep track of best solution
-    best, best_eval = min(fitness_func(pop, tt_tasks), key=lambda t: t[1])
+
+    best, all_solutions = fitness_func(pop, tt_tasks)
+
+    print("Starting best: ", best[1][1])
 
     # enumerate generations (repeat)
     for gen in range(number_of_generations):
+        print("--------------------------- (" + str(gen) + ")-----------------------------")
+
         # evaluate all candidates in the population
         # scores = [fitness_func(c, init_tt_tasks) for c in pop]
-        scores = fitness_func(pop, tt_tasks)
-        # check for new best solution
-        for i in range(population_size):
-            if scores[i] < best_eval:
-                best, best_eval = pop[i], scores[i]
-                print(">%d, new best f(%s) = %.3f" % (gen, pop[i], scores[i]))
-        # select parents
-        selected = [selection(pop, scores) for _ in range(population_size)]
+        gen_best, gen_solutions = fitness_func(pop, tt_tasks)
+
+        print("Best of gen (" + str(gen) + "): ", gen_best[1][1])
+
+        if gen_best[1][1] < best[1][1]:
+            print(best[1][1], "-->", gen_best[1][1])
+            best = gen_best
+
+        selected = [selection(gen_solutions) for _ in range(population_size)]
+
         # create the next generation
         children = list()
         for i in range(0, population_size, 2):
@@ -93,19 +120,22 @@ def genetic_algorithm(task_set, fitness_func, number_of_generations, population_
                 children.append(c)
         # replace population
         pop = children
-    return [best, best_eval]
+
+        # always keep det best in the population
+        pop.append(best[0])
+
+    return [best]
 
 
 # fitness function
 def cost(population, tt_tasks):
-    return [(solution, cost_f(tt_tasks + solution)) for solution in population]
+    return [(solution, cost_f(tt_tasks + [solution])) for solution in population]
 
 
 def eval(population, tt_tasks):
-    return min(cost(population, tt_tasks), key=lambda t: t[1])
-
-
-
+    solutions = cost(population, tt_tasks)
+    best = min(solutions, key=lambda t: t[1][1])
+    return best, solutions
 
 
 if __name__ == "__main__":
@@ -118,23 +148,23 @@ if __name__ == "__main__":
     tt_tasks = [t for t in all_tasks if t.type == TaskType.TIME]
     et_tasks = [t for t in all_tasks if t.type == TaskType.EVENT]
 
-    polling_servers_0 = [neighborhood.create_random_ps(et_tasks)]
+    # polling_servers_0 = [neighborhood.create_random_ps(et_tasks)]
 
-    task_set = tt_tasks + polling_servers_0
+    # task_set = tt_tasks + polling_servers_0
 
     # define the total iterations
-    n_iter = 100
+    n_iter = 50
     # bits
-    n_bits = 20
+    n_bits = 2
     # define the population size
-    n_pop = 100
+    n_pop = 50
     # crossover rate
-    r_cross = 0.9
+    r_cross = 0.7
     # mutation rate
-    r_mut = 1.0 / float(n_bits)
+    r_mut = 0.2
 
     # perform the genetic algorithm search
-    best, score = genetic_algorithm(task_set, eval, n_iter, n_pop, r_cross, r_mut)
+    best = genetic_algorithm(all_tasks, eval, n_iter, n_pop, r_cross, r_mut)
 
     print('Done!')
-    print('f(%s) = %f' % (best, score))
+    print("Best: ",  best[0][1][1])

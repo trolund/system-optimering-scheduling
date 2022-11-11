@@ -1,7 +1,9 @@
 import unittest
-from shared.models.taskType import TaskType
-from shared.models.task import Task
+
 from cost_functions import calculate_schedulabiltiy
+from shared.models.task import Task
+from shared.models.taskType import TaskType
+
 
 class CheckSchedulabilityTests(unittest.TestCase):
     
