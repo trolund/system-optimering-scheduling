@@ -51,7 +51,10 @@ int main() {
     is_schedulable = std::get<0>(thing);
     assert(!is_schedulable); 
     std::cout << is_schedulable << std::endl; 
-
+    cost = cost_function(task_set);
+    double expected_cost = (3 + 100 + 4 + 100) / 2.0;
+    assert(cost == expected_cost);
+    std::cout << cost << " " << expected_cost << std::endl;
     std::cout << "all good passed tests" << std::endl;
     
 }
