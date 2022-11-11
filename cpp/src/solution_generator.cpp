@@ -30,15 +30,16 @@ solution SolutionGenerator::generate_solution() {
     int period;
     int deadline;
     std::string name; // naming not that important, but we give one for debugging purposes
-    std::vector<Task> *et_subset;
+    
     
     for(auto it : separation_map) {
         duration = uni_dist(rng);
         period = uni_dist(rng) * 10;
         deadline = uni_dist(rng) * 10;
         name = "ttPS" + std::to_string(it.first);
-        et_subset = &it.second;
-        Task polling_server =  Task(name, duration, period, TT, 7, deadline, et_subset);
+        std::vector<Task> et_subset;
+        et_subset = it.second;
+        Task polling_server =  Task(name, duration, period, TT, 7, deadline, &et_subset);
         polling_servers.push_back(polling_server);
     }
 
