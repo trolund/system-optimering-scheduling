@@ -1,8 +1,11 @@
 #include "solution_generator.h"
 
-SolutionGenerator::SolutionGenerator(std::vector<Task> *task_set) {
-        this->rng = std::mt19937(dev()); 
-        this->uni_dist = std::uniform_int_distribution<std::mt19937::result_type>(1, 50);
+SolutionGenerator::SolutionGenerator(std::vector<Task> *task_set, int population_size) {
+        population_sz = population_size;
+        rng = std::mt19937(dev()); 
+        uni_dist = std::uniform_int_distribution<std::mt19937::result_type>(1, 20);
+        uni_real_dist = std::uniform_real_distribution<>(0, 1); // random double in [0, 1)
+        uni_dist_select = std::uniform_int_distribution<std::mt19937::result_type>(0, population_sz - 1);
         
         for (auto it : *task_set) {
             if (it.type == TT) { tt_tasks.push_back(it); } 
@@ -16,7 +19,7 @@ SolutionGenerator::SolutionGenerator(std::vector<Task> *task_set) {
 void SolutionGenerator::separate_et_tasks(){
     std::set<int> separation_set;
     
-    for (auto it : this->et_tasks) {
+    for (auto it : et_tasks) {
         if(!separation_map.contains(it.separation)) {
             std::vector<Task> *et_separated = new std::vector<Task>(); // we would like to only instantiate these tasks once keep on heap. wont work if 0s that we swap around present though... 
             et_separated->push_back(it);
@@ -48,11 +51,86 @@ solution SolutionGenerator::generate_solution() {
 }
 
 // generate a population of size sz
-std::vector<solution> SolutionGenerator::generate_population(int sz) {
+std::vector<solution> SolutionGenerator::generate_population() {
     std::vector<solution> population;
-    for(int i = 0; i < sz; i = i + 1) {
+    for(int i = 0; i < population_sz; i = i + 1) {
         population.push_back(generate_solution());
     }
 
     return population;
 }
+
+// https://en.cppreference.com/w/cpp/algorithm/swap
+// use the fact that switch statements 'fall through' without a break in case 2 and 1
+// no need for default case so far...
+void swap(solution& lhs, solution& rhs, int crossover_point) {
+    std::cout << "crossover point: " << crossover_point << std::endl;
+    switch(crossover_point) {
+        case 2:
+            std::swap(lhs.polling_servers[0].deadline, rhs.polling_servers[0].deadline); 
+            std::swap(lhs.polling_servers[1].deadline, rhs.polling_servers[1].deadline);
+            std::swap(lhs.polling_servers[2].deadline, rhs.polling_servers[2].deadline);
+        case 1:
+            std::swap(lhs.polling_servers[0].period, rhs.polling_servers[0].period);  
+            std::swap(lhs.polling_servers[1].period, rhs.polling_servers[1].period); 
+            std::swap(lhs.polling_servers[2].period, rhs.polling_servers[2].period);  
+        case 0:
+            std::swap(lhs.polling_servers[0].duration, rhs.polling_servers[0].duration); 
+            std::swap(lhs.polling_servers[1].duration, rhs.polling_servers[1].duration);
+            std::swap(lhs.polling_servers[2].duration, rhs.polling_servers[2].duration);
+            break;  
+    }
+
+}
+
+/* 
+ * generate two child solutions from two parent solutions if random() <= p crossover else children = parents
+ * crossover_point = n means 'line' between index n and n+1 
+ * four parameter to change: duration, period, deadline, et_subset
+ * represented as three possibilities for crossover point: 0, 1, 2
+ *  
+ * TODO: multiple crossover points
+ *
+ */
+std::vector<solution> SolutionGenerator::recombine(solution* solution1, solution* solution2, double pc) {
+    std::vector<solution> offspring = {*solution1, *solution2};
+    if (uni_real_dist(rng) <= pc) {
+        // shuffle polling servers? try. change ordering of vector. but offspring might be too dissimilar from parents then  
+        std::shuffle(std::begin(offspring[0].polling_servers), std::end(offspring[0].polling_servers), rng); 
+        std::shuffle(std::begin(offspring[1].polling_servers), std::end(offspring[1].polling_servers), rng); 
+        int crossover_point = uni_dist(rng) % 3;
+        swap(offspring[0], offspring[1], crossover_point); 
+    } 
+ 
+    return offspring; 
+} 
+
+// perform tournament. compete n times. return best. with replacement 
+solution SolutionGenerator::select(std::vector<solution>* population, int k) {
+    int selection_i = uni_dist_select(rng); 
+    int selection_j;
+    std::cout << "sel i: " << selection_i << std::endl;
+    
+    for(int i = 0; i < k; i = i + 1) {
+    
+        selection_j = uni_dist_select(rng);
+        std::cout << "sel j: " << selection_j << std::endl;
+        // do not let solutions compete against themselves in this round
+        while (selection_i == selection_j) { selection_j = uni_dist_select(rng); } 
+
+        // update if better 
+        if (population->at(selection_j).cost < population->at(selection_i).cost) {
+            selection_i = selection_j;
+        } 
+    }
+ 
+    return population->at(selection_i);
+
+}
+
+// mutate solution
+void SolutionGenerator::mutate(solution*, double) {
+
+} 
+//void check_separation(solution*); // check that separation requirement is met 
+//void check_param_sol(solution*); // check that parameters are ok deadline <= period etc. 

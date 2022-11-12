@@ -41,7 +41,6 @@ class Task {
             }
         };
 
-
         //std::vector<Task> evictFromSubset(int start, int stop);
         //void addToSubset(std::vector<Task>);
 

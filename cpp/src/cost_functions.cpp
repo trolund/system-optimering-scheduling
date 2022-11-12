@@ -21,7 +21,7 @@ double cost_function(std::vector<Task> *task_set) {
         if (it.et_subset != NULL) { polling_servers.push_back(it); };        
     }
 
-    // get cost contribution of polling servers 
+    // get cost contribution of each polling server 
     for(auto it : polling_servers) {
         is_schedulable_cost_et = is_polling_server_schedulable(&it);
         is_schedulable = std::get<0>(is_schedulable_cost_et);

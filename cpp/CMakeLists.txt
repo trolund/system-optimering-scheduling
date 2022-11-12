@@ -14,12 +14,12 @@ set(CMAKE_BUILD_TYPE Debug)
 # add libraries
 add_library(CSVReader src/csv_reader.cpp)
 #add_library(SimulatedAnnealing src/simulated_annealing.cpp)
-add_library(CostFunctions src/cost_functions.cpp)
+#add_library(CostFunctions src/cost_functions.cpp)
 #add_library(City src/city.cpp)
-add_library(Task src/task.cpp)
-add_library(Solutions src/solution_generator.cpp)
+#add_library(Task src/task.cpp)
+add_library(Solutions src/solution_generator.cpp src/cost_functions.cpp src/task.cpp)
 #set_property(TARGET SimulatedAnnealing PROPERTY CXX_STANDARD 20)
-set_property(TARGET CostFunctions PROPERTY CXX_STANDARD 20)
+#set_property(TARGET CostFunctions PROPERTY CXX_STANDARD 20)
 set_property(TARGET Solutions PROPERTY CXX_STANDARD 20)
 
 # add the executable
@@ -27,10 +27,10 @@ set_property(TARGET Solutions PROPERTY CXX_STANDARD 20)
 #set_property(TARGET test PROPERTY CXX_STANDARD 20)
 
 add_executable(test_edf src/test_edf.cpp)
-target_link_libraries(test_edf PUBLIC CSVReader Task CostFunctions)
+target_link_libraries(test_edf PUBLIC CSVReader Solutions)
 
 add_executable(test_solution src/test_solution_generator.cpp)
-target_link_libraries(test_solution PUBLIC CSVReader Task Solutions)
+target_link_libraries(test_solution PUBLIC CSVReader Solutions)
 
 
 # add the binary tree to the search path for include files
