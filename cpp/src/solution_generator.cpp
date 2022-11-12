@@ -107,6 +107,7 @@ std::vector<solution> SolutionGenerator::recombine(solution* solution1, solution
 
 // perform tournament. compete n times. return best. with replacement 
 solution SolutionGenerator::select(std::vector<solution>* population, int k) {
+    // we do not need rand here bc we shuffle
     int selection_i = uni_dist_select(rng); 
     int selection_j;
     std::cout << "sel i: " << selection_i << std::endl;
@@ -129,7 +130,26 @@ solution SolutionGenerator::select(std::vector<solution>* population, int k) {
 }
 
 // mutate solution
-void SolutionGenerator::mutate(solution*, double) {
+// a bit of freestyle. we go through each possible mutate. we could also check once for each parameter and apply 
+// mutation to parameter in each polling server. for each parameter.
+void SolutionGenerator::mutate(solution* sol, double mutation_rate) {
+    int sign;
+    for (int i = 0; i < sol->polling_servers.size(); i = i + 1) {
+        
+        if(uni_real_dist(rng) <= mutation_rate) {
+            sign = (uni_dist(rng) % 2 == 0) ? 1 : -1;
+            sol->polling_servers[i].duration += sign;
+        }
+        if(uni_real_dist(rng) <= mutation_rate) {
+            sign = (uni_dist(rng) % 2 == 0) ? 1 : -1;
+            sol->polling_servers[i].period += sign * uni_dist(rng); // add/sub a value in [1, 20]
+        }
+        if(uni_real_dist(rng) <= mutation_rate) {
+            sign = (uni_dist(rng) % 2 == 0) ? 1 : -1;
+            sol->polling_servers[i].deadline += sign * uni_dist(rng);
+            sol->polling_servers[i].deadline = std::min(sol->polling_servers[i].deadline, sol->polling_servers[i].period);
+        }
+    }
 
 } 
 //void check_separation(solution*); // check that separation requirement is met 
