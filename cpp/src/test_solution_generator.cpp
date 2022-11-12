@@ -27,7 +27,7 @@ int main() {
             task_set_ET.push_back(task);
         }
     }
-    SolutionGenerator sg(&task_set_all, 2);
+    SolutionGenerator sg(&task_set_all, 100);
 
     /*solution s = sg.generate_solution();
 
@@ -40,7 +40,7 @@ int main() {
     }*/
 
     std::vector<solution> population = sg.generate_population();
-
+    /*
     for(auto sol : population) {
         for (auto it : sol.polling_servers) {
             std::cout << it.name << " " << it.duration << " " << it.period << " " << " " << it.deadline << " " << std::endl;
@@ -65,9 +65,10 @@ int main() {
             std::cout << std::endl << std::endl;
         }
         std::cout << "__________" << std::endl << std::endl << std::endl;
-    }
+    }*/
 
     for(int i = 0; i < population.size(); i = i + 1) {
+        std::cout << "I IS: " << i << std::endl;    
         std::vector<Task> task_set = *population[i].tt_tasks;
         // do not think this works?? wait yeah yeah pollling servers is vector of task
         task_set.insert(task_set.end(), population[i].polling_servers.begin(), population[i].polling_servers.end());

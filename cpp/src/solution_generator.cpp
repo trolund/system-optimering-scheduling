@@ -39,9 +39,13 @@ solution SolutionGenerator::generate_solution() {
     std::string name; // naming not that important, but we give one for debugging purposes
      
     for(auto it : separation_map) {
-        duration = uni_dist(rng);
+        //duration = uni_dist(rng);
         period = uni_dist(rng) * 10;
-        deadline = uni_dist(rng) * 10;
+        //deadline = ((uni_dist(rng) * 10) % period) + duration;
+        deadline = ((uni_dist(rng) * 10) % period);
+        duration = uni_dist(rng);
+        duration = std::min(duration, deadline);
+        //deadline = (uni_dist(rng) * 10);
         while(deadline > period) { deadline = uni_dist(rng) * 10; }; // deadlines may not be greater than period. if so create instance t_i+1 before t_i has finished possibly  
         Task polling_server =  Task(name, duration, period, TT, 7, deadline, it.second);
         polling_servers.push_back(Task(name, duration, period, TT, 7, deadline, it.second));
@@ -107,7 +111,7 @@ std::vector<solution> SolutionGenerator::recombine(solution* solution1, solution
 
 // perform tournament. compete n times. return best. with replacement 
 solution SolutionGenerator::select(std::vector<solution>* population, int k) {
-    // we do not need rand here bc we shuffle
+    // we do not need rand here bc we shuffle no wait
     int selection_i = uni_dist_select(rng); 
     int selection_j;
     std::cout << "sel i: " << selection_i << std::endl;
