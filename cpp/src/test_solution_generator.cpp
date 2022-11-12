@@ -84,6 +84,19 @@ int main() {
 
     }
 
+    for(auto it : population) { 
+        std::cout << "cost for this solution is: " << it.cost << " solution is: " << std::endl;
+        for (auto itt : it.polling_servers) {
+            std::cout << itt.name << " " << itt.duration << " " << itt.period << " " << " " << itt.deadline << " " << std::endl;
+            for(auto et : *itt.et_subset) {
+                std::cout << et.name << " " << et.separation << " ";
+            }
+            std::cout << std::endl << std::endl;
+        }
+
+
+    }
+
     solution best_solution = sg.select(&population, 10);
 
     std::cout << "found best ____ cost is: " << best_solution.cost << std::endl;
