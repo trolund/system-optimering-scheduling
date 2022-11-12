@@ -67,13 +67,14 @@ int main() {
         std::cout << "__________" << std::endl << std::endl << std::endl;
     }
 
-    for(auto it : population) {
-        std::vector<Task> task_set = *it.tt_tasks;
-        task_set.insert(task_set.end(), it.polling_servers.begin(), it.polling_servers.end());
+    for(int i = 0; i < population.size(); i = i + 1) {
+        std::vector<Task> task_set = *population[i].tt_tasks;
+        // do not think this works?? wait yeah yeah pollling servers is vector of task
+        task_set.insert(task_set.end(), population[i].polling_servers.begin(), population[i].polling_servers.end());
         double cost = cost_function(&task_set);
-        it.cost = cost;
-        std::cout << "cost for this solution is: " << it.cost << " solution is: " << std::endl;
-        for (auto itt : it.polling_servers) {
+        population[i].cost = cost;
+        std::cout << "cost for this solution is: " << population[i].cost << " solution is: " << std::endl;
+        for (auto itt : population[i].polling_servers) {
             std::cout << itt.name << " " << itt.duration << " " << itt.period << " " << " " << itt.deadline << " " << std::endl;
             for(auto et : *itt.et_subset) {
                 std::cout << et.name << " " << et.separation << " ";
