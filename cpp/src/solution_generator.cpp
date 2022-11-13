@@ -16,6 +16,11 @@ SolutionGenerator::SolutionGenerator(std::vector<Task> *task_set, int population
 
     }
 
+void SolutionGenerator::set_population_sz(int sz) {
+    population_sz = sz;
+    uni_dist_select = uni_dist_select = std::uniform_int_distribution<std::mt19937::result_type>(0, population_sz - 1);
+}
+
 void SolutionGenerator::separate_et_tasks(){
     std::set<int> separation_set;
     
@@ -114,16 +119,16 @@ solution SolutionGenerator::select(std::vector<solution>* population, int k) {
     // we do not need rand here bc we shuffle no wait
     int selection_i = uni_dist_select(rng); 
     int selection_j;
-    std::cout << "sel i: " << selection_i << std::endl;
+    //std::cout << "sel i: " << selection_i << std::endl;
     
     for(int i = 0; i < k; i = i + 1) {
     
         selection_j = uni_dist_select(rng);
-        std::cout << "sel j: " << selection_j << std::endl;
+        //std::cout << "sel j: " << selection_j << std::endl;
         // do not let solutions compete against themselves in this round
         while (selection_i == selection_j) { selection_j = uni_dist_select(rng); } 
 
-        // update if better 
+        // update if better use compare function instead
         if (population->at(selection_j).cost < population->at(selection_i).cost) {
             selection_i = selection_j;
         } 
@@ -155,6 +160,12 @@ void SolutionGenerator::mutate(solution* sol, double mutation_rate) {
         }
     }
 
-} 
+}
+
+// get solution with minimum cost from a vector of solutions
+solution SolutionGenerator::get_min_cost(std::vector<solution> *solutions) {
+    std::vector<solution>::iterator result = std::min_element(solutions->begin(), solutions->end(), cmp_solution());
+    return *result;
+}
 //void check_separation(solution*); // check that separation requirement is met 
 //void check_param_sol(solution*); // check that parameters are ok deadline <= period etc. 
