@@ -178,7 +178,7 @@ void SolutionGenerator::mutate(solution* sol, double mutation_rate) {
             sign = (uni_dist(rng) % 2 == 0) ? 1 : -1;
 
             if (sol->polling_servers[i].period <= 10) { // try like this to get real good ones maybe but avoiding really long hyperperiods
-                sol->polling_servers[i].deadline += sign * 1;//uni_dist(rng);
+                sol->polling_servers[i].period += sign * 1;//uni_dist(rng);
             } else {
                 sol->polling_servers[i].period += sign * 10;//uni_dist(rng); // add/sub a value in [1, 20]
             }
