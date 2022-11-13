@@ -21,7 +21,7 @@ add_library(Solutions src/solution_generator.cpp src/cost_functions.cpp src/task
 #set_property(TARGET SimulatedAnnealing PROPERTY CXX_STANDARD 20)
 #set_property(TARGET CostFunctions PROPERTY CXX_STANDARD 20)
 set_property(TARGET Solutions PROPERTY CXX_STANDARD 20)
-
+set( CMAKE_CXX_FLAGS "-fopenmp" )
 # add the executable
 #add_executable(test src/main.cpp)
 #set_property(TARGET test PROPERTY CXX_STANDARD 20)

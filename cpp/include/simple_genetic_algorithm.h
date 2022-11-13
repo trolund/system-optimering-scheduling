@@ -1,5 +1,6 @@
 #include <vector>
 #include <chrono>
+#include <omp.h>
 #include "solution_generator.h"
 
 class SimpleGeneticAlgorithm {
