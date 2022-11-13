@@ -22,20 +22,19 @@ void SimpleGeneticAlgorithm::perform_sga(int population_sz, int num_generations,
     // main loop
     for(int gen = 0; gen <  num_generations; gen = gen + 1) {
         mating_pool.clear();
-        std::cout << "size of mating pool: " << mating_pool.size() << std::endl;
+        //std::cout << "size of mating pool: " << mating_pool.size() << std::endl;
         fill_mating_pool(mating_pool, &population); 
         std::shuffle(mating_pool.begin(), mating_pool.end(), rng); // should already be shuffled bc random selection but do it anyway 
-        std::cout << "filled mating pool. size of mating pool is now: " << mating_pool.size() << std::endl;
+        //std::cout << "filled mating pool. size of mating pool is now: " << mating_pool.size() << std::endl;
         new_population.clear();
         
         for (int i = 0; i < population_sz; i = i + 2) {
             offspring = sg->recombine(mating_pool[i], mating_pool[i+1], crossover_rate);
             sg->mutate(&offspring[0], mutation_rate); // perform mutation now instead of in loop afterwards
             sg->mutate(&offspring[1], mutation_rate); 
-            new_population.insert(new_population.end(), offspring.begin(), offspring.end());
-            std::cout << "size of new population: " << new_population.size() << std::endl; 
+            new_population.insert(new_population.end(), offspring.begin(), offspring.end()); 
         }
-
+        std::cout << "size of new population: " << new_population.size() << std::endl; 
         // update population. parallelize
         population = new_population;
         for(int i = 0; i < population_sz; i = i + 1) {
@@ -50,7 +49,7 @@ void SimpleGeneticAlgorithm::perform_sga(int population_sz, int num_generations,
     }
 
     uint64_t sec_end = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-    std::cout << "ran for: " << sec0 - sec_end << " seconds" << std::endl;
+    std::cout << "ran for: " << sec_end - sec0 << " seconds" << std::endl;
 }
 
 solution SimpleGeneticAlgorithm::get_best_solution() { return best_solution; }
