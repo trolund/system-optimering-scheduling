@@ -9,6 +9,8 @@ void SimpleGeneticAlgorithm::perform_sga(int population_sz, int num_generations,
     std::vector<solution*> mating_pool; // consider whether we should use ptrs to solution
     solution candidate_best;
 
+    uint64_t sec0 = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+
     for(int i = 0; i < population_sz; i = i + 1) {
         apply_cost_function(&population[i], cost_f);
         std::cout << "solution " << i << " cost: " << population[i].cost << std::endl;
@@ -47,6 +49,8 @@ void SimpleGeneticAlgorithm::perform_sga(int population_sz, int num_generations,
 
     }
 
+    uint64_t sec_end = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    std::cout << "ran for: " << sec0 - sec_end << " seconds" << std::endl;
 }
 
 solution SimpleGeneticAlgorithm::get_best_solution() { return best_solution; }

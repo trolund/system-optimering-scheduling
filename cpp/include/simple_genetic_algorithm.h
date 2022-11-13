@@ -1,4 +1,5 @@
 #include <vector>
+#include <chrono>
 #include "solution_generator.h"
 
 class SimpleGeneticAlgorithm {
