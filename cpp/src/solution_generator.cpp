@@ -176,12 +176,23 @@ void SolutionGenerator::mutate(solution* sol, double mutation_rate) {
         }
         if(uni_real_dist(rng) <= mutation_rate) {
             sign = (uni_dist(rng) % 2 == 0) ? 1 : -1;
-            sol->polling_servers[i].period += sign * 10;//uni_dist(rng); // add/sub a value in [1, 20]
+
+            if (sol->polling_servers[i].period <= 10) { // try like this to get real good ones maybe but avoiding really long hyperperiods
+                sol->polling_servers[i].deadline += sign * 1;//uni_dist(rng);
+            } else {
+                sol->polling_servers[i].period += sign * 10;//uni_dist(rng); // add/sub a value in [1, 20]
+            }
+            
             sol->polling_servers[i].period = std::max(2, sol->polling_servers[i].period); // avoid negative and period of 1
         }
         if(uni_real_dist(rng) <= mutation_rate) {
             sign = (uni_dist(rng) % 2 == 0) ? 1 : -1;
-            sol->polling_servers[i].deadline += sign * 10;//uni_dist(rng);
+            
+            if (sol->polling_servers[i].deadline <= 10) { 
+                sol->polling_servers[i].deadline += sign * 1;//uni_dist(rng);
+            } else {
+                sol->polling_servers[i].deadline += sign * 10;//uni_dist(rng);
+            }
             sol->polling_servers[i].deadline = std::min(sol->polling_servers[i].deadline, sol->polling_servers[i].period);
             sol->polling_servers[i].deadline = std::max(1, sol->polling_servers[i].deadline); // avoid negative
         }
