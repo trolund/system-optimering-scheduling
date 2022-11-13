@@ -17,7 +17,7 @@ add_library(CSVReader src/csv_reader.cpp)
 #add_library(CostFunctions src/cost_functions.cpp)
 #add_library(City src/city.cpp)
 #add_library(Task src/task.cpp)
-add_library(Solutions src/solution_generator.cpp src/cost_functions.cpp src/task.cpp)
+add_library(Solutions src/solution_generator.cpp src/cost_functions.cpp src/task.cpp src/simple_genetic_algorithm.cpp)
 #set_property(TARGET SimulatedAnnealing PROPERTY CXX_STANDARD 20)
 #set_property(TARGET CostFunctions PROPERTY CXX_STANDARD 20)
 set_property(TARGET Solutions PROPERTY CXX_STANDARD 20)
@@ -32,6 +32,8 @@ target_link_libraries(test_edf PUBLIC CSVReader Solutions)
 add_executable(test_solution src/test_solution_generator.cpp)
 target_link_libraries(test_solution PUBLIC CSVReader Solutions)
 
+add_executable(test_sga src/test_sga.cpp)
+target_link_libraries(test_sga PUBLIC CSVReader Solutions)
 
 # add the binary tree to the search path for include files
 # so that we will find TutorialConfig.h
@@ -39,3 +41,16 @@ target_include_directories(test_edf PUBLIC
                           "${PROJECT_BINARY_DIR}"
                           "${PROJECT_SOURCE_DIR}"
                           )
+# add the binary tree to the search path for include files
+# so that we will find TutorialConfig.h
+target_include_directories(test_solution PUBLIC
+                          "${PROJECT_BINARY_DIR}"
+                          "${PROJECT_SOURCE_DIR}"
+                          )
+
+                          # add the binary tree to the search path for include files
+# so that we will find TutorialConfig.h
+target_include_directories(test_sga PUBLIC
+"${PROJECT_BINARY_DIR}"
+"${PROJECT_SOURCE_DIR}"
+)

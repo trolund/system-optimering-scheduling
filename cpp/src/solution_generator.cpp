@@ -2,7 +2,7 @@
 
 SolutionGenerator::SolutionGenerator(std::vector<Task> *task_set, int population_size) {
         population_sz = population_size;
-        rng = std::mt19937(dev()); 
+        rng = std::mt19937(dev()); // https://stackoverflow.com/questions/686353/random-float-number-generation 
         uni_dist = std::uniform_int_distribution<std::mt19937::result_type>(1, 20);
         uni_real_dist = std::uniform_real_distribution<>(0, 1); // random double in [0, 1)
         uni_dist_select = std::uniform_int_distribution<std::mt19937::result_type>(0, population_sz - 1);
@@ -135,6 +135,30 @@ solution SolutionGenerator::select(std::vector<solution>* population, int k) {
     }
  
     return population->at(selection_i);
+
+}
+
+// perform tournament. compete n times. return best. with replacement 
+solution* SolutionGenerator::select_(std::vector<solution>* population, int k) {
+    // we do not need rand here bc we shuffle no wait
+    int selection_i = uni_dist_select(rng); 
+    int selection_j;
+    //std::cout << "sel i: " << selection_i << std::endl;
+    
+    for(int i = 0; i < k; i = i + 1) {
+    
+        selection_j = uni_dist_select(rng);
+        //std::cout << "sel j: " << selection_j << std::endl;
+        // do not let solutions compete against themselves in this round
+        while (selection_i == selection_j) { selection_j = uni_dist_select(rng); } 
+
+        // update if better use compare function instead
+        if (population->at(selection_j).cost < population->at(selection_i).cost) {
+            selection_i = selection_j;
+        } 
+    }
+ 
+    return &population->at(selection_i);
 
 }
 

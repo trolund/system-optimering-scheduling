@@ -6,6 +6,7 @@
 #include <algorithm> 
 #include "cost_functions.h" // includes kind of messy....
 
+// add is_schedulable field
 typedef struct solution {
     std::vector<Task> polling_servers;
     std::vector<Task> *tt_tasks;
@@ -46,7 +47,8 @@ class SolutionGenerator {
         solution generate_solution(); // generate a random solution
         std::vector<solution> generate_population(); // generate sz random solutions
         std::vector<solution> recombine(solution*, solution*, double); // generate two child solutions from two parent solutions      
-        solution select(std::vector<solution>*, int); // perform tournament. compete n times. return best. with replacement 
+        solution select(std::vector<solution>*, int); // perform tournament. compete n times. return best. with replacement. consider returning pointer.. 
+        solution* select_(std::vector<solution>*, int); // perform tournament. compete n times. return best. with replacement. ptr version 
         void mutate(solution*, double); // mutate solution
         void check_separation(solution*); // check that separation requirement is met 
         void check_param_sol(solution*); // check that parameters are ok deadline <= period etc. 

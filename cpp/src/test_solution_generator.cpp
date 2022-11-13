@@ -78,6 +78,7 @@ int main() {
     solution best_solution = sg.select(&population, 4);
 
     std::cout << "did tournament, winner cost is: " << best_solution.cost << std::endl;
+    
     for (auto it : best_solution.polling_servers) {
             std::cout << it.name << " " << it.duration << " " << it.period << " " << " " << it.deadline << " " << std::endl;
             for(auto et : *it.et_subset) {
@@ -86,4 +87,34 @@ int main() {
             std::cout << std::endl << std::endl;
         }
         std::cout << "__________" << std::endl << std::endl << std::endl;
+
+
+    std::vector<solution> recombined = sg.recombine(&population[0], &population[1], 1.0);
+    std::cout << "recombined. made " << recombined.size() << " new solutions" << std::endl;
+    for(int i = 0; i < 2; i=i+1) {
+        for (auto it : population[i].polling_servers) {
+            std::cout << "parent " << i << " : " << it.name << " " << it.duration << " " << it.period << " " << " " << it.deadline << " " << std::endl;
+            for(auto et : *it.et_subset) {
+                std::cout << et.name << " " << et.separation << " ";
+            }
+            std::cout << std::endl << std::endl;
+        }
+        std::cout << "__________" << std::endl << std::endl << std::endl;
+
+    }
+    for(int i = 0; i < 2; i = i + 1) {
+        for (auto it : recombined[i].polling_servers) {
+            std::cout << "child " << i << " : " << it.name << " " << it.duration << " " << it.period << " " << " " << it.deadline << " " << std::endl;
+            for(auto et : *it.et_subset) {
+                std::cout << et.name << " " << et.separation << " ";
+            }
+            std::cout << std::endl << std::endl;
+        }
+    }
+    std::cout << "__________" << std::endl << std::endl << std::endl;
+
+    std::cout << "address of population[0]: " << &population[0] << " address of population[1]: " << &population[1] << std::endl;
+    std::cout << "address of recombined[0]: " << &recombined[0] << " address of recombined[1]: " << &recombined[1] << std::endl;
+
+
 }
