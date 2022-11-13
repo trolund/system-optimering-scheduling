@@ -47,7 +47,7 @@ solution SolutionGenerator::generate_solution() {
         //duration = uni_dist(rng);
         period = uni_dist(rng) * 10;
         //deadline = ((uni_dist(rng) * 10) % period) + duration;
-        deadline = ((uni_dist(rng) * 10) % period);
+        deadline = ((uni_dist(rng) * 10) % period); // this is not good! never equal but yeah enforce it somehow
         duration = uni_dist(rng);
         duration = std::min(duration, deadline);
         //deadline = (uni_dist(rng) * 10);
