@@ -24,8 +24,8 @@ int main() {
     }
 
     // kind of weird with the population size arg
-    SolutionGenerator solution_generator(&task_set_all, 10); 
+    SolutionGenerator solution_generator(&task_set_all, 40); 
     SimpleGeneticAlgorithm sga(&solution_generator, 0.9, 0.05);
-    sga.perform_sga(10, 10, cost_function);
+    sga.perform_sga(40, 10, cost_function);
 
 }

@@ -73,7 +73,7 @@ std::vector<solution> SolutionGenerator::generate_population() {
 // use the fact that switch statements 'fall through' without a break in case 2 and 1
 // no need for default case so far...
 void swap(solution& lhs, solution& rhs, int crossover_point) {
-    std::cout << "crossover point: " << crossover_point << std::endl;
+    //std::cout << "crossover point: " << crossover_point << std::endl;
     switch(crossover_point) {
         case 2:
             std::swap(lhs.polling_servers[0].deadline, rhs.polling_servers[0].deadline); 
