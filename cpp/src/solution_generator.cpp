@@ -3,7 +3,7 @@
 SolutionGenerator::SolutionGenerator(std::vector<Task> *task_set, int population_size) {
         population_sz = population_size;
         rng = std::mt19937(dev()); // https://stackoverflow.com/questions/686353/random-float-number-generation 
-        uni_dist = std::uniform_int_distribution<std::mt19937::result_type>(1, 20);
+        uni_dist = std::uniform_int_distribution<std::mt19937::result_type>(1, 10);
         uni_real_dist = std::uniform_real_distribution<>(0, 1); // random double in [0, 1)
         uni_dist_select = std::uniform_int_distribution<std::mt19937::result_type>(0, population_sz - 1);
         
@@ -172,15 +172,18 @@ void SolutionGenerator::mutate(solution* sol, double mutation_rate) {
         if(uni_real_dist(rng) <= mutation_rate) {
             sign = (uni_dist(rng) % 2 == 0) ? 1 : -1;
             sol->polling_servers[i].duration += sign;
+            sol->polling_servers[i].duration = std::max(1, sol->polling_servers[i].duration); // avoid negative
         }
         if(uni_real_dist(rng) <= mutation_rate) {
             sign = (uni_dist(rng) % 2 == 0) ? 1 : -1;
             sol->polling_servers[i].period += sign * 10;//uni_dist(rng); // add/sub a value in [1, 20]
+            sol->polling_servers[i].period = std::max(2, sol->polling_servers[i].period); // avoid negative and period of 1
         }
         if(uni_real_dist(rng) <= mutation_rate) {
             sign = (uni_dist(rng) % 2 == 0) ? 1 : -1;
             sol->polling_servers[i].deadline += sign * 10;//uni_dist(rng);
             sol->polling_servers[i].deadline = std::min(sol->polling_servers[i].deadline, sol->polling_servers[i].period);
+            sol->polling_servers[i].deadline = std::max(1, sol->polling_servers[i].deadline); // avoid negative
         }
     }
 
