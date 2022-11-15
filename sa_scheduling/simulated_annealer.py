@@ -62,7 +62,7 @@ class SimulatedAnnealer:
 
         # does not matter if < or <= if 0 then new solution will be selected no matter what     
         while int(time.time()) - sec0 < stopcriterion_sec:
-            anneal(polling_servers, tt, t, a, self.n_solutions, current_cost, log_costs, best_cost)
+            self.anneal(polling_servers, tt, t, a, self.n_solutions, current_cost, log_costs, best_cost)
             # tmp_ps = self.get_neighbor(copy.deepcopy(polling_servers)) # obtain ps configuration from neighborhood
             # tmp_solution = tt + tmp_ps # complete task set
             #
@@ -160,7 +160,11 @@ class SimulatedAnnealer:
         self.n_solutions = self.n_solutions + 1
 
         # update temperature
+        t = self.update_temp(t, a)
+
+    def update_temp(self, t, a):
         t = t * a
+        return t
 
     def print_message(self, stopcriterion_sec):
         print("\n")
@@ -186,4 +190,5 @@ class SimulatedAnnealer:
         return self.best_cost
 
     def get_best_ps_config(self):
-        return self.best_ps_config 
+        return self.best_ps_config
+

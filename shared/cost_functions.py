@@ -56,7 +56,7 @@ def edf(ts):
         for task in ready_list:
             if task.duration > 0 and task.deadline <= t:
                 return [], -1 # just return 1 here maybe lol? 
-        # release taks at time t
+        # release task at time t
         ready_list = ready_list + [create_job(t, task) for task in ts if t % task.period == 0]     
 
         if ready_list == []:
@@ -69,7 +69,7 @@ def edf(ts):
             continue
         else:
             # EDF get next job to execute  
-            ed_job = min(ready_list,key=lambda x: x.deadline)
+            ed_job = min(ready_list, key=lambda x: x.deadline)
             s.append(ed_job.name)
             ed_job.duration = ed_job.duration - 1
 
@@ -137,12 +137,12 @@ def calculate_schedulabiltiy(polling_server):
                 (pj, Cj, Tj, Dj) = unpack(tj)
 
                 if pj >= pi:
-                    demand  = demand + math.ceil(t/Tj)*Cj
+                    demand = demand + math.ceil(t/Tj)*Cj
             
             #According to lemma 1 of [1], we are searching for the earliest time, when the supply exceeds the demand
             if supply >= demand:
                 response_time = t
-                result_dict[et_task.name]  = (response_time, et_task.deadline) # if actually greater than deadline, set to false later
+                result_dict[et_task.name] = (response_time, et_task.deadline) # if actually greater than deadline, set to false later
                 break
             
             t = t + 1
