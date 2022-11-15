@@ -21,7 +21,7 @@ def processor_demand_criterion(t1, t2, task_set):
 
     # phase or capital phi is 0 for all task in our case
     # for some task demand = duration*number_of_instances_interval 
-    demand = sum([max(0, ((t2 + task.period - task.deadline) - t1) / task.period) * task.duration for task in task_set])
+    demand = sum([max(0, (t2 + task.period - task.deadline - t1) / task.period) * task.duration for task in task_set])
     
     # task set is schedulable if processor demand does not exceed available time  
     return demand <= (t2 - t1)
