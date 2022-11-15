@@ -29,7 +29,7 @@ class Neighborhood:
         self.n_polling_servers = 0
 
     # hardcode mins and max duration,period, deadline for now
-    def create_random_ps(self, et_subset): 
+    def create_random_ps(self, et_subset):
         server_list = []
         for task in et_subset:
 
@@ -53,7 +53,7 @@ class Neighborhood:
                 ets_separated[et.separation] = [et]
             else:
                 ets_separated[et.separation].append(et)
-        
+
         return ets_separated#[value for key, value in ps_separated]
 
     # create random polling servers with separation requirement 
@@ -63,12 +63,12 @@ class Neighborhood:
         ets_non_zero = [value for key, value in ets_separated.items() if key != 0]
 
         # create a random number of partitions of et zero tasks. et_zeros is list of list of ets with sep 0 
-        et_zeros = self.partition_et_tasks(random.randint(0, len(ets_non_zero)), ets_separated[0]) if 0 in ets_separated else [] 
-        
+        et_zeros = self.partition_et_tasks(random.randint(0, len(ets_non_zero)), ets_separated[0]) if 0 in ets_separated else []
+
 
         # create polling servers 
         polling_servers = [self.create_random_ps1(subset + et_zeros.pop()) if et_zeros != [] \
-                            else self.create_random_ps1(subset) for subset in ets_non_zero]
+                               else self.create_random_ps1(subset) for subset in ets_non_zero]
 
         # make sure that separation requirement is fulfilled by every polling server
         for ps in polling_servers:
@@ -76,7 +76,7 @@ class Neighborhood:
                 return -1 # find something to do here, should NOT happen 
 
         return polling_servers
-        
+
     # without separation requirement 
     # hardcode mins and max duration,period, deadline for now
     def create_random_ps1(self, et_subset):
@@ -94,19 +94,19 @@ class Neighborhood:
     # partition list of et_tasks into n lists of et_tasks
     def partition_et_tasks(self, n, et_tasks):
         num_tasks = int(len(et_tasks)/n)
-        polling_servers = [et_tasks[i*num_tasks:(i+1)*num_tasks] for i in range(n-1)] 
+        polling_servers = [et_tasks[i*num_tasks:(i+1)*num_tasks] for i in range(n-1)]
         polling_servers += [et_tasks[(n-1)*num_tasks:]]
 
-        return  polling_servers 
+        return  polling_servers
 
-    # without separation requirement 
-    def create_n_random_ps(self, n, et_tasks): 
+        # without separation requirement
+    def create_n_random_ps(self, n, et_tasks):
         et_subsets = self.partition_et_tasks(n, et_tasks)
         return [self.create_random_ps1(et_subset) for et_subset in et_subsets]
 
 
     # get a subset of pses from victim and delete these from victim 
-    def create_ps_subset(self, victim_ps): 
+    def create_ps_subset(self, victim_ps):
         num_et_tasks = self.rand.randint(1, max(1, len(victim_ps.et_subset) - 1)) # doesnt work like this anymore only count 0s
         new_ps_et_subset = []
 
@@ -151,7 +151,7 @@ class Neighborhood:
         # select parameter to change. we rarely generate feasible solutions when including NUM_PS option
         parameter = self.rand.randint(NUM_PS+1, SWAP_SEP)
 
-        # select polling server to operate on 
+        # select polling server to operate on
         victim_ps = polling_servers[self.rand.randint(0, len(polling_servers) - 1)]
 
         # increase or decrease chosen parameter
@@ -163,82 +163,161 @@ class Neighborhood:
         step_p = steps_period[self.rand.randint(0, len(steps_period) - 1)]
         step_d = steps_deadline[self.rand.randint(0, len(steps_deadline) - 1)]
 
-        # if sign positive add a polling server if negative remove one 
+        # if sign positive add a polling server if negative remove one
         # when adding a polling server take some et tasks from victim
         #if False: # TODO refactor PS neighbour function
         if parameter == NUM_PS:
-            if sign == 1 and len(
-                    polling_servers) < 7:  # TODO find some way to determine max num polling servers or if we should even have
-                # print("adding polling server")
-                new_et_subset = self.create_ps_subset(victim_ps)
-                if len(new_et_subset) != 0:
-                    new_ps = self.create_random_ps1(new_et_subset)
-                    polling_servers.append(new_ps)
-
-                # remove victim from task set if it does not have any et tasks  
-                if victim_ps.et_subset == []:
-                    polling_servers.remove(victim_ps)
-
-            else:
-                if len(polling_servers) > 1:  # do not make set of polling servers empty
-                    # print("removing polling server")
-                    receiver_ps = polling_servers[self.rand.randint(0, len(polling_servers) - 1)]
-
-                    while receiver_ps == victim_ps:  # select a different ps than victim
-                        receiver_ps = polling_servers[self.rand.randint(0, len(polling_servers) - 1)]
-
-                    victim_separation = [ps.separation for ps in victim_ps if ps.separation != 0]
-                    receiver_separation = [ps.separation for ps in receiver_ps if ps.separation != 0]
-                    if len(victim_separation) == 0 or len(receiver_separation) == 0 or victim_separation[0].separation == receiver_separation[0].separation:
-                        self.merge_ps_subsets(victim_ps, receiver_ps)  # transfer et tasks to other ps
-
-                        polling_servers.remove(victim_ps)  # remove victim from set of polling servers
+            self.num_ps(sign, polling_servers, victim_ps, self.rand)
+            # if sign == 1 and len(
+            #         polling_servers) < 7:  # TODO find some way to determine max num polling servers or if we should even have
+            #     # print("adding polling server")
+            #     new_et_subset = self.create_ps_subset(victim_ps)
+            #     if len(new_et_subset) != 0:
+            #         new_ps = self.create_random_ps1(new_et_subset)
+            #         polling_servers.append(new_ps)
+            #
+            #     # remove victim from task set if it does not have any et tasks
+            #     if victim_ps.et_subset == []:
+            #         polling_servers.remove(victim_ps)
+            # else:
+            #     if len(polling_servers) > 1:  # do not make set of polling servers empty
+            #         # print("removing polling server")
+            #         receiver_ps = polling_servers[self.rand.randint(0, len(polling_servers) - 1)]
+            #
+            #         while receiver_ps == victim_ps:  # select a different ps than victim
+            #             receiver_ps = polling_servers[self.rand.randint(0, len(polling_servers) - 1)]
+            #
+            #         victim_separation = [ps.separation for ps in victim_ps if ps.separation != 0]
+            #         receiver_separation = [ps.separation for ps in receiver_ps if ps.separation != 0]
+            #         if len(victim_separation) == 0 or len(receiver_separation) == 0 or victim_separation[0].separation == receiver_separation[0].separation:
+            #             self.merge_ps_subsets(victim_ps, receiver_ps)  # transfer et tasks to other ps
+            #
+            #             polling_servers.remove(victim_ps)  # remove victim from set of polling servers
 
         elif parameter == BUDGET:  # change budget of victim
-            # victim_ps.duration = max(1, victim_ps.duration + sign * self.rand.randint(1,50))
-            victim_ps.duration = max(1, victim_ps.duration + sign*step_d)
-            victim_ps.duration = min(victim_ps.duration, victim_ps.deadline)  # do not accept duration > deadline
+            self.budget(victim_ps, sign, step_d)
+            # # victim_ps.duration = max(1, victim_ps.duration + sign * self.rand.randint(1,50))
+            # victim_ps.duration = max(1, victim_ps.duration + sign*step_d)
+            # victim_ps.duration = min(victim_ps.duration, victim_ps.deadline)  # do not accept duration > deadline
 
         # we add/subtract sum number divisible by 10 and <= 100
         elif parameter == PERIOD:  # change period of victim. we do not accept period < deadline, but we could also just let sa handle it
-            # victim_ps.period = max(5, victim_ps.period + sign * self.rand.randint(1,100))
-            victim_ps.period = max(2, victim_ps.period + sign * step_p)
-            victim_ps.period = max(victim_ps.period, victim_ps.deadline)  # do not accept period < deadline for now
+            self.period(victim_ps, sign, step_p)
+            # # victim_ps.period = max(5, victim_ps.period + sign * self.rand.randint(1,100))
+            # victim_ps.period = max(2, victim_ps.period + sign * step_p)
+            # victim_ps.period = max(victim_ps.period, victim_ps.deadline)  # do not accept period < deadline for now
 
         elif parameter == DEADLINE:  # change deadline of victim
-            # victim_ps.deadline = max(5, victim_ps.deadline + sign * self.rand.randint(1,100))
-            victim_ps.deadline = max(1, victim_ps.deadline + sign * step_d)
-            victim_ps.deadline = min(victim_ps.period, victim_ps.deadline)  # do not accept period < deadline for now
+            self.deadline(victim_ps, sign, step_d)
+            # # victim_ps.deadline = max(5, victim_ps.deadline + sign * self.rand.randint(1,100))
+            # victim_ps.deadline = max(1, victim_ps.deadline + sign * step_d)
+            # victim_ps.deadline = min(victim_ps.period, victim_ps.deadline)  # do not accept period < deadline for now
 
-        # not confident that it works  
+        # not confident that it works
         elif parameter == SUBSET:  # move et tasks from one ps to another
             if len(polling_servers) == 1:  # if no one to steal from
                 return polling_servers
 
-            other_ps_victim = polling_servers[self.rand.randint(0, len(polling_servers) - 1)]
-
-            while other_ps_victim == victim_ps:
-                other_ps_victim = polling_servers[self.rand.randint(0, len(polling_servers) - 1)]
-
-            # get some et tasks from other ps victim, delete these from this ps    
-            new_ps_et_subset = self.create_ps_subset(other_ps_victim)
-
-            # remove other victim from task set if it does not have any et tasks  
-            if other_ps_victim.et_subset == []:
-                polling_servers.remove(other_ps_victim)
-
-                # add et tasks to victim ps
-            victim_ps.et_subset += new_ps_et_subset
+            self.subset(polling_servers, victim_ps)
+            # other_ps_victim = polling_servers[self.rand.randint(0, len(polling_servers) - 1)]
+            #
+            # while other_ps_victim == victim_ps:
+            #     other_ps_victim = polling_servers[self.rand.randint(0, len(polling_servers) - 1)]
+            #
+            # # get some et tasks from other ps victim, delete these from this ps
+            # new_ps_et_subset = self.create_ps_subset(other_ps_victim)
+            #
+            # # remove other victim from task set if it does not have any et tasks
+            # if other_ps_victim.et_subset == []:
+            #     polling_servers.remove(other_ps_victim)
+            #
+            #     # add et tasks to victim ps
+            # victim_ps.et_subset += new_ps_et_subset
 
         elif parameter == SWAP_SEP:
-            other_ps_victim = polling_servers[self.rand.randint(0, len(polling_servers) - 1)]
-            
-            while other_ps_victim == victim_ps:
-                other_ps_victim = polling_servers[self.rand.randint(0, len(polling_servers) - 1)]
+            other_ps_victim = self.swap_sep(polling_servers, victim_ps, self.rand)
+            # other_ps_victim = polling_servers[self.rand.randint(0, len(polling_servers) - 1)]
+            #
+            # while other_ps_victim == victim_ps:
+            #     other_ps_victim = polling_servers[self.rand.randint(0, len(polling_servers) - 1)]
 
             self.swap_ets(victim_ps, other_ps_victim)
-        
+
         return polling_servers
+
+    # moving code in to functions
+    # function for parameter NUM_PS
+    def num_ps(self, sign, polling_servers, victim_ps, rand):
+        if sign == 1 and len(
+                polling_servers) < 7:  # TODO find some way to determine max num polling servers or if we should even have
+            # print("adding polling server")
+            new_et_subset = self.create_ps_subset(victim_ps)
+            if len(new_et_subset) != 0:
+                new_ps = self.create_random_ps1(new_et_subset)
+                polling_servers.append(new_ps)
+
+            # remove victim from task set if it does not have any et tasks
+            if victim_ps.et_subset == []:
+                polling_servers.remove(victim_ps)
+        else:
+            if len(polling_servers) > 1:  # do not make set of polling servers empty
+                # print("removing polling server")
+                receiver_ps = polling_servers[rand.randint(0, len(polling_servers) - 1)]
+
+                while receiver_ps == victim_ps:  # select a different ps than victim
+                    receiver_ps = polling_servers[rand.randint(0, len(polling_servers) - 1)]
+
+                victim_separation = [ps.separation for ps in victim_ps if ps.separation != 0]
+                receiver_separation = [ps.separation for ps in receiver_ps if ps.separation != 0]
+                if len(victim_separation) == 0 or len(receiver_separation) == 0 or victim_separation[0].separation == \
+                        receiver_separation[0].separation:
+                    self.merge_ps_subsets(victim_ps, receiver_ps)  # transfer et tasks to other ps
+
+                    polling_servers.remove(victim_ps)  # remove victim from set of polling servers
+
+    # function for parameter BUDGET
+    def budget(self, victim_ps, sign, step_d):
+        # victim_ps.duration = max(1, victim_ps.duration + sign * self.rand.randint(1,50))
+        victim_ps.duration = max(1, victim_ps.duration + sign * step_d)
+        victim_ps.duration = min(victim_ps.duration, victim_ps.deadline)  # do not accept duration > deadline
+
+    # function for parameter PERIOD
+    def period(self, victim_ps, sign, step_p):
+        # victim_ps.period = max(5, victim_ps.period + sign * self.rand.randint(1,100))
+        victim_ps.period = max(2, victim_ps.period + sign * step_p)
+        victim_ps.period = max(victim_ps.period, victim_ps.deadline)  # do not accept period < deadline for now
+
+    # function for parameter DEADLINE
+    def deadline(self, victim_ps, sign, step_d):
+        # victim_ps.deadline = max(5, victim_ps.deadline + sign * self.rand.randint(1,100))
+        victim_ps.deadline = max(1, victim_ps.deadline + sign * step_d)
+        victim_ps.deadline = min(victim_ps.period, victim_ps.deadline)  # do not accept period < deadline for now
+
+    # function for parameter SUBSET
+    def subset(self, polling_servers, victim_ps):
+        other_ps_victim = polling_servers[self.rand.randint(0, len(polling_servers) - 1)]
+
+        while other_ps_victim == victim_ps:
+            other_ps_victim = polling_servers[self.rand.randint(0, len(polling_servers) - 1)]
+
+        # get some et tasks from other ps victim, delete these from this ps
+        new_ps_et_subset = self.create_ps_subset(other_ps_victim)
+
+        # remove other victim from task set if it does not have any et tasks
+        if other_ps_victim.et_subset == []:
+            polling_servers.remove(other_ps_victim)
+
+            # add et tasks to victim ps
+        victim_ps.et_subset += new_ps_et_subset
+
+    # function for parameter SWAP_SEP
+    def swap_sep(self, polling_servers, victim_ps, rand):
+        other_ps_victim = polling_servers[rand.randint(0, len(polling_servers) - 1)]
+
+        while other_ps_victim == victim_ps:
+            other_ps_victim = polling_servers[rand.randint(0, len(polling_servers) - 1)]
+
+        return other_ps_victim
 
     # true if only contains ets of one sep type 
     def verify_separation_req(self, polling_server):
@@ -249,7 +328,7 @@ class Neighborhood:
     # precondition: both polling servers satisfy separation requirements 
     def swap_ets(self, ps1, ps2):
         et_sep1 = [et for et in ps1.et_subset if et.separation != 0]
-        et_sep2 = [et for et in ps2.et_subset if et.separation != 0]   
+        et_sep2 = [et for et in ps2.et_subset if et.separation != 0]
         print("ayo we here")
         for et in et_sep1:
             ps1.et_subset.remove(et)
@@ -263,7 +342,7 @@ class Neighborhood:
         # maybe not assert here...
         assert self.verify_separation_req(ps1) and self.verify_separation_req(ps2)
 
-       # lists are mutable and passed by reference, we do not need to pass anything       
+    # lists are mutable and passed by reference, we do not need to pass anything
 
 """
     QUESTIONS:
