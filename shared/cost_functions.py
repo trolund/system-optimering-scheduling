@@ -59,6 +59,7 @@ def edf(ts):
 
     # return same thing in all failed cases, just empty list fx!! 
     t = 0
+    print("HYPERPERIOD IS: ", T)
     while t < T:
         for task in ready_list:
             if task.duration > 0 and task.deadline <= t:
@@ -66,7 +67,7 @@ def edf(ts):
                 is_schedulable = False # indicate that task set is not schedulable
         # release taks at time t
         ready_list = ready_list + [create_job(t, task) for task in ts if t % task.period == 0]     
-
+        #print("LEN READY: ", len(ready_list))
         if ready_list == []:
             # increase period to next task's release
             steps_to_skip = steps_to_next_release(t, ts)
@@ -92,6 +93,7 @@ def edf(ts):
 
         # increment cycle counter
         t += 1
+        print("t: ", t)
 
     # not feasible if ready list is not empty after hyperperiod
     if ready_list != []:
@@ -188,11 +190,11 @@ def cost_f(task_set):
     # if not schedulable set tt cost contribution to 1 (max) and is_schedulable to false 
     if not is_schedulable_tt:  
         #sum_wcrts_tt = 1    # sum deadline / len task_set + 1 -> would not occur. consider larger penalty 
-        sum_wcrts_tt = sum([wcrts[task.name] for task in task_set]) / len(task_set) + 100
+        sum_wcrts_tt = sum([wcrts[task.name] if task.name in wcrts else task.deadline for task in task_set]) / len(task_set) + 100
     else:
         # normalize worst case response time. for each tt task 0 <= wcrt <= 1 by setting it to wcrt/deadline
         #sum_wcrts_tt = sum([wcrts[task.name] / task.deadline for task in task_set]) / len(task_set)
-        sum_wcrts_tt = sum([wcrts[task.name] for task in task_set]) / len(task_set)
+        sum_wcrts_tt = sum([wcrts[task.name] if task.name in wcrts else task.deadline for task in task_set]) / len(task_set)
     
     sum_wcrts = (sum_wcrts_tt + wcrts_et)
     #print("cost et: ", wcrts_et, " cost tt: ", sum_wcrts_tt, "total cost: ", sum_wcrts, " is schedulable: ", is_schedulable) 

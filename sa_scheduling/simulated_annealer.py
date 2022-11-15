@@ -71,10 +71,10 @@ class SimulatedAnnealer:
             delta = tmp_cost - current_cost
          
             # some logging     
-            #if delta > 0:
-            #    print("cost: ", tmp_cost, f" delta: {delta:.10f}", f" t: {t:.10f}", f" p(delta, t): {self.p(delta, t):.10f}", " is schedulable: ", is_schedulable, " num_ps: ", len(pss))
-            #else:
-            #    print("cost: ", tmp_cost, " delta: ", delta, " t: ", t, " is schedulable: ", is_schedulable, " num ps: ", len(pss))
+            if delta > 0:
+                print("cost: ", tmp_cost, f" delta: {delta:.10f}", f" t: {t:.10f}", f" p(delta, t): {self.p(delta, t):.10f}", " is schedulable: ", is_schedulable, " num_ps: ", len(pss))
+            else:
+                print("cost: ", tmp_cost, " delta: ", delta, " t: ", t, " is schedulable: ", is_schedulable, " num ps: ", len(pss))
                  
             # accept randomly drawn solution from current neighborhood if better or with some probability
             if delta <= 0 or self.p(delta, t) > self.rand.uniform(0.0, 1.0): 
