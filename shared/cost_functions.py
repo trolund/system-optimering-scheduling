@@ -52,17 +52,18 @@ def edf(ts):
     s = [] # schedule will be hyperperiod long. 12 000 microticks == 120 000 microsecs == 120 ms
     ready_list = [] 
     wcrts = {} # worst case response times
-
+    is_schedulable = True
     # total amount of computation time needed exceeding available time -> not schedulable
-    if not processor_demand_criterion(0, T, ts): 
-        return [], -1 
+    #if not processor_demand_criterion(0, T, ts): 
+    #    return [], -1 
 
     # return same thing in all failed cases, just empty list fx!! 
     t = 0
     while t < T:
         for task in ready_list:
             if task.duration > 0 and task.deadline <= t:
-                return [], -1 # just return 1 here maybe lol? 
+                #return [], -1 # just return 1 here maybe lol? 
+                is_schedulable = False # indicate that task set is not schedulable
         # release taks at time t
         ready_list = ready_list + [create_job(t, task) for task in ts if t % task.period == 0]     
 
@@ -94,9 +95,10 @@ def edf(ts):
 
     # not feasible if ready list is not empty after hyperperiod
     if ready_list != []:
-        return [], -1
+        #return [], -1
+        is_schedulable = False
 
-    return s, wcrts
+    return s, wcrts, is_schedulable
 
 # utility function 
 def unpack(task):
@@ -150,8 +152,8 @@ def calculate_schedulabiltiy(polling_server):
         if response_time > Di: 
             is_schedulable = False # TODO maybe just return here ... and penalize with 1 
             result_dict[et_task.name] = (response_time, et_task.deadline)
-            return is_schedulable, result_dict 
-        
+            #return is_schedulable, result_dict 
+            
     return is_schedulable, result_dict # contains wcrtbool indicating schedulability and deadline for each et
 
 # sum of average worst case response time for tt tasks and et tasks. penality for not schedulable
@@ -162,8 +164,9 @@ def cost_f(task_set):
     l = [calculate_schedulabiltiy(ps) for ps in polling_servers] # check schedulability for each polling server
     
     wcrts_et = 0 # use worst case response time for cost metric
-    is_schedulable = True # if some ps is not schedulable at some penalty to cost 
-    
+    is_schedulable_et = True # if some ps is not schedulable at some penalty to cost 
+    is_schedulable_tt = True
+
     # costs is (sum(wcrt_i/deadline_i) / len(et_subset)) /len(polling_servers)
     for element in l: 
         is_schedulable, wcrts = element
@@ -172,7 +175,7 @@ def cost_f(task_set):
             wcrts_et += sum([wcrts[key][0] for key in wcrts]) / len(wcrts)
         else:
             #wcrts_et += 1 
-            wcrts_et += sum(wcrts[key][1] for key in wcrts) / len(wcrts) + 1
+            wcrts_et += sum(wcrts[key][0] for key in wcrts) / len(wcrts) + 100 # penalty = 100
         #is_schedulable = is_schedulable and reduce((lambda a, b : a and b), [entry[key][0] for key in entry]) # https://www.geeksforgeeks.org/reduce-in-python/ 
     
     # normalize such that 0 <= cost <= 1. this check is funny  
@@ -180,13 +183,12 @@ def cost_f(task_set):
         wcrts_et *= 1/len(l)
      
     # apply earliest deadline first 
-    s, wcrts = edf(task_set) 
+    s, wcrts, is_schedulable_tt = edf(task_set) 
     
     # if not schedulable set tt cost contribution to 1 (max) and is_schedulable to false 
-    if s == []: 
-        is_schedulable = False
+    if not is_schedulable_tt:  
         #sum_wcrts_tt = 1    # sum deadline / len task_set + 1 -> would not occur. consider larger penalty 
-        sum_wcrts_tt = sum([task.deadline for task in task_set]) / len(task_set) + 1
+        sum_wcrts_tt = sum([wcrts[task.name] for task in task_set]) / len(task_set) + 100
     else:
         # normalize worst case response time. for each tt task 0 <= wcrt <= 1 by setting it to wcrt/deadline
         #sum_wcrts_tt = sum([wcrts[task.name] / task.deadline for task in task_set]) / len(task_set)
@@ -198,7 +200,7 @@ def cost_f(task_set):
     #alternative 0 <= sum <= 1 by doing sum/2 ..
     #assert 0 <= sum_wcrts and sum_wcrts <= 2  
     
-    return s, sum_wcrts, is_schedulable
+    return s, sum_wcrts, (is_schedulable_et and is_schedulable_tt)
 
 
     # (sum wcrt / len task_set) / (sum deadline / len task_set)  
