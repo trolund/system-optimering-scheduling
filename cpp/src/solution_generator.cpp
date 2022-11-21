@@ -12,6 +12,9 @@ SolutionGenerator::SolutionGenerator(std::vector<Task> *task_set, int population
             else { et_tasks.push_back(it); } 
         }
 
+        // sort et tasks to make checking validity of solution easier later 
+        std::sort(et_tasks.begin(), et_tasks.end(), Task::ByDeadline());
+
         separate_et_tasks();
 
     }
@@ -193,8 +196,7 @@ void SolutionGenerator::mutate(solution* sol, double mutation_rate) {
             } else {
                 sol->polling_servers[i].deadline += sign * 10;//uni_dist(rng);
             }
-            sol->polling_servers[i].deadline = std::min(sol->polling_servers[i].deadline, sol->polling_servers[i].period);
-            sol->polling_servers[i].deadline = std::max(1, sol->polling_servers[i].deadline); // avoid negative
+            
         }
         
         if(uni_real_dist(rng) <= mutation_rate) {
@@ -211,5 +213,62 @@ solution SolutionGenerator::get_min_cost(std::vector<solution> *solutions) {
     std::vector<solution>::iterator result = std::min_element(solutions->begin(), solutions->end(), cmp_solution());
     return *result;
 }
-//void check_separation(solution*); // check that separation requirement is met 
-//void check_param_sol(solution*); // check that parameters are ok deadline <= period etc. 
+
+// check that separation requirement is met 
+// check if number of et tasks appearing in solution is equal to orignal number of et tasks
+// check for duplicates. Does not check if a tt tasks somehow ended up in et subset of ps, shouldn't happen either. 
+void SolutionGenerator::check_ets(solution* sol) {
+    std::vector<Task> ets_solution;
+    
+    // ways to check:
+    // size of set of different et sep types (excluding 0) is 1 for all ps
+    // number of of et tasks same as orignally and no duplicates 
+    std::set<int> et_sep_set;
+
+    for(int i=0; i< sol->polling_servers.size(); i=i+1) {
+        et_sep_set.clear(); // empty set 
+        
+        // insert nonzero separation into set
+        for(auto et_it : *sol->polling_servers[i].et_subset) {
+            if(et_it.separation != 0) {
+                et_sep_set.insert(et_it.separation);
+            }
+        }
+
+        // fix if size of set is not 1 
+        if (et_sep_set.size() != 1) { fix_separation(sol); }
+
+        ets_solution.insert(ets_solution.end(), sol->polling_servers[i].et_subset->begin(), sol->polling_servers[i].et_subset->end());
+    }
+
+    std::sort(ets_solution.begin(), ets_solution.end(), Task::ByDeadline());
+
+    if (ets_solution.size() != this->et_tasks.size()) { fix_separation(sol); }
+
+    //for ()
+
+
+} 
+
+void SolutionGenerator::fix_separation(solution* sol) {
+
+}
+
+// fix invalid parameters
+void SolutionGenerator::fix_param_sol(solution* sol) { // check that parameters are ok deadline <= period etc. 
+    for(int i=0; i<sol->polling_servers.size(); i=i+1) {
+        sol->polling_servers[i].period = std::max(2, sol->polling_servers[i].period); // avoid negative and period of 1
+        
+        sol->polling_servers[i].deadline = std::min(sol->polling_servers[i].deadline, sol->polling_servers[i].period); // enforce deadline <= period 
+        sol->polling_servers[i].deadline = std::max(1, sol->polling_servers[i].deadline); // avoid negative
+
+        sol->polling_servers[i].duration = std::max(1, sol->polling_servers[i].duration); // avoid negative 
+        sol->polling_servers[i].duration = std::min(sol->polling_servers[i].duration, sol->polling_servers[i].deadline); // duration should be <= deadline
+    }
+}
+
+// fix invalid solution
+void SolutionGenerator::check_solution(solution* sol) {
+
+}
+    

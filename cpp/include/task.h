@@ -34,6 +34,7 @@ class Task {
         Task(std::string name, int duration, int period, int type, int priority, int deadline, int releaseTime);
         
         Task(std::string name, int duration, int period, int type, int priority, int deadline, std::vector<Task> *et_subset);
+        
         // t1 less than t2. compare on deadline
         struct ByDeadline {
             bool operator() (const Task& t1, const Task& t2) const {

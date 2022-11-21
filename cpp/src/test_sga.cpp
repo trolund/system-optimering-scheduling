@@ -28,7 +28,7 @@ int main() {
     // kind of weird with the population size arg
     SolutionGenerator solution_generator(&task_set_all, 16); 
     SimpleGeneticAlgorithm sga(&solution_generator, 0.85, 0.15);
-    sga.perform_sga(512, 100, cost_function);
+    sga.perform_sga(512, 10, cost_function);
 
     solution best_solution = sga.get_best_solution();
     for (auto it : best_solution.polling_servers) {

@@ -10,9 +10,8 @@ void SimpleGeneticAlgorithm::perform_sga(int population_sz, int num_generations,
     solution candidate_best;
     int chunk_sz = population_sz / 8;
     uint64_t sec0 = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-
-    //omp_set_num_threads(8);
-    #pragma omp parallel for num_threads(4)
+ 
+    #pragma omp parallel for num_threads(8)
     for(int i = 0; i < population_sz; i = i + 1) {
         apply_cost_function(&population[i], cost_f);
         std::cout << "solution " << i << " cost: " << population[i].cost << std::endl;
@@ -21,14 +20,13 @@ void SimpleGeneticAlgorithm::perform_sga(int population_sz, int num_generations,
     best_solution = get_min_cost(&population); // we could find in loop above but... one time cost below we have to do it separately...  
     std::cout << "best cost is: " << best_solution.cost << std::endl;
     
-    // main loop
-    //#pragma omp parallel
+    // main loop 
     for(int gen = 0; gen <  num_generations; gen = gen + 1) {
         mating_pool.clear();
-        //std::cout << "size of mating pool: " << mating_pool.size() << std::endl;
+        
         fill_mating_pool(mating_pool, &population); 
         std::shuffle(mating_pool.begin(), mating_pool.end(), rng); // should already be shuffled bc random selection but do it anyway 
-        //std::cout << "filled mating pool. size of mating pool is now: " << mating_pool.size() << std::endl;
+        
         new_population.clear();
         
         for (int i = 0; i < population_sz; i = i + 2) {
@@ -40,8 +38,9 @@ void SimpleGeneticAlgorithm::perform_sga(int population_sz, int num_generations,
         std::cout << "size of new population: " << new_population.size() << std::endl; 
         
         population = new_population;
+        
         // update population. parallelize. guided or static. some overhead with guided.. but if population size is large it might be good
-        #pragma omp parallel for num_threads(4) schedule(guided) 
+        #pragma omp parallel for num_threads(8) schedule(guided) 
         for(int i = 0; i < population_sz; i = i + 1) {
             apply_cost_function(&population[i], cost_f);
             std::cout << "solution " << i << " cost: " << population[i].cost << std::endl;

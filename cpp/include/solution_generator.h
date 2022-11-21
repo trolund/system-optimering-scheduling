@@ -50,9 +50,11 @@ class SolutionGenerator {
         solution select(std::vector<solution>*, int); // perform tournament. compete n times. return best. with replacement. consider returning pointer.. 
         solution* select_(std::vector<solution>*, int); // perform tournament. compete n times. return best. with replacement. ptr version 
         void mutate(solution*, double); // mutate solution
-        void check_separation(solution*); // check that separation requirement is met 
-        void check_param_sol(solution*); // check that parameters are ok deadline <= period etc. 
+        void check_ets(solution*); // check that separation requirement is met and all ets are in solution
+        void fix_separation(solution*); // move misplaced ets 
+        void fix_param_sol(solution*); // check that parameters are ok deadline <= period etc. fix if not 
         void set_population_sz(int sz); // convenient
+        void check_solution(solution*);
         solution get_min_cost(std::vector<solution>*);  
  
         friend void swap(solution& lhs, solution& rhs, int crossover_point); // swap parameters to generate offspring. couldnt make it work with references.
