@@ -148,7 +148,7 @@ solution* SolutionGenerator::select_(std::vector<solution>* population, int k) {
     for(int i = 0; i < k; i = i + 1) {
     
         selection_j = uni_dist_select(rng);
-
+        
         // do not let solutions compete against themselves in this round
         while (selection_i == selection_j) { selection_j = uni_dist_select(rng); } 
 

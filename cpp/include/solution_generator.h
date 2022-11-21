@@ -11,6 +11,7 @@ typedef struct solution {
     std::vector<Task> polling_servers;
     std::vector<Task> *tt_tasks;
     double cost; // store cost in solution to make selection easier
+    bool is_schedulable;
 } solution;
 
 // cost of solution a < cost of solution b ? https://stackoverflow.com/questions/34248336/min-value-and-index-from-elements-of-array-of-structure-in-c 
@@ -44,6 +45,7 @@ class SolutionGenerator {
     public:
         SolutionGenerator(std::vector<Task>*, int); 
         void separate_et_tasks(); // separate et tasks based on the separation field. store in map
+        void distribute_et_zeros(solution*);
         solution generate_solution(); // generate a random solution
         std::vector<solution> generate_population(); // generate sz random solutions
         std::vector<solution> recombine(solution*, solution*, double); // generate two child solutions from two parent solutions      
