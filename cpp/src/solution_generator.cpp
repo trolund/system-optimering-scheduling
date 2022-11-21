@@ -236,16 +236,18 @@ void SolutionGenerator::fix_separation(solution* sol) {
             } else {
                 et_name_set.insert(et_it->name);
 
-                // eiteher sep not in map, it is in map and points to "wrong" ps or it is in map and points to "right" ps
-                if( !separation_task_map.contains(et_it->separation) ) {
-                    separation_task_map.insert({et_it->separation, &sol->polling_servers[i]});
-                    et_it = et_it + 1;
-                } else if (separation_task_map[et_it->separation] != &sol->polling_servers[i]) {
-                    separation_task_map[et_it->separation]->et_subset->push_back(*et_it); // insert to right one and remove from wrong
-                    sol->polling_servers[i].et_subset->erase(et_it); // also do not increment
-                    std::cout << "jsaldjasldjal map" << std::endl;
-                } else {
-                    et_it = et_it + 1;
+                // either sep not in map, it is in map and points to "wrong" ps or it is in map and points to "right" ps
+                if (et_it->separation != 0) {
+                    if( !separation_task_map.contains(et_it->separation) ) {
+                        separation_task_map.insert({et_it->separation, &sol->polling_servers[i]});
+                        et_it = et_it + 1;
+                    } else if (separation_task_map[et_it->separation] != &sol->polling_servers[i]) {
+                        separation_task_map[et_it->separation]->et_subset->push_back(*et_it); // insert to right one and remove from wrong
+                        sol->polling_servers[i].et_subset->erase(et_it); // also do not increment
+                        std::cout << "jsaldjasldjal map" << std::endl;
+                    } else {
+                        et_it = et_it + 1;
+                    }
                 } 
             }
        }   
