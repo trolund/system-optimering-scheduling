@@ -12,7 +12,7 @@ void SimpleGeneticAlgorithm::perform_sga(int population_sz, int num_generations,
     uint64_t sec0 = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 
     //omp_set_num_threads(8);
-    #pragma omp parallel for num_threads(8)
+    #pragma omp parallel for num_threads(4)
     for(int i = 0; i < population_sz; i = i + 1) {
         apply_cost_function(&population[i], cost_f);
         std::cout << "solution " << i << " cost: " << population[i].cost << std::endl;
@@ -41,7 +41,7 @@ void SimpleGeneticAlgorithm::perform_sga(int population_sz, int num_generations,
         
         population = new_population;
         // update population. parallelize. guided or static. some overhead with guided.. but if population size is large it might be good
-        #pragma omp parallel for num_threads(8) schedule(guided) 
+        #pragma omp parallel for num_threads(4) schedule(guided) 
         for(int i = 0; i < population_sz; i = i + 1) {
             apply_cost_function(&population[i], cost_f);
             std::cout << "solution " << i << " cost: " << population[i].cost << std::endl;
