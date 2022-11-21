@@ -12,9 +12,6 @@ SolutionGenerator::SolutionGenerator(std::vector<Task> *task_set, int population
             else { et_tasks.push_back(it); } 
         }
 
-        // sort et tasks to make checking validity of solution easier later 
-        std::sort(et_tasks.begin(), et_tasks.end(), Task::ByDeadline());
-
         separate_et_tasks();
 
     }
@@ -147,12 +144,11 @@ solution* SolutionGenerator::select_(std::vector<solution>* population, int k) {
     // we do not need rand here bc we shuffle no wait
     int selection_i = uni_dist_select(rng); 
     int selection_j;
-    //std::cout << "sel i: " << selection_i << std::endl;
-    
+     
     for(int i = 0; i < k; i = i + 1) {
     
         selection_j = uni_dist_select(rng);
-        //std::cout << "sel j: " << selection_j << std::endl;
+
         // do not let solutions compete against themselves in this round
         while (selection_i == selection_j) { selection_j = uni_dist_select(rng); } 
 
