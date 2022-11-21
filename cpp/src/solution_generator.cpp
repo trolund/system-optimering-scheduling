@@ -168,34 +168,40 @@ solution* SolutionGenerator::select_(std::vector<solution>* population, int k) {
 void SolutionGenerator::mutate(solution* sol, double mutation_rate) {
     int sign;
     for (int i = 0; i < sol->polling_servers.size(); i = i + 1) {
-        
-        if(uni_real_dist(rng) <= mutation_rate) {
-            sign = (uni_dist(rng) % 2 == 0) ? 1 : -1;
-            sol->polling_servers[i].duration += sign;
-            sol->polling_servers[i].duration = std::max(1, sol->polling_servers[i].duration); // avoid negative
-        }
+
+        // else if == 11 
         if(uni_real_dist(rng) <= mutation_rate) {
             sign = (uni_dist(rng) % 2 == 0) ? 1 : -1;
 
             if (sol->polling_servers[i].period <= 10) { // try like this to get real good ones maybe but avoiding really long hyperperiods
                 sol->polling_servers[i].period += sign * 1;//uni_dist(rng);
+            } else if (sol->polling_servers[i].period == 11) {
+                sol->polling_servers[i].period = (sol->polling_servers[i].period - 1) + sign * 10; // do not carry +1 if we leave this region if becomes one we fix below
             } else {
                 sol->polling_servers[i].period += sign * 10;//uni_dist(rng); // add/sub a value in [1, 20]
-            }
-            
+            } 
             sol->polling_servers[i].period = std::max(2, sol->polling_servers[i].period); // avoid negative and period of 1
         }
+        
         if(uni_real_dist(rng) <= mutation_rate) {
             sign = (uni_dist(rng) % 2 == 0) ? 1 : -1;
             
             if (sol->polling_servers[i].deadline <= 10) { 
                 sol->polling_servers[i].deadline += sign * 1;//uni_dist(rng);
+            } else if (sol->polling_servers[i].deadline == 11){
+                sol->polling_servers[i].deadline += sign * 10 - 1; // if it becomes 0 we fix below.. 
             } else {
                 sol->polling_servers[i].deadline += sign * 10;//uni_dist(rng);
             }
             sol->polling_servers[i].deadline = std::min(sol->polling_servers[i].deadline, sol->polling_servers[i].period);
             sol->polling_servers[i].deadline = std::max(1, sol->polling_servers[i].deadline); // avoid negative
         }
+        
+        if(uni_real_dist(rng) <= mutation_rate) {
+            sign = (uni_dist(rng) % 2 == 0) ? 1 : -1;
+            sol->polling_servers[i].duration += sign;
+            sol->polling_servers[i].duration = std::max(1, sol->polling_servers[i].duration); // avoid negative. order should be period, dead, duration really
+        }        
     }
 
 }
