@@ -11,7 +11,7 @@ void SimpleGeneticAlgorithm::perform_sga(int population_sz, int num_generations,
     int chunk_sz = population_sz / 8;
     uint64_t sec0 = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
  
-    #pragma omp parallel for num_threads(8)
+    #pragma omp parallel for num_threads(4)
     for(int i = 0; i < population_sz; i = i + 1) {
         apply_cost_function(&population[i], cost_f);
         std::cout << "solution " << i << " cost: " << population[i].cost << std::endl;
@@ -33,6 +33,9 @@ void SimpleGeneticAlgorithm::perform_sga(int population_sz, int num_generations,
             offspring = sg->recombine(mating_pool[i], mating_pool[i+1], crossover_rate);
             sg->mutate(&offspring[0], mutation_rate); // perform mutation now instead of in loop afterwards
             sg->mutate(&offspring[1], mutation_rate); 
+            sg->fix_solution(&offspring[0]); // we might have generated invalid solution. check and fix
+            sg->fix_solution(&offspring[1]);
+
             new_population.insert(new_population.end(), offspring.begin(), offspring.end()); 
         }
         std::cout << "size of new population: " << new_population.size() << std::endl; 
@@ -40,7 +43,7 @@ void SimpleGeneticAlgorithm::perform_sga(int population_sz, int num_generations,
         population = new_population;
         
         // update population. parallelize. guided or static. some overhead with guided.. but if population size is large it might be good
-        #pragma omp parallel for num_threads(8) schedule(guided) 
+        #pragma omp parallel for num_threads(4) schedule(guided) 
         for(int i = 0; i < population_sz; i = i + 1) {
             apply_cost_function(&population[i], cost_f);
             std::cout << "solution " << i << " cost: " << population[i].cost << std::endl;

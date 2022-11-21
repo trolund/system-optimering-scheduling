@@ -101,7 +101,8 @@ void swap(solution& lhs, solution& rhs, int crossover_point) {
  * four parameter to change: duration, period, deadline, et_subset
  * represented as three possibilities for crossover point: 0, 1, 2
  *  
- * TODO: multiple crossover points
+ * TODO: multiple crossover points. nope!
+ * TODO: handle separation 0s
  *
  */
 std::vector<solution> SolutionGenerator::recombine(solution* solution1, solution* solution2, double pc) {
@@ -166,7 +167,7 @@ solution* SolutionGenerator::select_(std::vector<solution>* population, int k) {
 }
 
 // mutate solution
-// a bit of freestyle. we go through each possible mutate. we could also check once for each parameter and apply 
+// we go through each possible mutate. we could also check once for each parameter and apply 
 // mutation to parameter in each polling server. for each parameter.
 void SolutionGenerator::mutate(solution* sol, double mutation_rate) {
     int sign;
@@ -177,7 +178,7 @@ void SolutionGenerator::mutate(solution* sol, double mutation_rate) {
             sign = (uni_dist(rng) % 2 == 0) ? 1 : -1;
 
             if (sol->polling_servers[i].period <= 10) { // try like this to get real good ones maybe but avoiding really long hyperperiods
-                sol->polling_servers[i].period += sign * 1;//uni_dist(rng);
+                sol->polling_servers[i].period += sign * 1;
             } else if (sol->polling_servers[i].period == 11) {
                 sol->polling_servers[i].period = (sol->polling_servers[i].period - 1) + sign * 10; // do not carry +1 if we leave this region if becomes one we fix below
             } else {
@@ -203,7 +204,7 @@ void SolutionGenerator::mutate(solution* sol, double mutation_rate) {
             sign = (uni_dist(rng) % 2 == 0) ? 1 : -1;
             sol->polling_servers[i].duration += sign;
             sol->polling_servers[i].duration = std::max(1, sol->polling_servers[i].duration); // avoid negative. order should be period, dead, duration really
-        }        
+        } 
     }
 
 }
@@ -214,61 +215,66 @@ solution SolutionGenerator::get_min_cost(std::vector<solution> *solutions) {
     return *result;
 }
 
-// check that separation requirement is met 
-// check if number of et tasks appearing in solution is equal to orignal number of et tasks
-// check for duplicates. Does not check if a tt tasks somehow ended up in et subset of ps, shouldn't happen either. 
-void SolutionGenerator::check_ets(solution* sol) {
-    std::vector<Task> ets_solution;
-    
-    // ways to check:
-    // size of set of different et sep types (excluding 0) is 1 for all ps
-    // number of of et tasks same as orignally and no duplicates 
-    std::set<int> et_sep_set;
-
-    for(int i=0; i< sol->polling_servers.size(); i=i+1) {
-        et_sep_set.clear(); // empty set 
-        
-        // insert nonzero separation into set
-        for(auto et_it : *sol->polling_servers[i].et_subset) {
-            if(et_it.separation != 0) {
-                et_sep_set.insert(et_it.separation);
-            }
-        }
-
-        // fix if size of set is not 1 
-        if (et_sep_set.size() != 1) { fix_separation(sol); }
-
-        ets_solution.insert(ets_solution.end(), sol->polling_servers[i].et_subset->begin(), sol->polling_servers[i].et_subset->end());
-    }
-
-    std::sort(ets_solution.begin(), ets_solution.end(), Task::ByDeadline());
-
-    if (ets_solution.size() != this->et_tasks.size()) { fix_separation(sol); }
-
-    //for ()
-
-
-} 
-
+/* two things can go wrong: duplicate et tasks or misplaced et tasks
+ * create set. if some et name in set -> remove that et from its ps 
+ * create map int -> Task*. if some sep doesnt point to right Task move it
+ */
 void SolutionGenerator::fix_separation(solution* sol) {
+    std::map<int, Task*> separation_task_map;
+    std::set<std::string> et_name_set;
+     
+    for(int i=0; i < sol->polling_servers.size(); i=i+1) {   
+       // https://stackoverflow.com/questions/4713131/removing-item-from-vector-while-iterating
+       std::vector<Task>::iterator et_it = sol->polling_servers[i].et_subset->begin(); 
 
+       while (et_it != sol->polling_servers[i].et_subset->end()) {
+
+            // increment iterator when we do not erase anything  
+            if (et_name_set.contains(et_it->name)) {
+                sol->polling_servers[i].et_subset->erase(et_it); // do not increment
+                std::cout << "OGOSJDAS BA!! SET" << std::endl;
+            } else {
+                et_name_set.insert(et_it->name);
+
+                // eiteher sep not in map, it is in map and points to "wrong" ps or it is in map and points to "right" ps
+                if( !separation_task_map.contains(et_it->separation) ) {
+                    separation_task_map.insert({et_it->separation, &sol->polling_servers[i]});
+                    et_it = et_it + 1;
+                } else if (separation_task_map[et_it->separation] != &sol->polling_servers[i]) {
+                    separation_task_map[et_it->separation]->et_subset->push_back(*et_it); // insert to right one and remove from wrong
+                    sol->polling_servers[i].et_subset->erase(et_it); // also do not increment
+                    std::cout << "jsaldjasldjal map" << std::endl;
+                } else {
+                    et_it = et_it + 1;
+                } 
+            }
+       }   
+    }
 }
 
-// fix invalid parameters
-void SolutionGenerator::fix_param_sol(solution* sol) { // check that parameters are ok deadline <= period etc. 
+// check parameters for each polling server in solution
+void SolutionGenerator::fix_param_solution(solution* sol) {
     for(int i=0; i<sol->polling_servers.size(); i=i+1) {
-        sol->polling_servers[i].period = std::max(2, sol->polling_servers[i].period); // avoid negative and period of 1
-        
-        sol->polling_servers[i].deadline = std::min(sol->polling_servers[i].deadline, sol->polling_servers[i].period); // enforce deadline <= period 
-        sol->polling_servers[i].deadline = std::max(1, sol->polling_servers[i].deadline); // avoid negative
-
-        sol->polling_servers[i].duration = std::max(1, sol->polling_servers[i].duration); // avoid negative 
-        sol->polling_servers[i].duration = std::min(sol->polling_servers[i].duration, sol->polling_servers[i].deadline); // duration should be <= deadline
+        fix_param_ps(&sol->polling_servers[i]);
     }
+}
+
+
+// fix invalid parameters
+void SolutionGenerator::fix_param_ps(Task* polling_server) { // check that parameters are ok deadline <= period etc. 
+
+    polling_server->period = std::max(2, polling_server->period); // avoid negative and period of 1
+    
+    polling_server->deadline = std::min(polling_server->deadline, polling_server->period); // enforce deadline <= period 
+    polling_server->deadline = std::max(1, polling_server->deadline); // avoid negative
+ 
+    polling_server->duration = std::min(polling_server->duration, polling_server->deadline); // duration should be <= deadline
+    polling_server->duration = std::max(1, polling_server->duration); // avoid negative 
 }
 
 // fix invalid solution
-void SolutionGenerator::check_solution(solution* sol) {
-
+void SolutionGenerator::fix_solution(solution* sol) {
+    fix_separation(sol);
+    fix_param_solution(sol);
 }
     

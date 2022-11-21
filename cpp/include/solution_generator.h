@@ -52,9 +52,10 @@ class SolutionGenerator {
         void mutate(solution*, double); // mutate solution
         void check_ets(solution*); // check that separation requirement is met and all ets are in solution
         void fix_separation(solution*); // move misplaced ets 
-        void fix_param_sol(solution*); // check that parameters are ok deadline <= period etc. fix if not 
+        void fix_param_ps(Task*); // check that parameters are ok deadline <= period etc. fix if not 
+        void fix_param_solution(solution*); // check parameters for each ps in solution
         void set_population_sz(int sz); // convenient
-        void check_solution(solution*);
+        void fix_solution(solution*);
         solution get_min_cost(std::vector<solution>*);  
  
         friend void swap(solution& lhs, solution& rhs, int crossover_point); // swap parameters to generate offspring. couldnt make it work with references.
