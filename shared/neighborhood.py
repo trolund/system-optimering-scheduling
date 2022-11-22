@@ -149,7 +149,6 @@ class Neighborhood:
 
         # if sign positive add a polling server if negative remove one
         # when adding a polling server take some et tasks from victim
-        #if False: # TODO refactor PS neighbour function
         if parameter == NUM_PS:
             self.num_ps(sign, polling_servers, victim_ps, self.rand)
 
@@ -163,7 +162,6 @@ class Neighborhood:
         elif parameter == DEADLINE:  # change deadline of victim
             self.deadline(victim_ps, sign, step_d)
 
-        # not confident that it works
         elif parameter == SUBSET:  # move et tasks from one ps to another
             if len(polling_servers) == 1:  # if no one to steal from
                 return polling_servers
