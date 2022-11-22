@@ -106,9 +106,10 @@ void SimpleGeneticAlgorithm::perform_sga1(int population_sz, int num_generations
     #pragma omp parallel for num_threads(4)
     for(int i = 0; i < population_sz; i = i + 1) {
         apply_cost_function1(&population[i], cost_f);
-        std::cout << "solution " << i << " cost: " << population[i].cost << "is schedulable: " << population[i].is_schedulable << std::endl;
+        std::cout << "solution " << i << " cost: " << population[i].cost << " is schedulable: " << population[i].is_schedulable << std::endl;
     }
 
+    // handle case where no solution is schedulable
     best_solution = get_min_cost(&population); // we could find in loop above but... one time cost below we have to do it separately...  
     std::cout << "best cost is: " << best_solution.cost << std::endl;
     
@@ -142,7 +143,11 @@ void SimpleGeneticAlgorithm::perform_sga1(int population_sz, int num_generations
         }
 
         candidate_best = get_min_cost(&population);
-        best_solution = (candidate_best.cost < best_solution.cost && candidate_best.is_schedulable) ? candidate_best : best_solution;
+        /*if (candidate_best.cost < best_solution.cost && candidate_best.is_schedulable) {
+            best_solution = candidate_best;
+            std::cout << "yo" << std::endl;
+        }*/
+        best_solution = ((candidate_best.cost < best_solution.cost && candidate_best.is_schedulable) || (candidate_best.is_schedulable && !best_solution.is_schedulable)) ? candidate_best : best_solution;
 
         std::cout << "generation is: " << gen << " best solution cost is: "  << best_solution.cost << std::endl;
 

@@ -27,9 +27,9 @@ int main() {
 
     // kind of weird with the population size arg
     SolutionGenerator solution_generator(&task_set_all, 16); 
-    SimpleGeneticAlgorithm sga(&solution_generator, 0.9, 0.20);
+    SimpleGeneticAlgorithm sga(&solution_generator, 0.9, 0.10);
     //sga.perform_sga(128, 10, cost_function);
-    sga.perform_sga1(512, 20, cost_function1);
+    sga.perform_sga1(512, 10, cost_function1);
     solution best_solution = sga.get_best_solution();
 
     std::cout << std::endl << "best cost is: " << best_solution.cost << " is schedulable: " << best_solution.is_schedulable << std::endl;

@@ -3,7 +3,7 @@
 SolutionGenerator::SolutionGenerator(std::vector<Task> *task_set, int population_size) {
         population_sz = population_size;
         rng = std::mt19937(dev()); // https://stackoverflow.com/questions/686353/random-float-number-generation 
-        uni_dist = std::uniform_int_distribution<std::mt19937::result_type>(1, 10);
+        uni_dist = std::uniform_int_distribution<std::mt19937::result_type>(1, 20);
         uni_real_dist = std::uniform_real_distribution<>(0, 1); // random double in [0, 1)
         uni_dist_select = std::uniform_int_distribution<std::mt19937::result_type>(0, population_sz - 1);
         
@@ -47,11 +47,14 @@ solution SolutionGenerator::generate_solution() {
         //duration = uni_dist(rng);
         period = uni_dist(rng) * 10;
         //deadline = ((uni_dist(rng) * 10) % period) + duration;
-        deadline = ((uni_dist(rng) * 10) % period); // this is not good! never equal but yeah enforce it somehow
-        duration = uni_dist(rng);
+        //deadline = ((uni_dist(rng) * 10) % period); // this is not good! never equal but yeah enforce it somehow
+        //deadline = uni_dist(rng) * 10;
+        //deadline = std::min(period, deadline); 
+        deadline = period;
+        duration = uni_dist(rng) * 4; // another rng for this 
         duration = std::min(duration, deadline);
-        //deadline = (uni_dist(rng) * 10);
-        while(deadline > period) { deadline = uni_dist(rng) * 10; }; // deadlines may not be greater than period. if so create instance t_i+1 before t_i has finished possibly  
+        
+        //while(deadline > period) { deadline = uni_dist(rng) * 10; }; // deadlines may not be greater than period. if so create instance t_i+1 before t_i has finished possibly  
         Task polling_server =  Task(name, duration, period, TT, 7, deadline, it.second);
         polling_servers.push_back(Task(name, duration, period, TT, 7, deadline, it.second));
     }
