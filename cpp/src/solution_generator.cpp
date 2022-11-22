@@ -212,7 +212,7 @@ solution SolutionGenerator::get_min_cost(std::vector<solution> *solutions) {
 }
 
 /* two things can go wrong: duplicate et tasks or misplaced et tasks
- * create set. if some et name in set -> remove that et from its ps 
+ * create set. if some et name already in set -> remove that et from its ps else insert to set
  * create map int -> Task*. if some sep doesnt point to right Task move it
  */
 void SolutionGenerator::fix_separation(solution* sol) {
