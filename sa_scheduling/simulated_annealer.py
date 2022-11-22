@@ -62,53 +62,53 @@ class SimulatedAnnealer:
 
         # does not matter if < or <= if 0 then new solution will be selected no matter what     
         while int(time.time()) - sec0 < stopcriterion_sec:
-            self.anneal(polling_servers, tt, t, a, self.n_solutions, current_cost, log_costs, best_cost)
-            # tmp_ps = self.get_neighbor(copy.deepcopy(polling_servers)) # obtain ps configuration from neighborhood
-            # tmp_solution = tt + tmp_ps # complete task set
-            #
-            # tmp_schedule, tmp_cost, is_schedulable = cost_f(tmp_solution) # apply objective function
-            #
-            # # just for debugging
-            # pss = [t for t in tmp_solution if t.et_subset != None]
-            # #print(len(pss))
-            #
-            # # compute delta
-            # delta = tmp_cost - current_cost
-            #
-            # # some logging
-            # if delta > 0:
-            #     print("cost: ", tmp_cost, f" delta: {delta:.10f}", f" t: {t:.10f}", f" p(delta, t): {self.p(delta, t):.10f}", " is schedulable: ", is_schedulable, " num_ps: ", len(pss))
-            # else:
-            #     print("cost: ", tmp_cost, " delta: ", delta, " t: ", t, " is schedulable: ", is_schedulable, " num ps: ", len(pss))
-            #
-            # # accept randomly drawn solution from current neighborhood if better or with some probability
-            # if delta <= 0 or self.p(delta, t) > self.rand.uniform(0.0, 1.0):
-            #     polling_servers = copy.deepcopy(tmp_ps) # all these copies...
-            #     current_solution = tmp_solution # update current solution, current set of polling servers, costs & schedule
-            #     current_cost = tmp_cost
-            #     schedule = tmp_schedule[:]
-            #
-            #     if log_costs: # logging
-            #         self.cost_log.append(current_cost)
-            #
-            #     # keep track of the best solution. save all the things..
-            #     if current_cost < best_cost and is_schedulable:
-            #         self.best_solution = current_solution
-            #         self.best_schedule = schedule[:]
-            #         self.best_cost = current_cost
-            #         best_cost = current_cost # not so clean having best cost and self.best_cost ...
-            #         self.best_ps_config = copy.deepcopy(polling_servers)
-            #
-            #         # log to prompt
-            #         #print("*************************************************")
-            #         print("************* updated best solution *************")
-            #         #print("*************************************************")
-            #
-            # # logging
-            # self.n_solutions = self.n_solutions + 1
-            #
-            # # update temperature
-            # t = t * a
+            #self.anneal(polling_servers, tt, t, a, self.n_solutions, current_cost, log_costs, best_cost)
+            tmp_ps = self.get_neighbor(copy.deepcopy(polling_servers)) # obtain ps configuration from neighborhood
+            tmp_solution = tt + tmp_ps # complete task set
+            
+            tmp_schedule, tmp_cost, is_schedulable = cost_f(tmp_solution) # apply objective function
+            
+             # just for debugging
+            pss = [t for t in tmp_solution if t.et_subset != None]
+             #print(len(pss))
+            
+             # compute delta
+            delta = tmp_cost - current_cost
+            
+             # some logging
+            if delta > 0:
+                print("cost: ", tmp_cost, f" delta: {delta:.10f}", f" t: {t:.10f}", f" p(delta, t): {self.p(delta, t):.10f}", " is schedulable: ", is_schedulable, " num_ps: ", len(pss))
+            else:
+                print("cost: ", tmp_cost, " delta: ", delta, " t: ", t, " is schedulable: ", is_schedulable, " num ps: ", len(pss))
+            
+             # accept randomly drawn solution from current neighborhood if better or with some probability
+            if delta <= 0 or self.p(delta, t) > self.rand.uniform(0.0, 1.0):
+                polling_servers = copy.deepcopy(tmp_ps) # all these copies...
+                current_solution = tmp_solution # update current solution, current set of polling servers, costs & schedule
+                current_cost = tmp_cost
+                schedule = tmp_schedule[:]
+        
+                if log_costs: # logging
+                    self.cost_log.append(current_cost)
+        
+                # keep track of the best solution. save all the things..
+                if current_cost < best_cost and is_schedulable:
+                    self.best_solution = current_solution
+                    self.best_schedule = schedule[:]
+                    self.best_cost = current_cost
+                    best_cost = current_cost # not so clean having best cost and self.best_cost ...
+                    self.best_ps_config = copy.deepcopy(polling_servers)
+        
+                    # log to prompt
+                    #print("*************************************************")
+                    print("************* updated best solution *************")
+                    #print("*************************************************")
+        
+            # logging
+            self.n_solutions = self.n_solutions + 1
+        
+            # update temperature
+            t = t * a
  
         self.print_message(stopcriterion_sec)
 

@@ -261,7 +261,7 @@ class Neighborhood:
     def swap_ets(self, ps1, ps2):
         et_sep1 = [et for et in ps1.et_subset if et.separation != 0]
         et_sep2 = [et for et in ps2.et_subset if et.separation != 0]
-        print("ayo we here")
+        #print("ayo we here")
         for et in et_sep1:
             ps1.et_subset.remove(et)
 
