@@ -123,22 +123,6 @@ class Neighborhood:
 
         # move the polling server subset from one ps to another
 
-    # get a subset of pses from victim and delete these from victim 
-    def create_et_subset1(self, victim_ps):
-        num_et_tasks = self.rand.randint(1, max(1, len(victim_ps.et_subset) - 1))
-        new_ps_et_subset = []
-
-        for task in victim_ps.et_subset[0:num_et_tasks]:
-            new_ps_et_subset.append(task)
-
-        # do not know how removing and iterating at same time works so do like this 
-        for task in victim_ps.et_subset[0:num_et_tasks]:
-            victim_ps.et_subset.remove(task)
-
-        return new_ps_et_subset
-
-        # move the polling server subset from one ps to another
-
 
     def merge_ps_subsets(self, ps_giver, ps_receiver):
         ps_receiver.et_subset += ps_giver.et_subset
@@ -168,50 +152,16 @@ class Neighborhood:
         #if False: # TODO refactor PS neighbour function
         if parameter == NUM_PS:
             self.num_ps(sign, polling_servers, victim_ps, self.rand)
-            # if sign == 1 and len(
-            #         polling_servers) < 7:  # TODO find some way to determine max num polling servers or if we should even have
-            #     # print("adding polling server")
-            #     new_et_subset = self.create_ps_subset(victim_ps)
-            #     if len(new_et_subset) != 0:
-            #         new_ps = self.create_random_ps1(new_et_subset)
-            #         polling_servers.append(new_ps)
-            #
-            #     # remove victim from task set if it does not have any et tasks
-            #     if victim_ps.et_subset == []:
-            #         polling_servers.remove(victim_ps)
-            # else:
-            #     if len(polling_servers) > 1:  # do not make set of polling servers empty
-            #         # print("removing polling server")
-            #         receiver_ps = polling_servers[self.rand.randint(0, len(polling_servers) - 1)]
-            #
-            #         while receiver_ps == victim_ps:  # select a different ps than victim
-            #             receiver_ps = polling_servers[self.rand.randint(0, len(polling_servers) - 1)]
-            #
-            #         victim_separation = [ps.separation for ps in victim_ps if ps.separation != 0]
-            #         receiver_separation = [ps.separation for ps in receiver_ps if ps.separation != 0]
-            #         if len(victim_separation) == 0 or len(receiver_separation) == 0 or victim_separation[0].separation == receiver_separation[0].separation:
-            #             self.merge_ps_subsets(victim_ps, receiver_ps)  # transfer et tasks to other ps
-            #
-            #             polling_servers.remove(victim_ps)  # remove victim from set of polling servers
 
         elif parameter == BUDGET:  # change budget of victim
             self.budget(victim_ps, sign, step_d)
-            # # victim_ps.duration = max(1, victim_ps.duration + sign * self.rand.randint(1,50))
-            # victim_ps.duration = max(1, victim_ps.duration + sign*step_d)
-            # victim_ps.duration = min(victim_ps.duration, victim_ps.deadline)  # do not accept duration > deadline
 
         # we add/subtract sum number divisible by 10 and <= 100
         elif parameter == PERIOD:  # change period of victim. we do not accept period < deadline, but we could also just let sa handle it
             self.period(victim_ps, sign, step_p)
-            # # victim_ps.period = max(5, victim_ps.period + sign * self.rand.randint(1,100))
-            # victim_ps.period = max(2, victim_ps.period + sign * step_p)
-            # victim_ps.period = max(victim_ps.period, victim_ps.deadline)  # do not accept period < deadline for now
 
         elif parameter == DEADLINE:  # change deadline of victim
             self.deadline(victim_ps, sign, step_d)
-            # # victim_ps.deadline = max(5, victim_ps.deadline + sign * self.rand.randint(1,100))
-            # victim_ps.deadline = max(1, victim_ps.deadline + sign * step_d)
-            # victim_ps.deadline = min(victim_ps.period, victim_ps.deadline)  # do not accept period < deadline for now
 
         # not confident that it works
         elif parameter == SUBSET:  # move et tasks from one ps to another
@@ -219,27 +169,9 @@ class Neighborhood:
                 return polling_servers
 
             self.subset(polling_servers, victim_ps)
-            # other_ps_victim = polling_servers[self.rand.randint(0, len(polling_servers) - 1)]
-            #
-            # while other_ps_victim == victim_ps:
-            #     other_ps_victim = polling_servers[self.rand.randint(0, len(polling_servers) - 1)]
-            #
-            # # get some et tasks from other ps victim, delete these from this ps
-            # new_ps_et_subset = self.create_ps_subset(other_ps_victim)
-            #
-            # # remove other victim from task set if it does not have any et tasks
-            # if other_ps_victim.et_subset == []:
-            #     polling_servers.remove(other_ps_victim)
-            #
-            #     # add et tasks to victim ps
-            # victim_ps.et_subset += new_ps_et_subset
 
         elif parameter == SWAP_SEP:
             other_ps_victim = self.swap_sep(polling_servers, victim_ps, self.rand)
-            # other_ps_victim = polling_servers[self.rand.randint(0, len(polling_servers) - 1)]
-            #
-            # while other_ps_victim == victim_ps:
-            #     other_ps_victim = polling_servers[self.rand.randint(0, len(polling_servers) - 1)]
 
             self.swap_ets(victim_ps, other_ps_victim)
 
