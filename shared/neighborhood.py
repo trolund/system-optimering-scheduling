@@ -162,7 +162,6 @@ class Neighborhood:
         elif parameter == DEADLINE:  # change deadline of victim
             self.deadline(victim_ps, sign, step_d)
 
-        # not confident that it works
         elif parameter == SUBSET:  # move et tasks from one ps to another
             if len(polling_servers) == 1:  # if no one to steal from
                 return polling_servers
