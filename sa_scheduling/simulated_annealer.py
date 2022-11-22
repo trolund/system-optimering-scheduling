@@ -99,11 +99,9 @@ class SimulatedAnnealer:
                     best_cost = current_cost # not so clean having best cost and self.best_cost ...
                     self.best_ps_config = copy.deepcopy(polling_servers)
         
-                    # log to prompt
-                    #print("*************************************************")
+                    # log to stdout 
                     print("************* updated best solution *************")
-                    #print("*************************************************")
-        
+                     
             # logging
             self.n_solutions = self.n_solutions + 1
         

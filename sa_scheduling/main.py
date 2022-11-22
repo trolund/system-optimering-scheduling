@@ -57,7 +57,9 @@ if __name__ == "__main__":
         alpha = float(sys.argv[4])
         stopcriterion_sec = float(sys.argv[5])
 
+    # neighborhood object
     neighborhood = Neighborhood() 
+    
     # instantiate simulated annealer
     simulated_annealer = SimulatedAnnealer(neighborhood)
 
@@ -66,26 +68,19 @@ if __name__ == "__main__":
     tt_tasks = [t for t in all_tasks if t.type == TaskType.TIME]
     et_tasks = [t for t in all_tasks if t.type == TaskType.EVENT]
 
-    # generates ...good... solution for many cases, but should be random
-    #polling_servers_0 = [Task("tTTps00", 500, 1000, TaskType.TIME, 7, 1000, et_tasks)] 
-    #polling_servers_0 = [Task("tTTps00", 10, 20, TaskType.TIME, 7, 20, et_tasks)]
-    #polling_servers_0 = [Task("tTTps00", 3, 51, TaskType.TIME, 7, 21, et_tasks)] 
-    #polling_servers_0 = [Task("tTTps00", 250, 550, TaskType.TIME, 7, 650, et_tasks)]
-    #polling_servers_0 = [Task("tTTps00", 9, 41, TaskType.TIME, 7, 31, et_tasks)]  
-    #polling_servers_0 = [Task("tTTps00", 4, 5, TaskType.TIME, 7, 5, et_tasks)] 
-    
-    #polling_servers_0 = [Task("tTTps00", 5, 25, TaskType.TIME, 7, 5, et_tasks)] 
-    #polling_servers_0 = neighborhood.create_random_ps(et_tasks)
-
+    # create random polling servers with separation requirement 
     polling_servers_0 = neighborhood.create_random_pss_sep(et_tasks)
     print_best_ps_config(polling_servers_0, 0)
-    #polling_servers_0 = neighborhood.create_n_random_ps(random.randint(1,4), et_tasks)
+    
     task_set = tt_tasks + polling_servers_0
 
     simulated_annealer.sa(task_set, temperature, alpha, stopcriterion_sec, cost_f=cost_f, log_costs=True)
 
     print_best_ps_config(simulated_annealer.get_best_ps_config(), simulated_annealer.get_best_cost())
+
+    # just some check remove this 
     print("same as: ", cost_f(tt_tasks + simulated_annealer.get_best_ps_config())[1])
+    
     if is_logging:
         generate_plot(simulated_annealer.get_cost_log(), simulated_annealer.get_best_cost(), filename, test_case)
 
