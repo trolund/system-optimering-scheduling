@@ -115,7 +115,7 @@ def calculate_schedulabiltiy(polling_server):
     #We use the so-called linear supply lower bound function lslbf (t) (c.f. [9]) with α = Cp/Tp and ∆ = Tp + Dp − 2*Cp, as lslbf (t) = max{0, (t − ∆)*α}.
     #Ext3: Use the actual server supply function called A_s(t) which can be determined from the schedule table
     #   This will be done by remove alpha, and thereby saying the supply at e.g tick 2 is 2 - that way it will remove the pessimism
-    #alpha = Cp/Tp
+    alpha = Cp/Tp
 
     #hyperperiod is lcm of all task periods in T_ET (all values must be from the chosen subset of ET tasks from the .csv)
     periods = [t.period for t in et_tasks]
@@ -132,9 +132,9 @@ def calculate_schedulabiltiy(polling_server):
 
         while t <= hyperperiod:
             #the supply at time t ([1])
-            #supply = alpha*(t-Delta)
+            supply = alpha*(t-Delta)
             #EXT3:
-            supply = t-Delta
+            #supply = t-Delta
 
             #compute the maximum demand at time t according to Eq. 2
             demand = 0
@@ -190,7 +190,7 @@ def cost_f(task_set):
     if not is_schedulable: # penalize. do this to avoid ending up in a "false" minimum
         sum_wcrts_tt = sum_wcrts_tt + 0.2*sum_wcrts_tt 
 
-    print("cost et: ", wcrts_et, " cost tt: ", sum_wcrts_tt) 
+    #print("cost et: ", wcrts_et, " cost tt: ", sum_wcrts_tt) 
     sum_avg_wcrts = (sum_wcrts_tt + wcrts_et)
  
     return s, sum_avg_wcrts, is_schedulable

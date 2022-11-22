@@ -14,4 +14,8 @@ Tried not returning from edf and using avg in case of not schedulable
 
 ALSO GENERALLY:
 	reducing search space makes finding a solution quicker but has the disadvantage that these 
-	solutions are not as good as ones you can find in a longer time in a longer search space 
+	solutions are not as good as ones you can find in a longer time in a longer search space
+
+
+sa has to "walk on a path"
+sga works in another way 

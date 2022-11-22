@@ -39,8 +39,8 @@ class SolutionGenerator {
         std::vector<Task> tt_tasks;
         std::vector<Task> et_tasks;
         int population_sz; 
-        // these two do the same thing but trying to make things work here
         std::map<int, std::vector<Task>*> separation_map; 
+        std::vector<int> periods;
 
     public:
         SolutionGenerator(std::vector<Task>*, int); 
@@ -59,6 +59,6 @@ class SolutionGenerator {
         void set_population_sz(int sz); // convenient
         void fix_solution(solution*);
         solution get_min_cost(std::vector<solution>*);  
- 
+        void init_period_space(int max_period);
         friend void swap(solution& lhs, solution& rhs, int crossover_point); // swap parameters to generate offspring. couldnt make it work with references.
 };

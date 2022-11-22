@@ -234,7 +234,7 @@ std::tuple<bool, std::map<std::string, double>> is_polling_server_schedulable(Ta
         cur_response_time = et_it.deadline + 1;
         
         for(int t = 0; t <= hyperperiod; t = t + 1) {
-            supply = alpha * (double(t) - double(delta));
+            supply = alpha*(double(t) - double(delta));
             demand = 0;
 
             for(auto et_it_j : *et_set) {

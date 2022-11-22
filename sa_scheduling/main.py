@@ -72,10 +72,6 @@ if __name__ == "__main__":
     polling_servers_0 = neighborhood.create_random_pss_sep(et_tasks)
     print_best_ps_config(polling_servers_0, 0)
 
-    print(polling_servers_0[0].period_index)
-    
-    print(polling_servers_0[1].period_index)
-    print(polling_servers_0[2].period_index)
     task_set = tt_tasks + polling_servers_0
 
     simulated_annealer.sa(task_set, temperature, alpha, stopcriterion_sec, cost_f=cost_f, log_costs=True)
@@ -83,7 +79,9 @@ if __name__ == "__main__":
     print_best_ps_config(simulated_annealer.get_best_ps_config(), simulated_annealer.get_best_cost())
 
     # just some check remove this 
-    print("same as: ", cost_f(tt_tasks + simulated_annealer.get_best_ps_config())[1])
+    cost_thing = cost_f(tt_tasks + simulated_annealer.get_best_ps_config())
+    
+    print("is schedulable: ", cost_thing[2])
     
     if is_logging:
         generate_plot(simulated_annealer.get_cost_log(), simulated_annealer.get_best_cost(), filename, test_case)

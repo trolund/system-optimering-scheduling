@@ -32,6 +32,9 @@ target_link_libraries(test_edf PUBLIC CSVReader Solutions)
 add_executable(test_solution src/test_solution_generator.cpp)
 target_link_libraries(test_solution PUBLIC CSVReader Solutions)
 
+add_executable(test_cost src/test_cost.cpp)
+target_link_libraries(test_cost PUBLIC CSVReader Solutions)
+
 add_executable(test_sga src/test_sga.cpp)
 target_link_libraries(test_sga PUBLIC CSVReader Solutions)
 
@@ -48,9 +51,16 @@ target_include_directories(test_solution PUBLIC
                           "${PROJECT_SOURCE_DIR}"
                           )
 
-                          # add the binary tree to the search path for include files
+# add the binary tree to the search path for include files
 # so that we will find TutorialConfig.h
 target_include_directories(test_sga PUBLIC
-"${PROJECT_BINARY_DIR}"
-"${PROJECT_SOURCE_DIR}"
+                        "${PROJECT_BINARY_DIR}"
+                        "${PROJECT_SOURCE_DIR}"
+)
+
+# add the binary tree to the search path for include files
+# so that we will find TutorialConfig.h
+target_include_directories(test_cost PUBLIC
+                        "${PROJECT_BINARY_DIR}"
+                        "${PROJECT_SOURCE_DIR}"
 )

@@ -205,7 +205,7 @@ class Neighborhood:
         victim_ps.period_index = victim_ps.period_index + sign # move up or down the list
         victim_ps.period = self.periods[victim_ps.period_index] # get closest period that does not make hyperperiod > 10*12000
 
-        #victim_ps.period = max(victim_ps.period, victim_ps.deadline)  # do not accept period < deadline for now
+        victim_ps.period = max(victim_ps.period, victim_ps.deadline)  # do not accept period < deadline for now
         victim_ps.deadline = victim_ps.period # if period always = deadline we find solution more often - robust but they are not as good as when deadline can be < period
 
     # function for parameter DEADLINE

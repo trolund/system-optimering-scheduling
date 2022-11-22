@@ -58,8 +58,6 @@ class SimulatedAnnealer:
         if log_costs: # logging
             self.cost_log.append(current_cost)    
 
-        print("cost0: ", current_cost, " t: ", t, " is schedulable: ", is_schedulable)
-
         # does not matter if < or <= if 0 then new solution will be selected no matter what     
         while int(time.time()) - sec0 < stopcriterion_sec:
             #self.anneal(polling_servers, tt, t, a, self.n_solutions, current_cost, log_costs, best_cost)
@@ -74,14 +72,8 @@ class SimulatedAnnealer:
             
              # compute delta
             delta = tmp_cost - current_cost
-            
-             # some logging
-            if delta > 0:
-                print("cost: ", tmp_cost, f" delta: {delta:.10f}", f" t: {t:.10f}", f" p(delta, t): {self.p(delta, t):.10f}", " is schedulable: ", is_schedulable, " num_ps: ", len(pss))
-            else:
-                print("cost: ", tmp_cost, " delta: ", delta, " t: ", t, " is schedulable: ", is_schedulable, " num ps: ", len(pss))
-            
-             # accept randomly drawn solution from current neighborhood if better or with some probability
+             
+            # accept randomly drawn solution from current neighborhood if better or with some probability
             if delta <= 0 or self.p(delta, t) > self.rand.uniform(0.0, 1.0):
                 polling_servers = copy.deepcopy(tmp_ps) # all these copies...
                 current_solution = tmp_solution # update current solution, current set of polling servers, costs & schedule
