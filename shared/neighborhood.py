@@ -149,7 +149,6 @@ class Neighborhood:
 
         # if sign positive add a polling server if negative remove one
         # when adding a polling server take some et tasks from victim
-        #if False: # TODO refactor PS neighbour function
         if parameter == NUM_PS:
             self.num_ps(sign, polling_servers, victim_ps, self.rand)
 
