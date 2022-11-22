@@ -175,13 +175,9 @@ def cost_f(task_set):
         
         wcrts_et += sum([wcrts[key][0] for key in wcrts]) / len(wcrts)
         
-        #if is_schedulable:
-            #wcrts_et += sum([wcrts[key][0] / wcrts[key][1] for key in wcrts]) / len(wcrts)
-        #    wcrts_et += sum([wcrts[key][0] for key in wcrts]) / len(wcrts)
-        #else: 
-        #    wcrts_et += sum(wcrts[key][1] for key in wcrts) / len(wcrts) + 100
-        
-    
+        if not is_schedulable:
+            wcrts_et = wcrts_et + 0.2*wcrts_et # add penalty
+         
     # do not divide by zero. 
     if l != []:
         wcrts_et *= 1/len(l) 
@@ -191,12 +187,8 @@ def cost_f(task_set):
     
     # handle case where some task isn't even run also by check if in dict
     sum_wcrts_tt = sum([wcrts[task.name] if task.name in wcrts else task.deadline + 100 for task in task_set ]) / len(task_set)
-    # if not schedulable set tt cost contribution to 1 (max) and is_schedulable to false 
-    #if s == []: 
-    #    is_schedulable = False 
-    #    sum_wcrts_tt = sum([task.deadline for task in task_set]) / len(task_set) + 100
-    #else: 
-    #    sum_wcrts_tt = sum([wcrts[task.name] for task in task_set]) / len(task_set)
+    if not is_schedulable: # penalize. do this to avoid ending up in a "false" minimum
+        sum_wcrts_tt = sum_wcrts_tt + 0.2*sum_wcrts_tt 
 
     print("cost et: ", wcrts_et, " cost tt: ", sum_wcrts_tt) 
     sum_avg_wcrts = (sum_wcrts_tt + wcrts_et)

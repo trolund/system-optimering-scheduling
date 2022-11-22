@@ -9,4 +9,9 @@ Tried not returning from edf and using avg in case of not schedulable
 	check but not for edf and vice versa. also why would an infeasible "solution" with some cost
 	necessarily be closer to a good feasible solution (in terms of neighborhood) than some other 
 	infeasible solution with a higher cost? it should be though because neighborhood is well behaved
-	or whatever they call it. but still. otherwise we could anneal it would just be random search. 
+	or whatever they call it. but still. otherwise we could anneal it would just be random search.
+
+
+ALSO GENERALLY:
+	reducing search space makes finding a solution quicker but has the disadvantage that these 
+	solutions are not as good as ones you can find in a longer time in a longer search space 

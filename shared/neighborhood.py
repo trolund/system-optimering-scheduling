@@ -24,7 +24,7 @@ class Neighborhood:
         self.rand.seed() # if no arguments passed system time is used as seed
         self.n_polling_servers = 0
         # restrict search space like this. only choose periods from here -> make hyperperiod < 10*12000. 12000 = lcm(2000,3000,4000)
-        self.periods = [i for i in range(2,1000) if lcm(i, 2000,3000,4000) <= 12000] 
+        self.periods = [i for i in range(2,2001) if lcm(i, 2000,3000,4000) <= 12000] 
    
     # return dict m[separation] = list of ets with separation
     def get_separated_ets(self, et_tasks): 
@@ -78,7 +78,7 @@ class Neighborhood:
         period_index = self.rand.randint(0, len(self.periods) - 1) # choose an index in list of precomputed periods
         period = self.periods[period_index] 
         deadline = period 
-        duration = min(self.rand.randint(1, 100), deadline-1)  # restrict range of possible durations. restrict search space 
+        duration = min(self.rand.randint(1, 50), deadline-1)  # restrict range of possible durations. restrict search space 
 
         # naming of polling servers is unique 
         self.n_polling_servers += 1
@@ -205,12 +205,14 @@ class Neighborhood:
         victim_ps.period_index = victim_ps.period_index + sign # move up or down the list
         victim_ps.period = self.periods[victim_ps.period_index] # get closest period that does not make hyperperiod > 10*12000
 
-        victim_ps.period = max(victim_ps.period, victim_ps.deadline)  # do not accept period < deadline for now
+        #victim_ps.period = max(victim_ps.period, victim_ps.deadline)  # do not accept period < deadline for now
+        victim_ps.deadline = victim_ps.period # if period always = deadline we find solution more often - robust but they are not as good as when deadline can be < period
 
     # function for parameter DEADLINE
     def deadline(self, victim_ps, sign): 
-        victim_ps.deadline = max(1, victim_ps.deadline + sign * 5)
-        victim_ps.deadline = min(victim_ps.period, victim_ps.deadline)  # do not accept period < deadline 
+        self.period(victim_ps, sign) # just doing nothing or changing period and having deadline=period generates solutions more often
+        #victim_ps.deadline = max(1, victim_ps.deadline + sign * 5)
+        #victim_ps.deadline = min(victim_ps.period, victim_ps.deadline)  # do not accept period < deadline 
 
     # function for parameter SUBSET
     def subset(self, polling_servers, victim_ps):
