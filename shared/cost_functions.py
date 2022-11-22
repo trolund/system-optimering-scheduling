@@ -3,10 +3,6 @@ import copy
 from functools import reduce
 from shared.models.task import Task
 
-NAME = 0
-DEADLINE = 1
-RELEASE_TIME = 2
-
 # not used anymore 
 def get_ready(task_set, cycle, ready_list):
     for task in task_set:
@@ -32,7 +28,7 @@ def processor_demand_criterion(t1, t2, task_set):
     return demand <= (t2 - t1)
 
 # release new task instance
-def create_job(cycle, task): # create new instance instead of deepcopy 
+def create_job(cycle, task): # create new instance instead of deepcopy. Tried using list instead of task object. doesnt seem better and less readble 
     new_job = Task(task.name, task.duration, task.period, task.type, task.priority, task.deadline + cycle, et_subset=task.et_subset)
     #new_job.deadline = new_job.deadline + cycle
     new_job.release_time = cycle
