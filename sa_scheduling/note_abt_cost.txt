@@ -1,0 +1,12 @@
+Tried not returning from edf and using avg in case of not schedulable
+	but then we visit so few solutions and like ok we get a more precise cost 
+	but it does not make up for it i think. we visit more solutions the other way,
+	usually end up at a good one. the disadvantage of this is the cost becomes kind 
+	of artificial and maybe two solutions that are both infeasible but have very different 
+	true costs(avg wcrt) are given the same cost. so the fear would be that we do not 
+	visit many infeasible solutions and that infeasible solutions are treated the same.
+	but they are not treated the same way anyway bc might be feasible for et schedulability 
+	check but not for edf and vice versa. also why would an infeasible "solution" with some cost
+	necessarily be closer to a good feasible solution (in terms of neighborhood) than some other 
+	infeasible solution with a higher cost? it should be though because neighborhood is well behaved
+	or whatever they call it. but still. otherwise we could anneal it would just be random search. 

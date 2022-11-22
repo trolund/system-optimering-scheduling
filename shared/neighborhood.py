@@ -3,6 +3,7 @@ from shared.models.task import Task
 from shared.models.taskType import TaskType
 import random
 from functools import reduce
+from math import lcm
 
 """ 
     TODO look into random sampling of set library functions :D lots of homemade stuff here
@@ -22,7 +23,9 @@ class Neighborhood:
         self.rand = random.Random()
         self.rand.seed() # if no arguments passed system time is used as seed
         self.n_polling_servers = 0
-
+        # restrict search space like this. only choose periods from here -> make hyperperiod < 10*12000. 12000 = lcm(2000,3000,4000)
+        self.periods = [i for i in range(2,1000) if lcm(i, 2000,3000,4000) <= 12000] 
+   
     # return dict m[separation] = list of ets with separation
     def get_separated_ets(self, et_tasks): 
         ets_separated = {}
@@ -57,7 +60,7 @@ class Neighborhood:
 
     
     # create a polling server with a given et subset and randomly chosen parameters  
-    def create_random_ps(self, et_subset):
+    def create_random_ps_old(self, et_subset):
         
         period = self.rand.randint(1, 20) * 10  # multiple of 10 to avoid hyperperiod exploding??
         deadline = min(period, (self.rand.randint(1, 20) * 10)) # do not allow deadline > period 
@@ -68,6 +71,20 @@ class Neighborhood:
 
         # find naming scheme,have to b unique, requires counting or sth, some state 
         return Task("tTTps" + str(self.n_polling_servers), duration, period, TaskType.TIME, 7, deadline, et_subset, et_subset[0].separation)
+
+    # create a polling server with a given et subset and randomly chosen parameters  
+    def create_random_ps(self, et_subset):
+        
+        period_index = self.rand.randint(0, len(self.periods) - 1) # choose an index in list of precomputed periods
+        period = self.periods[period_index] 
+        deadline = period 
+        duration = min(self.rand.randint(1, 100), deadline-1)  # restrict range of possible durations. restrict search space 
+
+        # naming of polling servers is unique 
+        self.n_polling_servers += 1
+
+        # find naming scheme,have to b unique, requires counting or sth, some state 
+        return Task("tTTps" + str(self.n_polling_servers), duration, period, TaskType.TIME, 7, deadline, et_subset, et_subset[0].separation, period_index=period_index)
 
     # partition list of et_tasks into n lists of et_tasks
     def partition_et_tasks(self, n, et_tasks):
@@ -81,8 +98,6 @@ class Neighborhood:
     def create_n_random_ps(self, n, et_tasks):
         et_subsets = self.partition_et_tasks(n, et_tasks)
         return [self.create_random_ps(et_subset) for et_subset in et_subsets]
-
-
     
     # get a subset of pses from victim, delete these from victim and return them. only operate on sep 0
     def create_ps_subset(self, victim_ps):
@@ -115,28 +130,21 @@ class Neighborhood:
 
         # increase or decrease chosen parameter
         sign = 1 if self.rand.randint(0, 1) == 0 else -1
-
-        # todo change this 
-        # an argument for doing this is that sometimes we need a big difference to get far neighbor, avoid being stuck?
-        steps_period = [10, 10, 20]
-        steps_deadline = [1, 2, 5, 10, 10, 10, 20]
-        step_p = steps_period[self.rand.randint(0, len(steps_period) - 1)]
-        step_d = steps_deadline[self.rand.randint(0, len(steps_deadline) - 1)]
-
+     
         # if sign positive add a polling server if negative remove one
         # when adding a polling server take some et tasks from victim
         if parameter == NUM_PS:
             self.num_ps(sign, polling_servers, victim_ps, self.rand)
 
         elif parameter == BUDGET:  # change budget of victim
-            self.budget(victim_ps, sign, step_d)
+            self.budget(victim_ps, sign)
 
         # we add/subtract sum number divisible by 10 and <= 100
         elif parameter == PERIOD:  # change period of victim. we do not accept period < deadline, but we could also just let sa handle it
-            self.period(victim_ps, sign, step_p)
+            self.period(victim_ps, sign)
 
         elif parameter == DEADLINE:  # change deadline of victim
-            self.deadline(victim_ps, sign, step_d)
+            self.deadline(victim_ps, sign)
 
         elif parameter == SUBSET:  # move et tasks from one ps to another
             if len(polling_servers) == 1:  # if no one to steal from
@@ -182,22 +190,27 @@ class Neighborhood:
                     polling_servers.remove(victim_ps)  # remove victim from set of polling servers
 
     # function for parameter BUDGET
-    def budget(self, victim_ps, sign, step_d):
-        # victim_ps.duration = max(1, victim_ps.duration + sign * self.rand.randint(1,50))
-        victim_ps.duration = max(1, victim_ps.duration + sign * step_d)
+    def budget(self, victim_ps, sign):
+        victim_ps.duration = max(1, victim_ps.duration + sign) # avoid negative
         victim_ps.duration = min(victim_ps.duration, victim_ps.deadline)  # do not accept duration > deadline
-
+        
     # function for parameter PERIOD
-    def period(self, victim_ps, sign, step_p):
-        # victim_ps.period = max(5, victim_ps.period + sign * self.rand.randint(1,100))
-        victim_ps.period = max(2, victim_ps.period + sign * step_p)
+    def period(self, victim_ps, sign):
+        # avoid stepping out of list bound 
+        if victim_ps.period_index + sign == len(self.periods):
+            sign = -1        
+        elif victim_ps.period_index + sign == -1:
+            sign = 1
+        
+        victim_ps.period_index = victim_ps.period_index + sign # move up or down the list
+        victim_ps.period = self.periods[victim_ps.period_index] # get closest period that does not make hyperperiod > 10*12000
+
         victim_ps.period = max(victim_ps.period, victim_ps.deadline)  # do not accept period < deadline for now
 
     # function for parameter DEADLINE
-    def deadline(self, victim_ps, sign, step_d):
-        # victim_ps.deadline = max(5, victim_ps.deadline + sign * self.rand.randint(1,100))
-        victim_ps.deadline = max(1, victim_ps.deadline + sign * step_d)
-        victim_ps.deadline = min(victim_ps.period, victim_ps.deadline)  # do not accept period < deadline for now
+    def deadline(self, victim_ps, sign): 
+        victim_ps.deadline = max(1, victim_ps.deadline + sign * 5)
+        victim_ps.deadline = min(victim_ps.period, victim_ps.deadline)  # do not accept period < deadline 
 
     # function for parameter SUBSET
     def subset(self, polling_servers, victim_ps):

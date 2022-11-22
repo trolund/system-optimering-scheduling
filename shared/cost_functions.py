@@ -1,6 +1,11 @@
 import math
 import copy 
 from functools import reduce
+from shared.models.task import Task
+
+NAME = 0
+DEADLINE = 1
+RELEASE_TIME = 2
 
 # not used anymore 
 def get_ready(task_set, cycle, ready_list):
@@ -27,9 +32,9 @@ def processor_demand_criterion(t1, t2, task_set):
     return demand <= (t2 - t1)
 
 # release new task instance
-def create_job(cycle, task): 
-    new_job = copy.deepcopy(task)
-    new_job.deadline = new_job.deadline + cycle
+def create_job(cycle, task): # create new instance instead of deepcopy 
+    new_job = Task(task.name, task.duration, task.period, task.type, task.priority, task.deadline + cycle, et_subset=task.et_subset)
+    #new_job.deadline = new_job.deadline + cycle
     new_job.release_time = cycle
 
     return new_job 
@@ -45,17 +50,20 @@ def edf(ts):
     s = [] # schedule will be hyperperiod long. 12 000 microticks == 120 000 microsecs == 120 ms
     ready_list = [] 
     wcrts = {} # worst case response times
-
+    is_schedulable = True
     # total amount of computation time needed exceeding available time -> not schedulable
     if not processor_demand_criterion(0, T, ts): 
-        return [], -1 
+        #return [], -1 
+        is_schedulable = False
 
     # return same thing in all failed cases, just empty list fx!! 
     t = 0
     while t < T:
         for task in ready_list:
             if task.duration > 0 and task.deadline <= t:
-                return [], -1 # just return 1 here maybe lol? 
+                #return [], -1 # just return 1 here maybe lol?
+                is_schedulable = False
+
         # release task at time t
         ready_list = ready_list + [create_job(t, task) for task in ts if t % task.period == 0]     
 
@@ -87,10 +95,11 @@ def edf(ts):
 
     # not feasible if ready list is not empty after hyperperiod
     if ready_list != []:
-        return [], -1
+        #return [], -1
+        is_schedulable = False
 
     #print("in EDF wcrts is: ", wcrts)
-    return s, wcrts
+    return s, wcrts, is_schedulable
 
 # utility function 
 def unpack(task):
@@ -163,31 +172,37 @@ def cost_f(task_set):
     wcrts_et = 0 # use worst case response time for cost metric
     is_schedulable = True # if some ps is not schedulable at some penalty to cost 
     
-    # costs is (sum(wcrt_i/deadline_i) / len(et_subset)) /len(polling_servers)
+    # cost contribution of et tasks is the average of worst case response times
+    # si costs for et is: (sum(wcrt_i/deadline_i) / len(et_subset)) /len(polling_servers)
     for element in l: 
         is_schedulable, wcrts = element
-        if is_schedulable:
+        
+        wcrts_et += sum([wcrts[key][0] for key in wcrts]) / len(wcrts)
+        
+        #if is_schedulable:
             #wcrts_et += sum([wcrts[key][0] / wcrts[key][1] for key in wcrts]) / len(wcrts)
-            wcrts_et += sum([wcrts[key][0] for key in wcrts]) / len(wcrts)
-        else: 
-            wcrts_et += sum(wcrts[key][1] for key in wcrts) / len(wcrts) + 100
+        #    wcrts_et += sum([wcrts[key][0] for key in wcrts]) / len(wcrts)
+        #else: 
+        #    wcrts_et += sum(wcrts[key][1] for key in wcrts) / len(wcrts) + 100
         
     
-    # this check is funny  
+    # do not divide by zero. 
     if l != []:
-        wcrts_et *= 1/len(l)
+        wcrts_et *= 1/len(l) 
      
     # apply earliest deadline first 
-    s, wcrts = edf(task_set) 
+    s, wcrts, is_schedulable = edf(task_set) 
     
+    # handle case where some task isn't even run also by check if in dict
+    sum_wcrts_tt = sum([wcrts[task.name] if task.name in wcrts else task.deadline + 100 for task in task_set ]) / len(task_set)
     # if not schedulable set tt cost contribution to 1 (max) and is_schedulable to false 
-    if s == []: 
-        is_schedulable = False 
-        sum_wcrts_tt = sum([task.deadline for task in task_set]) / len(task_set) + 100
-    else: 
-        sum_wcrts_tt = sum([wcrts[task.name] for task in task_set]) / len(task_set)
+    #if s == []: 
+    #    is_schedulable = False 
+    #    sum_wcrts_tt = sum([task.deadline for task in task_set]) / len(task_set) + 100
+    #else: 
+    #    sum_wcrts_tt = sum([wcrts[task.name] for task in task_set]) / len(task_set)
 
     print("cost et: ", wcrts_et, " cost tt: ", sum_wcrts_tt) 
-    sum_wcrts = (sum_wcrts_tt + wcrts_et)
+    sum_avg_wcrts = (sum_wcrts_tt + wcrts_et)
  
-    return s, sum_wcrts, is_schedulable
+    return s, sum_avg_wcrts, is_schedulable

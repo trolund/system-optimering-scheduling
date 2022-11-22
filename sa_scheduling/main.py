@@ -71,7 +71,11 @@ if __name__ == "__main__":
     # create random polling servers with separation requirement 
     polling_servers_0 = neighborhood.create_random_pss_sep(et_tasks)
     print_best_ps_config(polling_servers_0, 0)
+
+    print(polling_servers_0[0].period_index)
     
+    print(polling_servers_0[1].period_index)
+    print(polling_servers_0[2].period_index)
     task_set = tt_tasks + polling_servers_0
 
     simulated_annealer.sa(task_set, temperature, alpha, stopcriterion_sec, cost_f=cost_f, log_costs=True)
