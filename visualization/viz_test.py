@@ -12,7 +12,7 @@ def do():
 
     viz = SchedulingVisualizer()
 
-    viz.draw_plot(s, "inf_10_10_7", height_of_jobs=20)
+    viz.draw_plot(s, "inf_10_10_8", height_of_jobs=20)
 
 if __name__ == '__main__':
     do()

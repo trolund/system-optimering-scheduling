@@ -59,7 +59,7 @@ class SchedulingVisualizer:
         gnt.set_ylim(0, len(servers))
 
         # Setting X-axis limits
-        gnt.set_xlim(0, max_end)
+        gnt.set_xlim(max_end, 0) # gnt.set_xlim(max_end, 0)
 
         # Setting labels for x-axis and y-axis
         gnt.set_xlabel('Ticks since start')
@@ -96,8 +96,7 @@ class SchedulingVisualizer:
 
             y_pos = dic[sol]
 
-            gnt.broken_barh(to_print, (y_pos, height_of_jobs),
-                            facecolors=(random.uniform(0, 1), random.uniform(0, 1), 0.5))
+            gnt.broken_barh(to_print, (y_pos, height_of_jobs), facecolors=(random.uniform(0, 1), random.uniform(0, 1), 0.5))
 
         # Declaring a bar in schedule
         # gnt.broken_barh([(80, 1500)], (dic["tTT26"] - 20, height_of_jobs), facecolors =('tab:orange'))
