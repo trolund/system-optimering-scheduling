@@ -24,7 +24,7 @@ class Task {
         int release_time;
         int separation;
         std::vector<Task> *et_subset; // maybe should be pointer to vector of pointers. so we only need to instantiate actual et tasks 
-
+        int period_index; // used to select neighboring period...
         Task(std::vector<std::string>);
         
         Task(std::string name, std::string duration, std::string period, std::string type, std::string priority, std::string deadline);
@@ -34,7 +34,7 @@ class Task {
         Task(std::string name, int duration, int period, int type, int priority, int deadline, int releaseTime);
         
         Task(std::string name, int duration, int period, int type, int priority, int deadline, std::vector<Task> *et_subset);
-        
+        Task(std::string name, int duration, int period, int type, int priority, int deadline, int period_index, std::vector<Task> *et_subset);
         // t1 less than t2. compare on deadline
         struct ByDeadline {
             bool operator() (const Task& t1, const Task& t2) const {

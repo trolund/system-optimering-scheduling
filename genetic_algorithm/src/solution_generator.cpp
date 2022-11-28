@@ -2,8 +2,11 @@
 
 SolutionGenerator::SolutionGenerator(std::vector<Task> *task_set, int population_size) {
         population_sz = population_size;
-        rng = std::mt19937(dev()); // https://stackoverflow.com/questions/686353/random-float-number-generation 
-        uni_dist = std::uniform_int_distribution<std::mt19937::result_type>(1, 20);
+        rng = std::mt19937(dev()); // https://stackoverflow.com/questions/686353/random-float-number-generation  
+        init_period_space(2, 4000);
+        uni_dist_periods = std::uniform_int_distribution<std::mt19937::result_type>(0, periods.size()-1);
+        uni_dist = std::uniform_int_distribution<std::mt19937::result_type>(0, 20);
+        uni_dist_duration = std::uniform_int_distribution<std::mt19937::result_type>(1, 1000);
         uni_real_dist = std::uniform_real_distribution<>(0, 1); // random double in [0, 1)
         uni_dist_select = std::uniform_int_distribution<std::mt19937::result_type>(0, population_sz - 1);
         
@@ -42,21 +45,20 @@ solution SolutionGenerator::generate_solution() {
     int period;
     int deadline;
     std::string name; // naming not that important, but we give one for debugging purposes
-     
+    int period_index;
     for(auto it : separation_map) {
-        //duration = uni_dist(rng);
-        period = uni_dist(rng) * 10;
-        //deadline = ((uni_dist(rng) * 10) % period) + duration;
-        //deadline = ((uni_dist(rng) * 10) % period); // this is not good! never equal but yeah enforce it somehow
-        //deadline = uni_dist(rng) * 10;
-        //deadline = std::min(period, deadline); 
+        period_index = uni_dist_periods(rng); 
+        //period_index = uni_dist(rng);
+        period = periods.at(period_index);
+        //period = uni_dist(rng) * 10;
         deadline = period;
-        duration = uni_dist(rng) * 4; // another rng for this 
-        duration = std::min(duration, deadline);
         
+        duration = uni_dist_duration(rng); // another rng for this 
+        duration = std::min(duration, deadline);
+        //duration = period / 2; 
         //while(deadline > period) { deadline = uni_dist(rng) * 10; }; // deadlines may not be greater than period. if so create instance t_i+1 before t_i has finished possibly  
-        Task polling_server =  Task(name, duration, period, TT, 7, deadline, it.second);
-        polling_servers.push_back(Task(name, duration, period, TT, 7, deadline, it.second));
+        Task polling_server =  Task(name, duration, period, TT, 7, deadline, period_index, it.second);
+        polling_servers.push_back(polling_server);
     }
 
     return (solution) {.polling_servers = polling_servers, .tt_tasks = &this->tt_tasks, .cost = 0.0};
@@ -175,7 +177,7 @@ void SolutionGenerator::mutate(solution* sol, double mutation_rate) {
         // else if == 11 
         if(uni_real_dist(rng) <= mutation_rate) {
             sign = (uni_dist(rng) % 2 == 0) ? 1 : -1;
-
+           /*
             if (sol->polling_servers[i].period <= 10) { // try like this to get real good ones maybe but avoiding really long hyperperiods
                 sol->polling_servers[i].period += sign * 1;
             } else if (sol->polling_servers[i].period == 11) {
@@ -184,15 +186,23 @@ void SolutionGenerator::mutate(solution* sol, double mutation_rate) {
                 sol->polling_servers[i].period += sign * 10;//uni_dist(rng); // add/sub a value in [1, 20]
             } 
             sol->polling_servers[i].period = std::max(2, sol->polling_servers[i].period); // avoid negative and period of 1
+            */
+           if (sol->polling_servers[i].period_index + sign < 0) {
+                sign = 1;
+           }
+           if (sol->polling_servers[i].period_index + sign == periods.size()) {
+                sign = -1;
+           }  
+           sol->polling_servers[i].period_index + sign;
+           sol->polling_servers[i].period = periods.at(sol->polling_servers[i].period_index);
+           
         }
-        
+
         if(uni_real_dist(rng) <= mutation_rate) {
             sign = (uni_dist(rng) % 2 == 0) ? 1 : -1;
             
             if (sol->polling_servers[i].deadline <= 10) { 
                 sol->polling_servers[i].deadline += sign * 1;//uni_dist(rng);
-            } else if (sol->polling_servers[i].deadline == 11){
-                sol->polling_servers[i].deadline += sign * 10 - 1; // if it becomes 0 we fix below.. 
             } else {
                 sol->polling_servers[i].deadline += sign * 10;//uni_dist(rng);
             }
@@ -208,9 +218,29 @@ void SolutionGenerator::mutate(solution* sol, double mutation_rate) {
 
 }
 
+int lcm(std::vector<int> periods) {
+    int hyperperiod = periods.at(0);
+    
+    // https://stackoverflow.com/questions/4210470/looping-on-c-iterators-starting-with-second-or-nth-item 
+    for(int i = 1; i < periods.size(); i = i + 1) { 
+        hyperperiod = std::lcm(hyperperiod, periods.at(i));
+        
+    }
+
+    return hyperperiod;
+}
+
+void SolutionGenerator::init_period_space(int min_period, int max_period) {
+    for(int i=min_period; i <= max_period; i=i+1) {
+        if(lcm(std::vector<int>{i, 2000, 3000, 4000}) <= 12000) {
+            periods.push_back(i);
+        }
+    } 
+}
+
 // get solution with minimum cost from a vector of solutions
 solution SolutionGenerator::get_min_cost(std::vector<solution> *solutions) {
-    std::vector<solution>::iterator result = std::min_element(solutions->begin(), solutions->end(), cmp_solution());
+    std::vector<solution>::iterator result = std::min_element(solutions->begin(), solutions->end(), cmp_solution_1());
     return *result;
 }
 

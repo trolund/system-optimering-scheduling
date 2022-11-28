@@ -31,7 +31,7 @@ double cost_function(std::vector<Task> *task_set) {
         // if polling server is schedulable sum wcrts if not sum deadline + a penalty for each
         for (auto et_task : *it.et_subset) {
             if (is_schedulable) { wcrts_et_sum += wcrts_et[et_task.name]; }
-            else { wcrts_et_sum += et_task.deadline + 100; }
+            else { wcrts_et_sum += 2*et_task.deadline; }
         }
 
         cost_et += wcrts_et_sum / it.et_subset->size();
@@ -47,7 +47,7 @@ double cost_function(std::vector<Task> *task_set) {
     // same approach as for ets in a ps. wcrt or deadline + penalty
     for(auto it : *task_set) {
         if(is_schedulable) { wcrts_tt_sum += wcrts_tt[it.name]; }
-        else {wcrts_tt_sum += it.deadline + 100; }
+        else {wcrts_tt_sum += 2*it.deadline; }
     }
 
     cost_tt = wcrts_tt_sum / task_set->size();

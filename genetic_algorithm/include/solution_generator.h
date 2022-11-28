@@ -21,6 +21,17 @@ struct cmp_solution {
   }
 };
 
+// cost of solution a < cost of solution b ? https://stackoverflow.com/questions/34248336/min-value-and-index-from-elements-of-array-of-structure-in-c 
+struct cmp_solution_1 {
+  bool operator()(const solution& a, const solution& b) const {
+    return ( (a.cost < b.cost && a.is_schedulable && b.is_schedulable) || 
+             //(a.cost < b.cost && a.is_schedulable && !b.is_schedulable) ||
+             (a.is_schedulable && !b.is_schedulable) ||
+             (a.cost < b.cost && !a.is_schedulable && !b.is_schedulable) // maybe also redundant, first check a.is is sched b not is sched
+            );
+  }
+};
+
 /*  For generating initial solution. Recombiner recombines and creates subsquent generations. 
     Solution is vector of polling servers and pointer to vector of tt tasks also store cost in this struct
 
@@ -33,9 +44,11 @@ class SolutionGenerator {
     private:
         std::random_device dev; 
         std::mt19937 rng;
-        std::uniform_int_distribution<std::mt19937::result_type> uni_dist; // uniform distribution in range [n, m] 
+        std::uniform_int_distribution<std::mt19937::result_type> uni_dist; // uniform distribution in range [n, m]
+        std::uniform_int_distribution<std::mt19937::result_type> uni_dist_duration; 
         std::uniform_real_distribution<> uni_real_dist; 
         std::uniform_int_distribution<std::mt19937::result_type> uni_dist_select; // uniform distribution in range [n, m] used for tournament selecting solutions 
+        std::uniform_int_distribution<std::mt19937::result_type> uni_dist_periods; // test vector of ok periods etc
         std::vector<Task> tt_tasks;
         std::vector<Task> et_tasks;
         int population_sz; 
@@ -59,6 +72,6 @@ class SolutionGenerator {
         void set_population_sz(int sz); // convenient
         void fix_solution(solution*);
         solution get_min_cost(std::vector<solution>*);  
-        void init_period_space(int max_period);
+        void init_period_space(int, int);
         friend void swap(solution& lhs, solution& rhs, int crossover_point); // swap parameters to generate offspring. couldnt make it work with references.
 };

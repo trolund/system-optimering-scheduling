@@ -48,3 +48,15 @@ Task::Task(std::string name, int duration, int period, int type, int priority, i
     this->release_time = 0;
     this->et_subset = et_subset;
 }
+
+Task::Task(std::string name, int duration, int period, int type, int priority, int deadline, int period_index, std::vector<Task>* et_subset) {
+    this->name = name;
+    this->duration = duration;
+    this->period = period;
+    this->type = type;
+    this->priority = priority;
+    this->deadline = deadline;
+    this->release_time = 0;
+    this->et_subset = et_subset;
+    this->period_index = period_index;
+}
