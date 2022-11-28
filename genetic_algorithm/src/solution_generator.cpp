@@ -177,16 +177,7 @@ void SolutionGenerator::mutate(solution* sol, double mutation_rate) {
         // else if == 11 
         if(uni_real_dist(rng) <= mutation_rate) {
             sign = (uni_dist(rng) % 2 == 0) ? 1 : -1;
-           /*
-            if (sol->polling_servers[i].period <= 10) { // try like this to get real good ones maybe but avoiding really long hyperperiods
-                sol->polling_servers[i].period += sign * 1;
-            } else if (sol->polling_servers[i].period == 11) {
-                sol->polling_servers[i].period = (sol->polling_servers[i].period - 1) + sign * 10; // do not carry +1 if we leave this region if becomes one we fix below
-            } else {
-                sol->polling_servers[i].period += sign * 10;//uni_dist(rng); // add/sub a value in [1, 20]
-            } 
-            sol->polling_servers[i].period = std::max(2, sol->polling_servers[i].period); // avoid negative and period of 1
-            */
+
            if (sol->polling_servers[i].period_index + sign < 0) {
                 sign = 1;
            }
