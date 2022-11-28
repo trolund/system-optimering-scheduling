@@ -7,8 +7,8 @@ using namespace std;
 int main() {
     //CSVReader csvReader = CSVReader("../testcases_seperation_tested/taskset_small.csv");
     //CSVReader csvReader = CSVReader("../testcases_seperation_tested/taskset__1643188539-a_0.6-b_0.1-n_30-m_20-d_unif-p_2000-q_4000-g_1000-t_5__0__tsk.csv");
-    CSVReader csvReader = CSVReader("../testcases_seperation_tested/taskset__1643188013-a_0.1-b_0.1-n_30-m_20-d_unif-p_2000-q_4000-g_1000-t_5__0__tsk.csv");
-    //CSVReader csvReader = CSVReader("../testcases_seperation_tested/taskset__1643188175-a_0.2-b_0.3-n_30-m_20-d_unif-p_2000-q_4000-g_1000-t_5__0__tsk.csv");
+    //CSVReader csvReader = CSVReader("../testcases_seperation_tested/taskset__1643188013-a_0.1-b_0.1-n_30-m_20-d_unif-p_2000-q_4000-g_1000-t_5__0__tsk.csv");
+    CSVReader csvReader = CSVReader("../testcases_seperation_tested/taskset__1643188175-a_0.2-b_0.3-n_30-m_20-d_unif-p_2000-q_4000-g_1000-t_5__0__tsk.csv");
     csvReader.openFile(); 
     std::vector<std::vector<std::string>> rows = csvReader.getRows(';', false);
     std::vector<Task> task_set_all, task_set_TT, task_set_ET;//, taskSetET; 
