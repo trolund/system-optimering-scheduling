@@ -24,19 +24,47 @@ void SolutionGenerator::set_population_sz(int sz) {
     uni_dist_select = uni_dist_select = std::uniform_int_distribution<std::mt19937::result_type>(0, population_sz - 1);
 }
 
-void SolutionGenerator::separate_et_tasks(){
-    std::set<int> separation_set;
-    
+void SolutionGenerator::separate_et_tasks(){ 
     for (auto it : et_tasks) {
         if(!separation_map.contains(it.separation)) {
             std::vector<Task> *et_separated = new std::vector<Task>(); // we would like to only instantiate these tasks once keep on heap. wont work if 0s that we swap around present though... 
             et_separated->push_back(it);
             separation_map.insert({it.separation, et_separated});
+            separation_set.insert(it.separation);
         } else { 
             separation_map.at(it.separation)->push_back(it);
         }
     } 
 }
+// randomly partition et 0s to n vectors
+// https://www.geeksforgeeks.org/random-list-of-m-non-negative-integers-whose-sum-is-n/ !!!!!!!
+std::vector<std::vector<Task>> SolutionGenerator::distribute_et_zeros(int n) {
+    // check that there actually is 0s just to be sure 
+    std::vector<std::vector<Task>> distributed_et_zeros(n);
+
+    if(separation_map.contains(0)) { 
+        int num_et0s = separation_map.at(0)->size(); 
+        std::shuffle(std::begin(*separation_map.at(0)), std::end(*separation_map.at(0)), rng);
+        int num_pr_vec[n]; // apparently u can do = {0} but this surely works
+        
+        for(int i=0; i<n; i=i+1) {num_pr_vec[i] = 0;}
+
+        // create an array of size n where elements sum to num_et0s
+        for(int i = 0; i < num_et0s; i = i + 1) { 
+            num_pr_vec[uni_dist(rng) % n]++; 
+        }
+        int low = 0;
+        for(int i = 0; i < n; i = i + 1) {
+            distributed_et_zeros.at(i) = {separation_map.at(0)->begin() + low, separation_map.at(0)->begin() + low + num_pr_vec[i]};
+            low = low + num_pr_vec[i];
+        }
+    }
+
+    return distributed_et_zeros;
+
+    
+
+};
 
 // generate a solution
 solution SolutionGenerator::generate_solution() {
@@ -46,19 +74,36 @@ solution SolutionGenerator::generate_solution() {
     int deadline;
     std::string name; // naming not that important, but we give one for debugging purposes
     int period_index;
-    for(auto it : separation_map) {
-        period_index = uni_dist_periods(rng); 
-        //period_index = uni_dist(rng);
-        period = periods.at(period_index);
-        //period = uni_dist(rng) * 10;
-        deadline = period;
-        
-        duration = uni_dist_duration(rng); // another rng for this 
-        duration = std::min(duration, deadline);
-        //duration = period / 2; 
-        //while(deadline > period) { deadline = uni_dist(rng) * 10; }; // deadlines may not be greater than period. if so create instance t_i+1 before t_i has finished possibly  
-        Task polling_server =  Task(name, duration, period, TT, 7, deadline, period_index, it.second);
-        polling_servers.push_back(polling_server);
+
+    int et_0s_index = 0;
+    std::vector<std::vector<Task>> et_0s;
+
+    // if there are any et tasks with separation 0
+    if (separation_map.contains(0)) {
+        // set contains n elements where n is the number of different separation types 
+        et_0s = distribute_et_zeros(separation_set.size()-1);
+    }
+
+    for(auto it : separation_map) { 
+        if (it.first != 0) {
+            period_index = uni_dist_periods(rng);  
+            period = periods.at(period_index);
+            
+            deadline = period;
+            
+            duration = uni_dist_duration(rng); // another rng for this 
+            duration = std::min(duration, deadline); 
+            std::vector<Task> *et_subset = new std::vector<Task>; 
+            *et_subset = *it.second; 
+            Task polling_server =  Task(name, duration, period, TT, 7, deadline, period_index, et_subset);
+
+            if(et_0s.size() != 0) {
+                polling_server.et_subset->insert(polling_server.et_subset->end(), et_0s.at(et_0s_index).begin(), et_0s.at(et_0s_index).end());
+                et_0s_index = et_0s_index + 1;
+            }
+
+            polling_servers.push_back(polling_server);
+        }
     }
 
     return (solution) {.polling_servers = polling_servers, .tt_tasks = &this->tt_tasks, .cost = 0.0};
@@ -247,7 +292,7 @@ void SolutionGenerator::fix_separation(solution* sol) {
        // https://stackoverflow.com/questions/4713131/removing-item-from-vector-while-iterating
        std::vector<Task>::iterator et_it = sol->polling_servers[i].et_subset->begin(); 
 
-       while (et_it != sol->polling_servers[i].et_subset->end()) {
+       /*while (et_it != sol->polling_servers[i].et_subset->end()) {
 
             // increment iterator when we do not erase anything  
             if (et_name_set.contains(et_it->name)) {
@@ -270,7 +315,7 @@ void SolutionGenerator::fix_separation(solution* sol) {
                     }
                 } 
             }
-       }   
+       }*/  
     }
 }
 
