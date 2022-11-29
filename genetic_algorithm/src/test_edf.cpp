@@ -33,11 +33,11 @@ int main() {
     }
 
     assert(equals);
-    double cost = cost_function(task_set);
+    std::tuple<double,bool> cost = cost_function(task_set);
 
-    std::cout << cost << std::endl;
+    std::cout << std::get<0>(cost) << std::endl;
 
-    assert(cost == 4.0);
+    assert(std::get<0>(cost) == 4.0);
 
     delete(task_set);  
     tt0 = Task("tTT0", 2, 3, TT, 7, 3, 0); 
@@ -52,9 +52,9 @@ int main() {
     assert(!is_schedulable); 
     std::cout << is_schedulable << std::endl; 
     cost = cost_function(task_set);
-    double expected_cost = (3 + 100 + 4 + 100) / 2.0;
-    assert(cost == expected_cost);
-    std::cout << cost << " " << expected_cost << std::endl;
+    double expected_cost = (2*3+2*4) / 2.0;
+    assert(std::get<0>(cost) == expected_cost);
+    std::cout << std::get<0>(cost) << " " << expected_cost << std::endl;
     std::cout << "all good passed tests" << std::endl;
     
 }

@@ -46,7 +46,7 @@ int main() {
 
     bool is_schedulable = std::get<0>(thing);
     //assert(!is_schedulable);
-    std::tuple<double, bool> cost = cost_function1(&task_set_TT);
+    std::tuple<double, bool> cost = cost_function(&task_set_TT);
     
     is_schedulable = std::get<1>(cost); 
     std::cout << is_schedulable << std::endl; 
