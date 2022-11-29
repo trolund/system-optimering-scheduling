@@ -41,12 +41,17 @@ class SimulatedAnnealer:
         # used for checking stop criterion
         sec0 = int(time.time())
 
+        # used to measure time spent evaluating costs
+        cost_time = 0
+
         # get tt and et tasks
         tt = [t for t in s0 if t.type == TaskType.TIME and t.et_subset == None] 
         polling_servers = [t for t in s0 if t.et_subset != None]
         # current and best solution
         current_solution = tt + polling_servers
+        start_time = time.time()
         schedule, current_cost, is_schedulable = cost_f(current_solution)
+        cost_time = cost_time + (time.time() - start_time)
         self.best_solution = copy.deepcopy(current_solution)
         best_cost = current_cost
         self.best_cost = current_cost
@@ -65,9 +70,11 @@ class SimulatedAnnealer:
             #self.anneal(polling_servers, tt, t, a, self.n_solutions, current_cost, log_costs, best_cost)
             tmp_ps = self.get_neighbor(copy.deepcopy(polling_servers)) # obtain ps configuration from neighborhood
             tmp_solution = tt + tmp_ps # complete task set
-            
+
+            start_time = time.time()
             tmp_schedule, tmp_cost, is_schedulable = cost_f(tmp_solution) # apply objective function
-            
+            cost_time = cost_time + (time.time() - start_time)
+
              # just for debugging
             pss = [t for t in tmp_solution if t.et_subset != None]
              #print(len(pss))
@@ -111,6 +118,8 @@ class SimulatedAnnealer:
             t = t * a
  
         self.print_message(stopcriterion_sec)
+
+        return cost_time
 
     def anneal(self, polling_servers, tt, t, a, n_solutions, current_cost, log_costs, best_cost):
         tmp_ps = self.get_neighbor(copy.deepcopy(polling_servers))  # obtain ps configuration from neighborhood

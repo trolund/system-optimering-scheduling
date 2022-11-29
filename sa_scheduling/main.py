@@ -7,6 +7,7 @@ from shared.neighborhood import Neighborhood
 from shared.cost_functions import *
 import matplotlib.pyplot as plt 
 import numpy as np
+import time as time
 
 def usage(argv):
     print("python3.9 ", argv[0], " [-l/--log <filename>] <inf_X_Y N> <temperature0> <alpha> <stopcriterion_sec>", )
@@ -57,12 +58,17 @@ if __name__ == "__main__":
         alpha = float(sys.argv[4])
         stopcriterion_sec = float(sys.argv[5])
 
+    starttime = time.time()
+
     neighborhood = Neighborhood() 
     # instantiate simulated annealer
     simulated_annealer = SimulatedAnnealer(neighborhood)
 
     loader = CaseLoader()
-    all_tasks = loader.load_test_case(test_case[0], test_case[1]) 
+    print("test_case is", test_case)
+    print("sys.argv are", sys.argv)
+    print("filename is", filename)
+    all_tasks = loader.load_test_case(test_case[0], test_case[1])
     tt_tasks = [t for t in all_tasks if t.type == TaskType.TIME]
     et_tasks = [t for t in all_tasks if t.type == TaskType.EVENT]
 
@@ -82,10 +88,15 @@ if __name__ == "__main__":
     #polling_servers_0 = neighborhood.create_n_random_ps(random.randint(1,4), et_tasks)
     task_set = tt_tasks + polling_servers_0
 
-    simulated_annealer.sa(task_set, temperature, alpha, stopcriterion_sec, cost_f=cost_f, log_costs=True)
+    cost_time = simulated_annealer.sa(task_set, temperature, alpha, stopcriterion_sec, cost_f=cost_f, log_costs=True)
+
+    endtime = time.time()
+    total_time = endtime - starttime
 
     print_best_ps_config(simulated_annealer.get_best_ps_config(), simulated_annealer.get_best_cost())
     print("same as: ", cost_f(tt_tasks + simulated_annealer.get_best_ps_config())[1])
+    print("algorithm spent", cost_time/total_time, "% of time in cost_f()")
+    print("algorithm spent", cost_time, "seconds in cost_f and", total_time, "seconds in total")
     if is_logging:
         generate_plot(simulated_annealer.get_cost_log(), simulated_annealer.get_best_cost(), filename, test_case)
 
