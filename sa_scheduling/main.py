@@ -8,6 +8,7 @@ from shared.cost_functions import *
 import matplotlib.pyplot as plt 
 import numpy as np
 import time as time
+from visualization.scheduling_visualizer import SchedulingVisualizer
 
 def usage(argv):
     print("python3.9 ", argv[0], " [-l/--log <filename>] <inf_X_Y N> <temperature0> <alpha> <stopcriterion_sec>", )
@@ -67,7 +68,8 @@ if __name__ == "__main__":
     loader = CaseLoader()
     print("test_case is", test_case)
     print("sys.argv are", sys.argv)
-    print("filename is", filename)
+    #print(test_case[0], test_case[1], type(test_case[0]), type(test_case[1]))
+    #print("filename is", filename)
     all_tasks = loader.load_test_case(test_case[0], test_case[1])
     tt_tasks = [t for t in all_tasks if t.type == TaskType.TIME]
     et_tasks = [t for t in all_tasks if t.type == TaskType.EVENT]
@@ -94,10 +96,17 @@ if __name__ == "__main__":
     total_time = endtime - starttime
 
     print_best_ps_config(simulated_annealer.get_best_ps_config(), simulated_annealer.get_best_cost())
-    print("same as: ", cost_f(tt_tasks + simulated_annealer.get_best_ps_config())[1])
+    s, cost, is_sched = cost_f(tt_tasks + simulated_annealer.get_best_ps_config())
+
+    #print("same as: ", cost_f(tt_tasks + simulated_annealer.get_best_ps_config())[1])
     print("algorithm spent", cost_time/total_time, "% of time in cost_f()")
     print("algorithm spent", cost_time, "seconds in cost_f and", total_time, "seconds in total")
     if is_logging:
         generate_plot(simulated_annealer.get_cost_log(), simulated_annealer.get_best_cost(), filename, test_case)
+
+    sched_vis = SchedulingVisualizer()
+
+    sched_vis.draw_plot(s, test_case[0] + str(test_case[1]), 20)
+    #task_set = tt_tasks + simulated_annealer.
 
     

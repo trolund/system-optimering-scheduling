@@ -5,8 +5,12 @@ from sortedcontainers import SortedSet
 
 
 def sortBy(s):
-  num = int(s.replace('tTT', ''))
-  return num
+    if "ps" in s:
+        num = int(s.replace('tTTps', '')) + 100
+    else:
+        num = int(s.replace('tTT', ''))
+
+    return num
 
 def get_bounds(solution):
     curr_task = "IDLE"
@@ -47,8 +51,8 @@ class SchedulingVisualizer:
         servers = SortedSet([c for c in sol if c.__contains__("TT")], key=sortBy)
         data, max_end = get_bounds(sol)
 
-        print(sol)
-        print(data)
+        #print(sol)
+        #print(data)
 
         #print(len(servers), data, max_end)
 
@@ -56,7 +60,7 @@ class SchedulingVisualizer:
         fig, gnt = plt.subplots()
 
         # Setting Y-axis limits
-        gnt.set_ylim(0, len(servers))
+        gnt.set_ylim(0, len(servers)+1)
 
         # Setting X-axis limits
         gnt.set_xlim(max_end, 0) # gnt.set_xlim(max_end, 0)
@@ -71,7 +75,7 @@ class SchedulingVisualizer:
             dic = {}
 
             for idx, x in enumerate(s):
-                placement = idx * height_of_jobs
+                placement = idx * height_of_jobs + height_of_jobs
                 list.append(placement)
                 dic[x] = placement
 
@@ -86,8 +90,13 @@ class SchedulingVisualizer:
         # Setting graph attribute
         gnt.grid(grid)
 
+        print("length of servers: ", len(servers))
+
         # iterate servers
+        #i = 1
         for sol in servers:
+            #print(i)
+            #i = i + 1
             exeutions = [c for c in data if c[0] == sol]
             to_print = []
             for e in exeutions:
@@ -95,8 +104,9 @@ class SchedulingVisualizer:
                 to_print.append(job_dif)
 
             y_pos = dic[sol]
+            
 
-            gnt.broken_barh(to_print, (y_pos, height_of_jobs), facecolors=(random.uniform(0, 1), random.uniform(0, 1), 0.5))
+            gnt.broken_barh(to_print, (y_pos-height_of_jobs, height_of_jobs), facecolors=(random.uniform(0, 1), random.uniform(0, 1), 0.5))
 
         # Declaring a bar in schedule
         # gnt.broken_barh([(80, 1500)], (dic["tTT26"] - 20, height_of_jobs), facecolors =('tab:orange'))
@@ -108,4 +118,4 @@ class SchedulingVisualizer:
         # gnt.broken_barh([(10, 50), (100, 20), (130, 10)], (20, 9),
         #                                  facecolors =('tab:red'))
 
-        plt.savefig(f"{name}.png")
+        plt.savefig(f"{name}.png", dpi=300)

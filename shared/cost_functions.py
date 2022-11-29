@@ -189,5 +189,5 @@ def cost_f(task_set):
 
     print("cost et: ", wcrts_et, " cost tt: ", sum_wcrts_tt) 
     sum_wcrts = (sum_wcrts_tt + wcrts_et)
- 
+    # rename sum variable :D 
     return s, sum_wcrts, is_schedulable
