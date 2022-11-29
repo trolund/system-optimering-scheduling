@@ -1,0 +1,38 @@
+Processor demand, return if not met? ok? but then also they keep saying run until hyperperiod no matter what to
+get actual wcrts. right now we do both - until hyper in sa, leave and penalize in sga (all unschedulable do not 
+get same cost anyway so still u can have an unschedulable that might be 'closer' to being schedulable indicated in cost).
+
+fitness of a solution is correlated with the distance to the optimal solution. this must be the case since 
+the course is about metaheuristics. but we do not prove okay to assume? 
+
+extension 3:
+how to determine actual server supply function AS (t) from the schedule table.
+	delta is greates distance between two isntances of polling server being checked 
+
+Extension 2: just make up some priorities and try and see if this makes wcrts smaller??
+	priorities new dimension. neighborhood etc etc. 
+
+using only periods that make hyperperiod <= 12000 ok?
+
+"You need to search for the “best” server budget. However, in the first versions of your
+solution, you can use a Hill Climbing approach based on a “binary search”, i.e., searching
+from 1 until the current server period and use the value that optimizes the cost function
+as the server budget." ???
+
+
+"If you use Simulated Annealing or similar local search algorithms, e.g., Tabu Search, you
+may need to combine the TT and ET worst-case response times into a “weighted sum” [6].
+In this case, you may need to normalize the terms of the weighted sum, and also consider
+these normalization in relation to the penalty values, see earlier point."
+	We do avg tt + *avg et. Also weighted sum 
+	sum(tt)+sum(et)/(len(tt)+len(et))
+
+"In your first versions of the solution, consider the number of polling servers as a parameter.
+Start with one polling server and then increase manually the number of polling servers,
+e.g., 2, 3." first versions????
+
+
+DET ÆLDGAMLE SPØRGSMÅL!!!
+
+
+nogen testcases vi VED ikke har en løsning?

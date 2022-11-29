@@ -67,6 +67,7 @@ std::tuple<double, bool>  cost_function1(std::vector<Task> *task_set) {
     double cost_tt = 0.0, cost_et = 0.0, cost = 0.0, wcrts_et_sum = 0.0, wcrts_tt_sum = 0.0;
     bool is_schedulable; // iteration
     bool is_schedulable_et=true, is_schedulable_tt;
+    int num_et_tasks = 0;
 
     for (auto it : *task_set) { 
         if (it.et_subset != NULL) { polling_servers.push_back(it); };        
@@ -82,15 +83,16 @@ std::tuple<double, bool>  cost_function1(std::vector<Task> *task_set) {
         
         // if polling server is schedulable sum wcrts if not sum deadline + a penalty for each
         for (auto et_task : *it.et_subset) {
+            num_et_tasks = num_et_tasks + 1;
             if (is_schedulable) { wcrts_et_sum += wcrts_et[et_task.name]; }
-            else { wcrts_et_sum += et_task.deadline + 100; }
+            else { wcrts_et_sum += 2*et_task.deadline; }
         }
 
-        cost_et += wcrts_et_sum / it.et_subset->size();
+        cost_et += wcrts_et_sum; /// it.et_subset->size();
     }
 
     // do not divide by zero
-    cost_et = polling_servers.size() > 0 ? cost_et / polling_servers.size() : 0; 
+    //cost_et = polling_servers.size() > 0 ? cost_et / polling_servers.size() : 0; 
         
     is_schedulable_cost_tt = edf(task_set);
     is_schedulable_tt = std::get<0>(is_schedulable_cost_tt);
@@ -99,12 +101,13 @@ std::tuple<double, bool>  cost_function1(std::vector<Task> *task_set) {
     // same approach as for ets in a ps. wcrt or deadline + penalty
     for(auto it : *task_set) {
         if(is_schedulable_tt) { wcrts_tt_sum += wcrts_tt[it.name]; }
-        else {wcrts_tt_sum += it.deadline + 100; }
+        else {wcrts_tt_sum += 2*it.deadline; }
     }
 
-    cost_tt = wcrts_tt_sum / task_set->size();
+    cost_tt = wcrts_tt_sum;// / task_set->size();
      
-    cost = cost_tt + cost_et;
+    // (sum wcrt tt + sum wcrt et) 
+    cost = (cost_tt + cost_et) / (task_set->size() + num_et_tasks);
     //std::cout << "cost function cost is: " << cost << " et: " << cost_et << " tt: " << cost_tt << std::endl;
     return std::tuple<double, bool>(cost, is_schedulable_et && is_schedulable_tt); 
 }
