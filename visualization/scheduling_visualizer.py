@@ -1,5 +1,6 @@
 import random
 
+import matplotlib
 import matplotlib.pyplot as plt
 from sortedcontainers import SortedSet
 
@@ -117,5 +118,60 @@ class SchedulingVisualizer:
 
         # gnt.broken_barh([(10, 50), (100, 20), (130, 10)], (20, 9),
         #                                  facecolors =('tab:red'))
+
+        plt.savefig(f"{name}.png", dpi=300)
+
+    def draw_plot_compress(self, sol, name="plot", grid: bool = False, height_of_jobs: int = 70):
+        servers = SortedSet([c for c in sol if c.__contains__("TT")], key=sortBy)
+        data, max_end = get_bounds(sol)
+
+        # Declaring a figure "gnt"
+        fig, gnt = plt.subplots()
+
+        fig.set_figheight(4)
+        fig.set_figwidth(10)
+
+        # Setting Y-axis limits
+        gnt.set_ylim(0, 1)
+
+        # Setting X-axis limits
+        gnt.set_xlim(max_end, 0)  # gnt.set_xlim(max_end, 0)
+
+        # Setting labels for x-axis and y-axis
+        gnt.set_xlabel('Ticks since start')
+        gnt.set_ylabel('Polling servers')
+
+        # Setting ticks on y-axis
+        def y_ticks(s):
+            list = []
+            dic = {}
+
+            for idx, x in enumerate(s):
+                placement = idx * height_of_jobs + height_of_jobs
+                list.append(placement)
+                dic[x] = placement
+
+            return list, dic
+
+        y, dic = y_ticks(servers)
+
+        gnt.set_yticks([height_of_jobs])
+        # Labelling tickes of y-axis
+        z = gnt.set_yticklabels([])
+
+        # Setting graph attribute
+        gnt.grid(grid)
+
+        for sol in servers:
+            exeutions = [c for c in data if c[0] == sol]
+            to_print = []
+            for e in exeutions:
+                job_dif = (e[1][0], e[2])
+                to_print.append(job_dif)
+
+            y_pos = dic[sol]
+
+            gnt.broken_barh(to_print, (20 - height_of_jobs, height_of_jobs),
+                            facecolors=(random.uniform(0, 1), random.uniform(0, 1), 0.5))
 
         plt.savefig(f"{name}.png", dpi=300)

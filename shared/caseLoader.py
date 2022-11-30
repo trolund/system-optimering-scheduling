@@ -7,8 +7,8 @@ class CaseLoader:
 
     def get_filename_id(self, filename):
         # lots of assumptions about filename, fx always have this __.__ format
-        
-        filename_id = re.findall("__(.)__", filename)[-1]# assuming that the character (.) is in [0,2,3,4,5,6,7,8,9] and last occurence of pattern is what we use
+        filename_id = filename.split("_")[13]
+        # filename_id = re.findall("__(.)__", filename)[-1]# assuming that the character (.) is in [0,2,3,4,5,6,7,8,9] and last occurence of pattern is what we use
      
         return filename_id
 
