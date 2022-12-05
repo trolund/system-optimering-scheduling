@@ -105,8 +105,10 @@ solution SolutionGenerator::generate_solution() {
             polling_servers.push_back(polling_server);
         }
     }
-
-    return (solution) {.polling_servers = polling_servers, .tt_tasks = &this->tt_tasks, .cost = 0.0};
+    solution sol = (solution) {.polling_servers = polling_servers, .tt_tasks = &this->tt_tasks, .cost = 0.0};
+    fix_solution(&sol); // just making sure
+    //return (solution) {.polling_servers = polling_servers, .tt_tasks = &this->tt_tasks, .cost = 0.0};
+    return sol;
 }
 
 // generate a population of size sz
@@ -283,24 +285,22 @@ solution SolutionGenerator::get_min_cost(std::vector<solution> *solutions) {
 /* two things can go wrong: duplicate et tasks or misplaced et tasks
  * create set. if some et name already in set -> remove that et from its ps else insert to set
  * create map int -> Task*. if some sep doesnt point to right Task move it
+ * also a thing that can go wrong: some ets missing. does not fix this if it happens...
  */
 void SolutionGenerator::fix_separation(solution* sol) {
-    std::map<int, Task*> separation_task_map;
-    std::set<std::string> et_name_set;
-     
+    std::map<int, Task*> separation_task_map; 
+    std::set<std::string> et_name_set; 
+
     for(int i=0; i < sol->polling_servers.size(); i=i+1) {   
        // https://stackoverflow.com/questions/4713131/removing-item-from-vector-while-iterating
        std::vector<Task>::iterator et_it = sol->polling_servers[i].et_subset->begin(); 
-
-       /*while (et_it != sol->polling_servers[i].et_subset->end()) {
-
-            // increment iterator when we do not erase anything  
+       
+       while (et_it != sol->polling_servers[i].et_subset->end()) {  
             if (et_name_set.contains(et_it->name)) {
                 sol->polling_servers[i].et_subset->erase(et_it); // do not increment
-                std::cout << "OGOSJDAS BA!! SET" << std::endl;
+                std::cout << "Oh no!" << std::endl;
             } else {
                 et_name_set.insert(et_it->name);
-
                 // either sep not in map, it is in map and points to "wrong" ps or it is in map and points to "right" ps
                 if (et_it->separation != 0) {
                     if( !separation_task_map.contains(et_it->separation) ) {
@@ -309,13 +309,20 @@ void SolutionGenerator::fix_separation(solution* sol) {
                     } else if (separation_task_map[et_it->separation] != &sol->polling_servers[i]) {
                         separation_task_map[et_it->separation]->et_subset->push_back(*et_it); // insert to right one and remove from wrong
                         sol->polling_servers[i].et_subset->erase(et_it); // also do not increment
-                        std::cout << "jsaldjasldjal map" << std::endl;
+                        std::cout << "oh no map!" << std::endl; 
                     } else {
                         et_it = et_it + 1;
                     }
+                } else {
+                    et_it = et_it + 1;
                 } 
             }
-       }*/  
+       }  
+    }
+
+    // TODO find missing and insert
+    if (et_name_set.size() != et_tasks.size()) {
+        std::cout << "epic fail " << std::endl;
     }
 }
 

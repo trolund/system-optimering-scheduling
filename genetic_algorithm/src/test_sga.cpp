@@ -33,7 +33,7 @@ int main() {
     SolutionGenerator solution_generator(&task_set_all, 128); 
     SimpleGeneticAlgorithm sga(&solution_generator, 0.9, 0.05);
     
-    sga.perform_sga(2048, 40, cost_function);
+    sga.perform_sga(2048, 10, cost_function);
     solution best_solution = sga.get_best_solution();
 
     std::cout << std::endl << "best cost is: " << best_solution.cost << " is schedulable: " << best_solution.is_schedulable << std::endl;
