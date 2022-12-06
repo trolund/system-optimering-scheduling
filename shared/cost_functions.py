@@ -102,7 +102,7 @@ def unpack(task):
     return (task.priority, task.duration, task.period, task.deadline)
 
 #Schedulability of ET tasks under a given polling task
-def calculate_schedulabiltiy(polling_server):
+def calculate_schedulability(polling_server):
     et_tasks = polling_server.et_subset
     Tp = polling_server.period
     Dp = polling_server.deadline
@@ -128,42 +128,45 @@ def calculate_schedulabiltiy(polling_server):
         #initialize the response time of ti (task period) to a value exceeding the deadline
         response_time = Di + 1
 
+        supply = alpha*(t-Delta)
         #remember we are dealing with constrained deadline tasks for the AdvPoll, hence, in the worst case arrival pattern, the intersection must lie within the hyperperiod if the task is schedulable
-
         while t <= hyperperiod:
             #the supply at time t ([1])
-            supply = alpha*(t-Delta)
             #EXT3:
             #supply = t-Delta
-
+            #as alpha and delta remain unchanged, this might save a few ms
+            # supply = alpha * (t - Delta)
+            supply += alpha
             #compute the maximum demand at time t according to Eq. 2
             demand = 0
             for tj in et_tasks:
-                (pj, Cj, Tj, Dj) = unpack(tj)
+                # (pj, Cj, Tj, Dj) = unpack(tj)
 
-                if pj >= pi:
-                    demand = demand + math.ceil(t/Tj)*Cj
-            
+                if tj.priority >= pi:
+                    #if demand is always 0, this is unnecessary
+                    # demand = demand + math.ceil(t/Tj)*Cj
+                    demand = math.ceil(t/tj.period)*tj.duration
+
             #According to lemma 1 of [1], we are searching for the earliest time, when the supply exceeds the demand
             if supply >= demand:
                 response_time = t
                 result_dict[et_task.name] = (response_time, et_task.deadline) # if actually greater than deadline, set to false later
                 break
-            
+
             t = t + 1
-        
-        if response_time > Di: 
+
+        if response_time > Di:
             is_schedulable = False # TODO maybe just return here ... and penalize with 1 
             result_dict[et_task.name] = (response_time, et_task.deadline)
-            return is_schedulable, result_dict 
-        
+            return is_schedulable, result_dict
+
     return is_schedulable, result_dict # contains wcrtbool indicating schedulability and deadline for each et
 
 # sum of average worst case response time for tt tasks and et tasks. penality for not schedulable
 # also returns the schedule and boolean indicating schedulability 
 def cost_f(task_set):
     polling_servers = [ps for ps in task_set if ps.et_subset != None] # get set of polling servers from task set
-    l = [calculate_schedulabiltiy(ps) for ps in polling_servers] # check schedulability for each polling server
+    l = [calculate_schedulability(ps) for ps in polling_servers] # check schedulability for each polling server
     
     wcrts_et = 0 # use worst case response time for cost metric
     is_schedulable = True # if some ps is not schedulable at some penalty to cost 
@@ -176,21 +179,26 @@ def cost_f(task_set):
         wcrts_et += sum([wcrts[key][0] for key in wcrts]) / len(wcrts)
         
         if not is_schedulable:
-            wcrts_et = wcrts_et + 0.2*wcrts_et # add penalty
+            wcrts_et += 0.2*wcrts_et # add penalty
          
-    # do not divide by zero. 
-    if l != []:
-        wcrts_et *= 1/len(l) 
+    # do not divide by zero.
+    # changing how cost is calculated, dividing by number of tasks at the end
+    # if l != []:
+    #     wcrts_et *= 1/len(l)
      
     # apply earliest deadline first 
     s, wcrts, is_schedulable = edf(task_set) 
     
     # handle case where some task isn't even run also by check if in dict
-    sum_wcrts_tt = sum([wcrts[task.name] if task.name in wcrts else task.deadline + 100 for task in task_set ]) / len(task_set)
+    # changing how cost is calculated, dividing by number of tasks at the end
+    # sum_wcrts_tt = sum([wcrts[task.name] if task.name in wcrts else task.deadline + 100 for task in task_set ]) / len(task_set)
+    sum_wcrts_tt = sum([wcrts[task.name] if task.name in wcrts else task.deadline + 100 for task in task_set ])
     if not is_schedulable: # penalize. do this to avoid ending up in a "false" minimum
-        sum_wcrts_tt = sum_wcrts_tt + 0.2*sum_wcrts_tt 
+        sum_wcrts_tt += 0.2*sum_wcrts_tt
 
     #print("cost et: ", wcrts_et, " cost tt: ", sum_wcrts_tt) 
-    sum_avg_wcrts = (sum_wcrts_tt + wcrts_et)
+    # sum_avg_wcrts = (sum_wcrts_tt + wcrts_et)
+    # changing how cost is calculated, dividing by number of tasks at the end
+    sum_avg_wcrts = (sum_wcrts_tt + wcrts_et) / (len(l) + len(task_set))
  
     return s, sum_avg_wcrts, is_schedulable
