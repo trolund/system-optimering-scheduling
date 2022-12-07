@@ -9,6 +9,7 @@
 #include <list>
 #include <tuple>
 #include <climits>
+#include <algorithm>
 
 #include "task.h"
 

@@ -45,10 +45,10 @@ void SimpleGeneticAlgorithm::perform_sga(int population_sz, int num_generations,
         }
         //std::cout << "solution " << i << " cost: " << population[i].cost << " is schedulable: " << population[i].is_schedulable << std::endl;
     }
-
+    avg_costs.push_back(avg_cost_population(population));
     // handle case where no solution is schedulable
     best_solution = get_min_cost(&population); // we could find in loop above but... one time cost below we have to do it separately...  
-    std::cout << "best cost is: " << best_solution.cost << std::endl;
+    //std::cout << "best cost is: " << best_solution.cost << std::endl;
     
     // main loop 
     for(int gen = 0; gen <  num_generations; gen = gen + 1) {
@@ -68,7 +68,7 @@ void SimpleGeneticAlgorithm::perform_sga(int population_sz, int num_generations,
 
             new_population.insert(new_population.end(), offspring.begin(), offspring.end()); 
         }
-        std::cout << "size of new population: " << new_population.size() << std::endl; 
+        //std::cout << "size of new population: " << new_population.size() << std::endl; 
         
         population = new_population;
         
@@ -77,23 +77,50 @@ void SimpleGeneticAlgorithm::perform_sga(int population_sz, int num_generations,
         for(int i = 0; i < population_sz; i = i + 1) {
             apply_cost_function1(&population[i], cost_f);
             //std::cout << "solution " << i << " cost: " << population[i].cost << " is schedulable: " << population[i].is_schedulable << std::endl;
-            if (population[i].is_schedulable) {
-                std::cout << "solution " << i << " cost: " << population[i].cost << " is schedulable: " << population[i].is_schedulable << std::endl;
-            } 
+            //if (population[i].is_schedulable) {
+            //    std::cout << "solution " << i << " cost: " << population[i].cost << " is schedulable: " << population[i].is_schedulable << std::endl;
+            //} 
         }
 
         candidate_best = get_min_cost(&population);
+        avg_costs.push_back(avg_cost_population(population));
         /*if (candidate_best.cost < best_solution.cost && candidate_best.is_schedulable) {
             best_solution = candidate_best;
             std::cout << "yo" << std::endl;
         }*/
-        best_solution = ((candidate_best.cost < best_solution.cost && candidate_best.is_schedulable) || (candidate_best.is_schedulable && !best_solution.is_schedulable)) ? candidate_best : best_solution;
-
-        std::cout << "generation is: " << gen << " best solution cost is: "  << best_solution.cost << std::endl;
+        //best_solution = ((candidate_best.cost < best_solution.cost && candidate_best.is_schedulable) || (candidate_best.is_schedulable && !best_solution.is_schedulable)) ? candidate_best : best_solution;
+        if ((candidate_best.cost < best_solution.cost && candidate_best.is_schedulable) || (candidate_best.is_schedulable && !best_solution.is_schedulable)) {
+            best_solution = candidate_best;
+            gen_best_solution = gen + 1; // okay +1 bc initial and 
+        }
+        //std::cout << "generation is: " << gen << " best solution cost is: "  << best_solution.cost << std::endl;
 
     }
 
     uint64_t sec_end = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-    std::cout << "ran for: " << sec_end - sec0 << " seconds" << std::endl;
+    //std::cout << "ran for: " << sec_end - sec0 << " seconds" << std::endl;
+    print_run_summary(sec_end - sec0);
 }
 
+double SimpleGeneticAlgorithm::avg_cost_population(std::vector<solution> population) {
+    double num = 0, den;
+
+    den = double(population.size());
+
+    for(int i = 0; i < population.size(); i = i + 1) {
+        num = num + population[i].cost;
+    }
+
+    return num/den;
+}
+
+void SimpleGeneticAlgorithm::print_run_summary(double sec) {
+    std::string output;
+    output = test_case + "," + std::to_string(sec) + "," + std::to_string(best_solution.cost) + "," + std::to_string(gen_best_solution);
+    for (auto avg : avg_costs) {
+        output = output + "," + std::to_string(avg);
+
+    }
+
+    std::cout << output + "\n"; 
+}
