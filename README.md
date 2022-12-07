@@ -36,7 +36,7 @@ Genetics Algorithm:
 
 Simulated Annealing:
     Prerequsites:
-        python
+        python version 3.9
         pip
         Install necessary libraries
             pip install -r requirements.txt
@@ -45,6 +45,15 @@ Simulated Annealing:
     Build and run the code
         go into the folder "sa_scheduling"
         python main.py [options]
+            e.g python main.py testcases_seperation_tested 1 2000 0.99 5 or python3.9 main.py testcases_seperation_tested 1 2000 0.99 5
+
+
+On Linux:
+    Genetics:
+        XXX
+
+    Simulated Annealing:
+        Same procedure as on Windows
 
 
 Other notes:
