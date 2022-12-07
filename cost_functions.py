@@ -1,7 +1,6 @@
 import math
-import copy 
-from functools import reduce
-from shared.models.task import Task
+import copy
+from task import Task
 
 # not used anymore 
 def get_ready(task_set, cycle, ready_list):
@@ -167,7 +166,7 @@ def calculate_schedulability(polling_server):
 def cost_f(task_set):
     polling_servers = [ps for ps in task_set if ps.et_subset != None] # get set of polling servers from task set
     l = [calculate_schedulability(ps) for ps in polling_servers] # check schedulability for each polling server
-    
+    num_tasks = sum([len(ps.et_subset) for ps in polling_servers]) + len(task_set)
     wcrts_et = 0 # use worst case response time for cost metric
     is_schedulable = True # if some ps is not schedulable at some penalty to cost 
     
@@ -175,11 +174,11 @@ def cost_f(task_set):
     # si costs for et is: (sum(wcrt_i/deadline_i) / len(et_subset)) /len(polling_servers)
     for element in l: 
         is_schedulable, wcrts = element
-        
-        wcrts_et += sum([wcrts[key][0] for key in wcrts]) / len(wcrts)
-        
-        if not is_schedulable:
-            wcrts_et += 0.2*wcrts_et # add penalty
+
+        if is_schedulable:
+            wcrts_et += sum([wcrts[key][0] for key in wcrts])
+        else:
+            wcrts_et += 2 * sum([wcrts[key][1] for key in wcrts]) # add penalty
          
     # do not divide by zero.
     # changing how cost is calculated, dividing by number of tasks at the end
@@ -192,13 +191,13 @@ def cost_f(task_set):
     # handle case where some task isn't even run also by check if in dict
     # changing how cost is calculated, dividing by number of tasks at the end
     # sum_wcrts_tt = sum([wcrts[task.name] if task.name in wcrts else task.deadline + 100 for task in task_set ]) / len(task_set)
-    sum_wcrts_tt = sum([wcrts[task.name] if task.name in wcrts else task.deadline + 100 for task in task_set ])
-    if not is_schedulable: # penalize. do this to avoid ending up in a "false" minimum
-        sum_wcrts_tt += 0.2*sum_wcrts_tt
+    sum_wcrts_tt = sum([wcrts[task.name] if task.name in wcrts else 2*task.deadline for task in task_set ])
+    #if not is_schedulable: # penalize. do this to avoid ending up in a "false" minimum
+        # sum_wcrts_tt += 0.2*sum_wcrts_tt
 
     #print("cost et: ", wcrts_et, " cost tt: ", sum_wcrts_tt) 
     # sum_avg_wcrts = (sum_wcrts_tt + wcrts_et)
     # changing how cost is calculated, dividing by number of tasks at the end
-    sum_avg_wcrts = (sum_wcrts_tt + wcrts_et) / (len(l) + len(task_set))
+    sum_avg_wcrts = (sum_wcrts_tt + wcrts_et) / num_tasks
  
     return s, sum_avg_wcrts, is_schedulable

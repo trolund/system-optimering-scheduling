@@ -1,4 +1,4 @@
-from shared.models.taskType import TaskType
+from taskType import TaskType
 
 
 class Task:

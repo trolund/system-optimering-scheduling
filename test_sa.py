@@ -1,6 +1,6 @@
 import unittest
 
-from sa_scheduling import simulated_annealer
+import simulated_annealer
 
 
 def sumSomething(a,b):

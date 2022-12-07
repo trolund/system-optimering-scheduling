@@ -1,6 +1,6 @@
-from shared.caseLoader import CaseLoader
-from shared.cost_functions import edf
-from shared.models.taskType import TaskType
+from caseLoader import CaseLoader
+from cost_functions import edf
+from taskType import TaskType
 from visualization.scheduling_visualizer import SchedulingVisualizer
 
 

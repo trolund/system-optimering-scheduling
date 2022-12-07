@@ -1,11 +1,8 @@
-import sys
-sys.path.insert(1, "../")
-from shared.models.task import Task
-from shared.models.taskType import TaskType
-from shared.cost_functions import *
-from shared.caseLoader import CaseLoader
-from shared.neighborhood import Neighborhood
-from shared.cost_functions import *
+# import sys
+# sys.path.insert(1, "/")
+from taskType import TaskType
+from caseLoader import CaseLoader
+from neighborhood import Neighborhood
 import unittest
 
 # ONLY works when running in terminal for some weird reason 

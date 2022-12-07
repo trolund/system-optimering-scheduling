@@ -2,10 +2,10 @@ import copy
 
 from numpy.random import randint, rand
 
-from shared.caseLoader import CaseLoader
-from shared.cost_functions import cost_f
-from shared.models.taskType import TaskType
-from shared.neighborhood import Neighborhood
+from caseLoader import CaseLoader
+from cost_functions import cost_f
+from taskType import TaskType
+from neighborhood import Neighborhood
 
 max_number_of_polling_servers = 10
 

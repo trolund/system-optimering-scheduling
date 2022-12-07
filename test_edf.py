@@ -1,6 +1,5 @@
-from shared.models.task import Task
-from shared.models.taskType import TaskType
-from shared.cost_functions import *
+from taskType import TaskType
+from cost_functions import *
 import unittest
 
 # 2 feasible 2 infeasible for each. test the last case where ready list not empty??
