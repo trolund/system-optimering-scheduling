@@ -27,7 +27,8 @@ int main() {
             task_set_ET.push_back(task);
         }
     }
-    SolutionGenerator sg(&task_set_all, 3);
+    SolutionGenerator sg(&task_set_all);
+    sg.set_population_sz(3);
 
     /*solution s = sg.generate_solution();
 

@@ -4,15 +4,21 @@
 
 using namespace std;
 
-int main() {
-    
-    std::string test_case = "taskset__1643188157-a_0.2-b_0.2-n_30-m_20-d_unif-p_2000-q_4000-g_1000-t_5__20__tsk.csv";
+int main(int argc, char* argv[]) {
+    if(argc != 2) {
+        std::cout << "./test_sga <test case>" << std::endl;
+        std::cout << "Example: ./test_sga ../testcases_seperation_tested/taskset__1643188157-a_0.2-b_0.2-n_30-m_20-d_unif-p_2000-q_4000-g_1000-t_5__20__tsk.csv" << std::endl;
+        exit(0);
+    }
+
+    //std::string test_case = "taskset__1643188157-a_0.2-b_0.2-n_30-m_20-d_unif-p_2000-q_4000-g_1000-t_5__20__tsk.csv";
     //CSVReader csvReader = CSVReader("../testcases_seperation_tested/taskset_small.csv");
     //CSVReader csvReader = CSVReader("../testcases_seperation_tested/taskset__1643188539-a_0.6-b_0.1-n_30-m_20-d_unif-p_2000-q_4000-g_1000-t_5__0__tsk.csv");
     //CSVReader csvReader = CSVReader("../testcases_seperation_tested/taskset__1643188013-a_0.1-b_0.1-n_30-m_20-d_unif-p_2000-q_4000-g_1000-t_5__0__tsk.csv");
     //CSVReader csvReader = CSVReader("../testcases_seperation_tested/taskset__1643188175-a_0.2-b_0.3-n_30-m_20-d_unif-p_2000-q_4000-g_1000-t_5__0__tsk.csv");
     //CSVReader csvReader = CSVReader("../testcases_seperation_tested/taskset__1643188157-a_0.2-b_0.2-n_30-m_20-d_unif-p_2000-q_4000-g_1000-t_5__20__tsk.csv");
-    CSVReader csvReader = CSVReader("../testcases_seperation_tested/" + test_case);
+     
+    CSVReader csvReader = CSVReader(argv[1]);
     csvReader.openFile(); 
     
     std::vector<std::vector<std::string>> rows = csvReader.getRows(';', false);
@@ -30,10 +36,10 @@ int main() {
             task_set_ET.push_back(task);
         }
     }
-
+    std::vector<std::string> test_case = csvReader.splitString(argv[1], '/');
     // kind of weird with the population size arg
-    SolutionGenerator solution_generator(&task_set_all, 128); 
-    SimpleGeneticAlgorithm sga(&solution_generator, 0.9, 0.05, test_case);
+    SolutionGenerator solution_generator(&task_set_all); 
+    SimpleGeneticAlgorithm sga(&solution_generator, 0.9, 0.05, test_case.at(test_case.size()-1));
     
     sga.perform_sga(2048, 30, cost_function);
     solution best_solution = sga.get_best_solution();

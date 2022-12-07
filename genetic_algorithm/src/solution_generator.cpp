@@ -1,7 +1,6 @@
 #include "solution_generator.h"
 
-SolutionGenerator::SolutionGenerator(std::vector<Task> *task_set, int population_size) {
-        population_sz = population_size;
+SolutionGenerator::SolutionGenerator(std::vector<Task> *task_set) { 
         rng = std::mt19937(dev()); // https://stackoverflow.com/questions/686353/random-float-number-generation  
         init_period_space(2, 4000);
         uni_dist_periods = std::uniform_int_distribution<std::mt19937::result_type>(0, periods.size()-1);

@@ -6,7 +6,7 @@
 class SimpleGeneticAlgorithm {
     private:
         SolutionGenerator *sg;
-        solution best_solution; 
+        solution best_solution, init_best_solution; // init solution only necessary for showing some test results 
         double crossover_rate;
         double mutation_rate;
         std::random_device dev; 

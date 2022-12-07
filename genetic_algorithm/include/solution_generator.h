@@ -57,7 +57,7 @@ class SolutionGenerator {
         std::vector<int> periods;
 
     public:
-        SolutionGenerator(std::vector<Task>*, int); 
+        SolutionGenerator(std::vector<Task>*); 
         void separate_et_tasks(); // separate et tasks based on the separation field. store in map
         std::vector<std::vector<Task>> distribute_et_zeros(int n); // randomly partition et 0s to n vectors
         solution generate_solution(); // generate a random solution

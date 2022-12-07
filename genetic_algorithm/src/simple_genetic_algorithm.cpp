@@ -37,17 +37,18 @@ void SimpleGeneticAlgorithm::perform_sga(int population_sz, int num_generations,
     int chunk_sz = population_sz / 8;
     uint64_t sec0 = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
  
-    #pragma omp parallel for num_threads(4)
+    #pragma omp parallel for num_threads(8) schedule(guided)
     for(int i = 0; i < population_sz; i = i + 1) {
         apply_cost_function1(&population[i], cost_f);
-        if(population[i].is_schedulable) {
-                std::cout << "solution " << i << " cost: " << population[i].cost << " is schedulable: " << population[i].is_schedulable << std::endl; 
-        }
+        //if(population[i].is_schedulable) {
+        //        std::cout << "solution " << i << " cost: " << population[i].cost << " is schedulable: " << population[i].is_schedulable << std::endl; 
+        //}
         //std::cout << "solution " << i << " cost: " << population[i].cost << " is schedulable: " << population[i].is_schedulable << std::endl;
     }
     avg_costs.push_back(avg_cost_population(population));
     // handle case where no solution is schedulable
     best_solution = get_min_cost(&population); // we could find in loop above but... one time cost below we have to do it separately...  
+    init_best_solution = best_solution;
     //std::cout << "best cost is: " << best_solution.cost << std::endl;
     
     // main loop 
@@ -73,7 +74,7 @@ void SimpleGeneticAlgorithm::perform_sga(int population_sz, int num_generations,
         population = new_population;
         
         // update population. parallelize. guided or static. some overhead with guided.. but if population size is large it might be good
-        #pragma omp parallel for num_threads(4) schedule(guided) 
+        #pragma omp parallel for num_threads(8) schedule(guided) 
         for(int i = 0; i < population_sz; i = i + 1) {
             apply_cost_function1(&population[i], cost_f);
             //std::cout << "solution " << i << " cost: " << population[i].cost << " is schedulable: " << population[i].is_schedulable << std::endl;
@@ -84,10 +85,7 @@ void SimpleGeneticAlgorithm::perform_sga(int population_sz, int num_generations,
 
         candidate_best = get_min_cost(&population);
         avg_costs.push_back(avg_cost_population(population));
-        /*if (candidate_best.cost < best_solution.cost && candidate_best.is_schedulable) {
-            best_solution = candidate_best;
-            std::cout << "yo" << std::endl;
-        }*/
+         
         //best_solution = ((candidate_best.cost < best_solution.cost && candidate_best.is_schedulable) || (candidate_best.is_schedulable && !best_solution.is_schedulable)) ? candidate_best : best_solution;
         if ((candidate_best.cost < best_solution.cost && candidate_best.is_schedulable) || (candidate_best.is_schedulable && !best_solution.is_schedulable)) {
             best_solution = candidate_best;
@@ -116,7 +114,7 @@ double SimpleGeneticAlgorithm::avg_cost_population(std::vector<solution> populat
 
 void SimpleGeneticAlgorithm::print_run_summary(double sec) {
     std::string output;
-    output = test_case + "," + std::to_string(sec) + "," + std::to_string(best_solution.cost) + "," + std::to_string(gen_best_solution);
+    output = test_case + "," + std::to_string(sec) + "," + std::to_string(best_solution.cost) + "," + std::to_string(best_solution.is_schedulable) + "," + std::to_string(init_best_solution.cost) + "," + std::to_string(init_best_solution.is_schedulable) + "," + std::to_string(gen_best_solution);
     for (auto avg : avg_costs) {
         output = output + "," + std::to_string(avg);
 
