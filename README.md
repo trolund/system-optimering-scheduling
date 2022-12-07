@@ -37,6 +37,9 @@ Genetics Algorithm
 Simulated Annealing:
     Prerequsites:
         python
+        pip
+        Install necessary libraries
+            pip install -r requirements.txt
     
 
     Build and run the code
