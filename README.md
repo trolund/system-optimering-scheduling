@@ -45,3 +45,7 @@ Simulated Annealing:
     Build and run the code
         go into the folder "sa_scheduling"
         python main.py [options]
+
+
+Other notes:
+    There has been some issues when running on different environments which has been caused by the code running in several threads, comment out XXX to only run with one thread which should fix the issue
