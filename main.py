@@ -49,15 +49,21 @@ if __name__ == "__main__":
     if sys.argv[1] == "-l" or sys.argv[1] == "--log":
         filename = sys.argv[2]
         test_case = [sys.argv[3], int(sys.argv[4])]
-        temperature = float(sys.argv[5])
-        alpha = float(sys.argv[6])
-        stopcriterion_sec = float(sys.argv[7])
+        # temperature = float(sys.argv[5])
+        # alpha = float(sys.argv[6])
+        # stopcriterion_sec = float(sys.argv[7])
+        stopcriterion_sec = float(sys.argv[5])
         is_logging = True
     else:
         test_case = [sys.argv[1], int(sys.argv[2])]
-        temperature = float(sys.argv[3])
-        alpha = float(sys.argv[4])
-        stopcriterion_sec = float(sys.argv[5])
+        # temperature = float(sys.argv[3])
+        # alpha = float(sys.argv[4])
+        # stopcriterion_sec = float(sys.argv[5])
+        stopcriterion_sec = float(sys.argv[3])
+
+    # hardcoded parameters
+    temperature = 500
+    alpha = 0.999
 
     # neighborhood object
     neighborhood = Neighborhood() 

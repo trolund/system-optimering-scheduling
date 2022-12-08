@@ -13,15 +13,8 @@ from taskType import TaskType
 class CaseLoader:
 
     def get_filename_id(self, filename):
-        # lots of assumptions about filename, fx always have this __.__ format
-        # print(filename[-10:-9])
-        # try:
-        #     int(filename[-11:-10])
-        #     two_digit = filename[-11:-10]
-        # except:
-        #     two_digit = ""
-        # filename_id = two_digit + filename[-10:-9]
-        filename_id = re.findall("__(.)__", filename)[-1]# assuming that the character (.) is in [0,2,3,4,5,6,7,8,9] and last occurence of pattern is what we use
+        # lots of assumptions about filename, fx always have this __.__ or __..__ format
+        filename_id = re.findall("__(.?.?)__", filename)[-1]# assuming that the character (.) is in [0,2,3,4,5,6,7,8,9] and last occurence of pattern is what we use
      
         return filename_id
 
@@ -32,7 +25,6 @@ class CaseLoader:
             return None
 
     def load_test_case(self, test_case_name="", id: int = -1, filePath=""):
-        # print(sys.path)
         try:
             print("Searching for test cases at:")
             file_path = filePath if len(filePath) > 0 else "test_cases\\"
@@ -46,8 +38,6 @@ class CaseLoader:
 
             for root, dirs, files in os.walk(path):
                 for fileName in files:
-                    # print(root.split("\\"))
-                    # print(root.split("\\")[-1])
                     case_name = root.split("\\")[-1]
                     path = os.path.join(root, fileName)
                     with open(path, "r") as file:
@@ -99,8 +89,6 @@ class CaseLoader:
 
             for root, dirs, files in os.walk(path):
                 for fileName in files:
-                    # print(root.split("\\"))
-                    # print(root.split("\\")[-1])
                     case_name = root.split("/")[-1]
                     path = os.path.join(root, fileName)
                     with open(path, "r") as file:

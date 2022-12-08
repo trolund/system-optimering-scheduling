@@ -62,7 +62,8 @@ class SimulatedAnnealer:
         self.n_solutions = 0
         self.cost_log = []
         if log_costs: # logging
-            self.cost_log.append(current_cost)    
+            print("First cost is", self.best_cost)
+            self.cost_log.append(current_cost)
 
         # does not matter if < or <= if 0 then new solution will be selected no matter what     
         while int(time.time()) - sec0 < stopcriterion_sec:
@@ -73,10 +74,6 @@ class SimulatedAnnealer:
             start_time = time.time()
             tmp_schedule, tmp_cost, is_schedulable = cost_f(tmp_solution) # apply objective function
             cost_time = cost_time + (time.time() - start_time)
-            
-             # just for debugging
-            pss = [t for t in tmp_solution if t.et_subset != None]
-             #print(len(pss))
             
              # compute delta
             delta = tmp_cost - current_cost
