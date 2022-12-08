@@ -49,7 +49,7 @@ std::tuple<double, bool>  cost_function(std::vector<Task> *task_set) {
     }
 
     cost_tt = wcrts_tt_sum;// / task_set->size();
-     
+    //std::cout << "number of tasks: " << task_set->size() + num_et_tasks << std::endl; 
     // (sum wcrt tt + sum wcrt et) 
     cost = (cost_tt + cost_et) / (task_set->size() + num_et_tasks);
     //std::cout << "cost function cost is: " << cost << " et: " << cost_et << " tt: " << cost_tt << std::endl;
