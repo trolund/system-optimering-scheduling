@@ -25,4 +25,5 @@ class SimpleGeneticAlgorithm {
         void fill_mating_pool(std::vector<solution*>& mating_pool, std::vector<solution>* population);
         double avg_cost_population(std::vector<solution>);
         void print_run_summary(double);
+        void print_ps_config(solution*);
 };

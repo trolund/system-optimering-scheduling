@@ -39,17 +39,17 @@ void SimpleGeneticAlgorithm::perform_sga(int population_sz, int num_generations,
  
     #pragma omp parallel for num_threads(4) schedule(guided)
     for(int i = 0; i < population_sz; i = i + 1) {
-        apply_cost_function1(&population[i], cost_f);
-        //if(population[i].is_schedulable) {
-        //        std::cout << "solution " << i << " cost: " << population[i].cost << " is schedulable: " << population[i].is_schedulable << std::endl; 
-        //}
-        //std::cout << "solution " << i << " cost: " << population[i].cost << " is schedulable: " << population[i].is_schedulable << std::endl;
+        apply_cost_function1(&population[i], cost_f); 
     }
     avg_costs.push_back(avg_cost_population(population));
+    
     // handle case where no solution is schedulable
     best_solution = get_min_cost(&population); // we could find in loop above but... one time cost below we have to do it separately...  
     init_best_solution = best_solution;
-    //std::cout << "best cost is: " << best_solution.cost << std::endl;
+
+    print_ps_config(&best_solution);
+
+    std::cout << "initial generation: " << " best solution cost is: "  << best_solution.cost << " is schedulable: " << best_solution.is_schedulable << std::endl;
     
     // main loop 
     for(int gen = 0; gen <  num_generations; gen = gen + 1) {
@@ -68,21 +68,14 @@ void SimpleGeneticAlgorithm::perform_sga(int population_sz, int num_generations,
             sg->fix_solution(&offspring[1]);
 
             new_population.insert(new_population.end(), offspring.begin(), offspring.end()); 
-        }
-        //std::cout << "size of new population: " << new_population.size() << std::endl; 
+        } 
         
         population = new_population;
-        /*for(int i = 0; i < population_sz; i = i + 1) {
-            population[i] = new_population[i];
-        }*/
+         
         // update population. parallelize. guided or static. some overhead with guided.. but if population size is large it might be good
         #pragma omp parallel for num_threads(4) schedule(guided) 
         for(int i = 0; i < population_sz; i = i + 1) {
-            apply_cost_function1(&population[i], cost_f);
-            //std::cout << "solution " << i << " cost: " << population[i].cost << " is schedulable: " << population[i].is_schedulable << std::endl;
-            //if (population[i].is_schedulable) {
-            //    std::cout << "solution " << i << " cost: " << population[i].cost << " is schedulable: " << population[i].is_schedulable << std::endl;
-            //} 
+            apply_cost_function1(&population[i], cost_f); 
         }
 
         candidate_best = get_min_cost(&population);
@@ -93,10 +86,10 @@ void SimpleGeneticAlgorithm::perform_sga(int population_sz, int num_generations,
             best_solution = candidate_best;
             gen_best_solution = gen + 1; // okay +1 bc initial and 
         }
-        std::cout << "generation is: " << gen + 1 << " best solution cost is: "  << best_solution.cost << std::endl;
+        std::cout << "generation is: " << gen + 1 << " best solution cost is: "  << best_solution.cost << " is schedulable: " << best_solution.is_schedulable << std::endl;
 
     }
-
+    print_ps_config(&best_solution);
     uint64_t sec_end = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     //std::cout << "ran for: " << sec_end - sec0 << " seconds" << std::endl;
     print_run_summary(sec_end - sec0);
@@ -123,4 +116,15 @@ void SimpleGeneticAlgorithm::print_run_summary(double sec) {
     }
 
     std::cout << output + "\n"; 
+}
+
+void SimpleGeneticAlgorithm::print_ps_config(solution* sol) {
+    std::cout << std::endl << "cost is: " << sol->cost << " is schedulable: " << sol->is_schedulable << std::endl;
+    for (auto it : sol->polling_servers) {
+        std::cout << it.name << " " << it.duration << " " << it.period << " " << " " << it.deadline << " " << std::endl;
+        for(auto et : *it.et_subset) {
+            std::cout << et.name << " " << et.separation << " ";
+        }
+        std::cout << std::endl << std::endl;
+    }
 }
