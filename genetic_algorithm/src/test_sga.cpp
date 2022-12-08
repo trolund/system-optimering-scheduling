@@ -44,12 +44,12 @@ int main(int argc, char* argv[]) {
     sga.perform_sga(2048, 30, cost_function);
     solution best_solution = sga.get_best_solution();
 
-    std::cout << std::endl << "best cost is: " << best_solution.cost << " is schedulable: " << best_solution.is_schedulable << std::endl;
+    /*std::cout << std::endl << "best cost is: " << best_solution.cost << " is schedulable: " << best_solution.is_schedulable << std::endl;
     for (auto it : best_solution.polling_servers) {
         std::cout << it.name << " " << it.duration << " " << it.period << " " << " " << it.deadline << " " << std::endl;
         for(auto et : *it.et_subset) {
             std::cout << et.name << " " << et.separation << " ";
         }
         std::cout << std::endl << std::endl;
-    }
+    }*/
 }
