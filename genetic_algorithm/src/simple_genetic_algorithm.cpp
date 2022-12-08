@@ -121,7 +121,7 @@ void SimpleGeneticAlgorithm::print_run_summary(double sec) {
 void SimpleGeneticAlgorithm::print_ps_config(solution* sol) {
     std::cout << std::endl << "cost is: " << sol->cost << " is schedulable: " << sol->is_schedulable << std::endl;
     for (auto it : sol->polling_servers) {
-        std::cout << it.name << " " << it.duration << " " << it.period << " " << " " << it.deadline << " " << std::endl;
+        std::cout << "name: " << it.name << " duration: " << it.duration << " period: " << it.period << " " << " deadline: " << it.deadline << " " << std::endl;
         for(auto et : *it.et_subset) {
             std::cout << et.name << " " << et.separation << " ";
         }
