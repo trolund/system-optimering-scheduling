@@ -52,6 +52,10 @@ class SimulatedAnnealer:
         cost_time = 0
         start_time = time.time()
         schedule, current_cost, is_schedulable = cost_f(current_solution)
+
+        # determining whether any solution is schedulable
+        schedulable = is_schedulable
+
         cost_time = cost_time + (time.time() - start_time)
         self.best_solution = copy.deepcopy(current_solution)
         best_cost = current_cost
@@ -63,7 +67,12 @@ class SimulatedAnnealer:
         self.cost_log = []
         if log_costs: # logging
             print("First cost is", self.best_cost)
+            if is_schedulable:
+                print("First solution is schedulable.")
+            else:
+                print("First solution is not schedulable.")
             self.cost_log.append(current_cost)
+
 
         # does not matter if < or <= if 0 then new solution will be selected no matter what     
         while int(time.time()) - sec0 < stopcriterion_sec:
@@ -95,9 +104,10 @@ class SimulatedAnnealer:
                     self.best_cost = current_cost
                     best_cost = current_cost # not so clean having best cost and self.best_cost ...
                     self.best_ps_config = copy.deepcopy(polling_servers)
+                    schedulable = is_schedulable
         
                     # log to stdout 
-                    print("************* updated best solution *************")
+                    print("************* updated best solution at iteration", self.n_solutions + 1, "*************")
                      
             # logging
             self.n_solutions = self.n_solutions + 1
@@ -105,7 +115,7 @@ class SimulatedAnnealer:
             # update temperature
             t = t * a
  
-        self.print_message(stopcriterion_sec)
+        self.print_message(stopcriterion_sec, schedulable)
 
         return cost_time
 
@@ -163,11 +173,13 @@ class SimulatedAnnealer:
         t = t * a
         return t
 
-    def print_message(self, stopcriterion_sec):
+    def print_message(self, stopcriterion_sec, schedulable):
         print("\n")
         print("ran for ", stopcriterion_sec, " seconds")
         print("number of generated solutions: ", self.n_solutions)
         print("number of visited solutions: ", len(self.cost_log))
+        if not schedulable:
+            print("No schedulable solution was found.")
     
     def print_n_solutions(self):
         print("Total generated solutions: ", self.n_solutions)

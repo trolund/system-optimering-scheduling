@@ -39,7 +39,7 @@ def print_best_ps_config(best_ps_config, best_cost):
 
 if __name__ == "__main__":
     starttime = time.time()
-    if len(sys.argv) < 6:
+    if len(sys.argv) < 4:
         usage(sys.argv)
         sys.exit(0)
     
@@ -71,6 +71,7 @@ if __name__ == "__main__":
     # instantiate simulated annealer
     simulated_annealer = SimulatedAnnealer(neighborhood)
 
+    print("Started running algorithm at", time.asctime(time.localtime(time.time())), "and will finish running around", time.asctime(time.localtime(time.time() + stopcriterion_sec)))
     loader = CaseLoader()
     all_tasks = loader.load_test_case(test_case[0], test_case[1])
     tt_tasks = [t for t in all_tasks if t.type == TaskType.TIME]
