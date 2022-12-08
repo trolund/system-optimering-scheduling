@@ -98,7 +98,7 @@ class SimulatedAnnealer:
                     self.cost_log.append(current_cost)
         
                 # keep track of the best solution. save all the things..
-                if current_cost < best_cost and is_schedulable:
+                if (current_cost < best_cost or not schedulable) and is_schedulable:
                     self.best_solution = current_solution
                     self.best_schedule = schedule[:]
                     self.best_cost = current_cost
