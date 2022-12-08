@@ -92,7 +92,11 @@ solution SolutionGenerator::generate_solution() {
             
             duration = uni_dist_duration(rng); // another rng for this 
             duration = std::min(duration, deadline); 
-            std::vector<Task> *et_subset = new std::vector<Task>; 
+            std::vector<Task> *et_subset = new std::vector<Task>;  
+            /*std::vector<Task> et_subset = std::vector<Task>();
+            for(int i = 0; i < it.second->size(); i = i + 1) {
+                et_subset.push_back(it.second->at(i));
+            }*/
             *et_subset = *it.second; 
             Task polling_server =  Task(name, duration, period, TT, 7, deadline, period_index, et_subset);
 
@@ -127,17 +131,26 @@ void swap(solution& lhs, solution& rhs, int crossover_point) {
     //std::cout << "crossover point: " << crossover_point << std::endl;
     switch(crossover_point) {
         case 2:
-            std::swap(lhs.polling_servers[0].deadline, rhs.polling_servers[0].deadline); 
+            for(int i = 0; i < lhs.polling_servers.size(); i  = i + 1) {
+                std::swap(lhs.polling_servers[i].deadline, rhs.polling_servers[i].deadline); 
+            }
+            /*std::swap(lhs.polling_servers[0].deadline, rhs.polling_servers[0].deadline); 
             std::swap(lhs.polling_servers[1].deadline, rhs.polling_servers[1].deadline);
-            std::swap(lhs.polling_servers[2].deadline, rhs.polling_servers[2].deadline);
+            std::swap(lhs.polling_servers[2].deadline, rhs.polling_servers[2].deadline);*/
         case 1:
-            std::swap(lhs.polling_servers[0].period, rhs.polling_servers[0].period);  
+            for(int i = 0; i < lhs.polling_servers.size(); i = i + 1) {
+                std::swap(lhs.polling_servers[i].period, rhs.polling_servers[i].period);  
+            }
+            /*std::swap(lhs.polling_servers[0].period, rhs.polling_servers[0].period);  
             std::swap(lhs.polling_servers[1].period, rhs.polling_servers[1].period); 
-            std::swap(lhs.polling_servers[2].period, rhs.polling_servers[2].period);  
+            std::swap(lhs.polling_servers[2].period, rhs.polling_servers[2].period);*/ 
         case 0:
-            std::swap(lhs.polling_servers[0].duration, rhs.polling_servers[0].duration); 
+            for(int i = 0; i < lhs.polling_servers.size(); i = i + 1) {
+                std::swap(lhs.polling_servers[i].duration, rhs.polling_servers[i].duration); 
+            }
+            /*std::swap(lhs.polling_servers[0].duration, rhs.polling_servers[0].duration); 
             std::swap(lhs.polling_servers[1].duration, rhs.polling_servers[1].duration);
-            std::swap(lhs.polling_servers[2].duration, rhs.polling_servers[2].duration);
+            std::swap(lhs.polling_servers[2].duration, rhs.polling_servers[2].duration);*/
             break;  
     }
 
