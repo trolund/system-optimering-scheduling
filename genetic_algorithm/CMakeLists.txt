@@ -33,6 +33,7 @@ add_executable(test_solution src/test_solution_generator.cpp)
 target_link_libraries(test_solution PUBLIC CSVReader Solutions)
 
 add_executable(test_cost src/test_cost.cpp)
+set_property(TARGET test_cost PROPERTY CXX_STANDARD 20)
 target_link_libraries(test_cost PUBLIC CSVReader Solutions)
 
 add_executable(test_sga src/test_sga.cpp)
