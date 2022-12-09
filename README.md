@@ -36,6 +36,12 @@ On windows:
 
 On Linux:
 
+    From the folder genetic_algorithms:
+    mkdir build
+    cd build 
+    cmake ..
+    cmake --build . 
+
 ### Simulated annealing 
 Windows:
     Prerequsites:
@@ -54,11 +60,13 @@ Windows:
     The files in the **test_cases** folder can be run like this:
 
         python main.py ../test_cases/taskset_small__3__.csv 20
+
 Linux:
+
     Same as on Windows
 
 
-Other notes:
+### Other notes:
     There has been some issues when running on different environments which has been caused by the code running in several threads. If any issues occur regarding basic_string::_M_create, comment out the following lines:
 
         pragma omp parallel for num_threads(4)
