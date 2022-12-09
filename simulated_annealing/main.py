@@ -1,16 +1,19 @@
 import sys
-# sys.path.insert(1, '/')
-from caseLoader import CaseLoader
-from taskType import TaskType
-from simulated_annealer import SimulatedAnnealer
-from neighborhood import Neighborhood
-from cost_functions import *
-import matplotlib.pyplot as plt 
-import numpy as np
 import time as time
 
+import matplotlib.pyplot as plt
+import numpy as np
+
+# sys.path.insert(1, '/')
+from caseLoader import CaseLoader
+from cost_functions import *
+from neighborhood import Neighborhood
+from simulated_annealer import SimulatedAnnealer
+from taskType import TaskType
+
+
 def usage(argv):
-    print("python3.9 ", argv[0], " [-l/--log <filename>] <inf_X_Y N> <temperature0> <alpha> <stopcriterion_sec>", )
+    print("python3.9 ", argv[0], " [-l/--log <filename>] <file path> <stop criterion in sec>", )
     print("--log/-l <filename>: log solutions and save plot of costs save as <filename>")
 
 
@@ -18,7 +21,7 @@ def generate_plot(cost_log, best_cost, filename, test_case):
     fig, ax = plt.subplots()
     ax.plot(np.arange(len(cost_log)), cost_log)
     fig.set_size_inches(18.5, 10.5)
-    plt.axhline(y = best_cost, color = 'r', linestyle = '-', label="Best cost")
+    plt.axhline(y=best_cost, color='r', linestyle='-', label="Best cost")
     plt.title("Costs " + test_case[0] + " " + str(test_case[1]))
     plt.xlabel("Solution number")
     plt.ylabel("Cost")
@@ -27,11 +30,13 @@ def generate_plot(cost_log, best_cost, filename, test_case):
     fig.set_dpi(300)
     plt.savefig(filename)
 
+
 def print_best_ps_config(best_ps_config, best_cost):
     print("Best polling server configuration: ")
     print("Cost: ", best_cost)
     for polling_server in best_ps_config:
-        print("\tName: ", polling_server.name, " Duration: ", polling_server.duration, " Period: ", polling_server.period, " Deadline: ", polling_server.deadline)
+        print("\tName: ", polling_server.name, " Duration: ", polling_server.duration, " Period: ",
+              polling_server.period, " Deadline: ", polling_server.deadline)
         for et in polling_server.et_subset:
             print("\t\tName: ", et.name, "Separation type: ", et.separation)
         # add print ets for each ps 
@@ -39,41 +44,42 @@ def print_best_ps_config(best_ps_config, best_cost):
 
 if __name__ == "__main__":
     starttime = time.time()
-    if len(sys.argv) < 4:
+    if len(sys.argv) < 3:
         usage(sys.argv)
         sys.exit(0)
-    
+
     is_logging = False
 
     # get commandline arguments
     if sys.argv[1] == "-l" or sys.argv[1] == "--log":
         filename = sys.argv[2]
-        test_case = [sys.argv[3], int(sys.argv[4])]
+        test_case = sys.argv[3]
         # temperature = float(sys.argv[5])
         # alpha = float(sys.argv[6])
         # stopcriterion_sec = float(sys.argv[7])
         stopcriterion_sec = float(sys.argv[5])
         is_logging = True
     else:
-        test_case = [sys.argv[1], int(sys.argv[2])]
+        test_case = sys.argv[1]
         # temperature = float(sys.argv[3])
         # alpha = float(sys.argv[4])
         # stopcriterion_sec = float(sys.argv[5])
-        stopcriterion_sec = float(sys.argv[3])
+        stopcriterion_sec = float(sys.argv[2])
 
     # hardcoded parameters
     temperature = 500
     alpha = 0.999
 
     # neighborhood object
-    neighborhood = Neighborhood() 
-    
+    neighborhood = Neighborhood()
+
     # instantiate simulated annealer
     simulated_annealer = SimulatedAnnealer(neighborhood)
 
-    print("Started running algorithm at", time.asctime(time.localtime(time.time())), "and will finish running around", time.asctime(time.localtime(time.time() + stopcriterion_sec)))
+    print("Started running algorithm at", time.asctime(time.localtime(time.time())), "and will finish running around",
+          time.asctime(time.localtime(time.time() + stopcriterion_sec)))
     loader = CaseLoader()
-    all_tasks = loader.load_test_case(test_case[0], test_case[1])
+    all_tasks = loader.load_test_case(test_case)
     tt_tasks = [t for t in all_tasks if t.type == TaskType.TIME]
     et_tasks = [t for t in all_tasks if t.type == TaskType.EVENT]
 
@@ -93,5 +99,5 @@ if __name__ == "__main__":
     endtime = time.time()
     total_time = endtime - starttime
 
-    print("algorithm spent", cost_time/total_time*100, "% of time in cost_f()")
+    print("algorithm spent", cost_time / total_time * 100, "% of time in cost_f()")
     print("algorithm spent", cost_time, "seconds in cost_f and", total_time, "seconds in total")

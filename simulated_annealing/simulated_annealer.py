@@ -21,7 +21,7 @@ class SimulatedAnnealer:
         self.best_cost = 0
 
     def reset(self):
-        self.n_solutions = 0 
+        self.n_solutions = 0
         self.cost_log = []
         self.best_solution = []
         self.best_ps_config = []
@@ -31,10 +31,10 @@ class SimulatedAnnealer:
         return self.neighborhood.get_neighbor(polling_servers)
 
     def p(self, delta, t):
-        return np.exp( -delta / t )
+        return np.exp(-delta / t)
 
     # simulated annealing 
-    def sa(self, s0, t, a, stopcriterion_sec, cost_f=None, log_costs = False):
+    def sa(self, s0, t, a, stopcriterion_sec, cost_f=None, log_costs=False):
         # reset part of state
 
         self.reset()
@@ -43,7 +43,7 @@ class SimulatedAnnealer:
         sec0 = int(time.time())
 
         # get tt and et tasks
-        tt = [t for t in s0 if t.type == TaskType.TIME and t.et_subset == None] 
+        tt = [t for t in s0 if t.type == TaskType.TIME and t.et_subset == None]
         polling_servers = [t for t in s0 if t.et_subset != None]
         # current and best solution
         current_solution = tt + polling_servers
@@ -61,11 +61,11 @@ class SimulatedAnnealer:
         best_cost = current_cost
         self.best_cost = current_cost
         self.best_ps_config = polling_servers
-         
+
         # for logging purposes
         self.n_solutions = 0
         self.cost_log = []
-        if log_costs: # logging
+        if log_costs:  # logging
             print("First cost is", self.best_cost)
             if is_schedulable:
                 print("First solution is schedulable.")
@@ -73,48 +73,47 @@ class SimulatedAnnealer:
                 print("First solution is not schedulable.")
             self.cost_log.append(current_cost)
 
-
-        # does not matter if < or <= if 0 then new solution will be selected no matter what     
+        # does not matter if < or <= if 0 then new solution will be selected no matter what
         while int(time.time()) - sec0 < stopcriterion_sec:
-            #self.anneal(polling_servers, tt, t, a, self.n_solutions, current_cost, log_costs, best_cost)
-            tmp_ps = self.get_neighbor(copy.deepcopy(polling_servers)) # obtain ps configuration from neighborhood
-            tmp_solution = tt + tmp_ps # complete task set
+            # self.anneal(polling_servers, tt, t, a, self.n_solutions, current_cost, log_costs, best_cost)
+            tmp_ps = self.get_neighbor(copy.deepcopy(polling_servers))  # obtain ps configuration from neighborhood
+            tmp_solution = tt + tmp_ps  # complete task set
 
             start_time = time.time()
-            tmp_schedule, tmp_cost, is_schedulable = cost_f(tmp_solution) # apply objective function
+            tmp_schedule, tmp_cost, is_schedulable = cost_f(tmp_solution)  # apply objective function
             cost_time = cost_time + (time.time() - start_time)
-            
-             # compute delta
+
+            # compute delta
             delta = tmp_cost - current_cost
-             
+
             # accept randomly drawn solution from current neighborhood if better or with some probability
             if delta <= 0 or self.p(delta, t) > self.rand.uniform(0.0, 1.0):
-                polling_servers = copy.deepcopy(tmp_ps) # all these copies...
-                current_solution = tmp_solution # update current solution, current set of polling servers, costs & schedule
+                polling_servers = copy.deepcopy(tmp_ps)  # all these copies...
+                current_solution = tmp_solution  # update current solution, current set of polling servers, costs & schedule
                 current_cost = tmp_cost
                 schedule = tmp_schedule[:]
-        
-                if log_costs: # logging
+
+                if log_costs:  # logging
                     self.cost_log.append(current_cost)
-        
+
                 # keep track of the best solution. save all the things..
                 if (current_cost < best_cost or not schedulable) and is_schedulable:
                     self.best_solution = current_solution
                     self.best_schedule = schedule[:]
                     self.best_cost = current_cost
-                    best_cost = current_cost # not so clean having best cost and self.best_cost ...
+                    best_cost = current_cost  # not so clean having best cost and self.best_cost ...
                     self.best_ps_config = copy.deepcopy(polling_servers)
                     schedulable = is_schedulable
-        
+
                     # log to stdout 
                     print("************* updated best solution at iteration", self.n_solutions + 1, "*************")
-                     
+
             # logging
             self.n_solutions = self.n_solutions + 1
-        
+
             # update temperature
             t = t * a
- 
+
         self.print_message(stopcriterion_sec, schedulable)
 
         return cost_time
@@ -180,7 +179,7 @@ class SimulatedAnnealer:
         print("number of visited solutions: ", len(self.cost_log))
         if not schedulable:
             print("No schedulable solution was found.")
-    
+
     def print_n_solutions(self):
         print("Total generated solutions: ", self.n_solutions)
         print("Visited solutions:         ", len(self.cost_log))
@@ -200,4 +199,3 @@ class SimulatedAnnealer:
 
     def get_best_ps_config(self):
         return self.best_ps_config
-

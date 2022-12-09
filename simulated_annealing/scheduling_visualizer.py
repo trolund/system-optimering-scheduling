@@ -5,8 +5,9 @@ from sortedcontainers import SortedSet
 
 
 def sortBy(s):
-  num = int(s.replace('tTT', ''))
-  return num
+    num = int(s.replace('tTT', ''))
+    return num
+
 
 def get_bounds(solution):
     curr_task = "IDLE"
@@ -38,8 +39,6 @@ def get_bounds(solution):
     return [c for c in bounds if c[0] != "IDLE"], max_end
 
 
-
-
 class SchedulingVisualizer:
     """Returns a list of boundaries of each task execution and 'biggest' x cor"""
 
@@ -50,7 +49,7 @@ class SchedulingVisualizer:
         print(sol)
         print(data)
 
-        #print(len(servers), data, max_end)
+        # print(len(servers), data, max_end)
 
         # Declaring a figure "gnt"
         fig, gnt = plt.subplots()

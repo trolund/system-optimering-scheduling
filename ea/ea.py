@@ -2,10 +2,10 @@ import copy
 
 from numpy.random import randint, rand
 
-from caseLoader import CaseLoader
-from cost_functions import cost_f
-from taskType import TaskType
-from neighborhood import Neighborhood
+from simulated_annealing.caseLoader import CaseLoader
+from simulated_annealing.cost_functions import cost_f
+from simulated_annealing.neighborhood import Neighborhood
+from simulated_annealing.taskType import TaskType
 
 max_number_of_polling_servers = 10
 
@@ -25,12 +25,14 @@ def selection(pop_scores, k=3):
 
 # mutation operator
 def mutation(obj, r_mut):
-        for attr, value in obj.__dict__.items():
-            # do mutation if rand less then r_mut
-            if attr == "duration" or attr == "period" or attr == "deadline":
-                if rand() < r_mut:
-                    p = randint(-1, 1)
-                    setattr(obj, attr, int(value) + (1 * p))
+    for attr, value in obj.__dict__.items():
+        # do mutation if rand less then r_mut
+        if attr == "duration" or attr == "period" or attr == "deadline":
+            if rand() < r_mut:
+                p = randint(-1, 1)
+                setattr(obj, attr, int(value) + (1 * p))
+
+
 def list_to_task(l, obj):
     for idx, ele in enumerate(l):
         if idx == 0:
@@ -61,6 +63,7 @@ def crossover(p1, p2, r_cross):
             return list_to_task([l1[1], l2[2], l1[5]], c1), list_to_task([l2[1], l1[2], l2[5]], c2)
     else:
         return c1, c2
+
 
 def create_pop(population_size, task_set):
     population = []
@@ -167,4 +170,4 @@ if __name__ == "__main__":
     best = genetic_algorithm(all_tasks, eval, n_iter, n_pop, r_cross, r_mut)
 
     print('Done!')
-    print("Best: ",  best[0][1][1])
+    print("Best: ", best[0][1][1])
