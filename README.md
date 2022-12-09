@@ -13,7 +13,7 @@ As the Genetics Algorithm has been implemented with C++ and Simulated Annealing 
 
 
 On Windows:
-The following has been done to run genetics on Windows environment
+The following has been done to run genetics on Windows environment. 
 Genetics Algorithm
     Prerequsites:
         mingw
@@ -33,6 +33,14 @@ Genetics Algorithm
 	    make
 
         This will now compile the .exe files that can be run
+	
+On Linux:
+From genetic_algorithms 
+
+mkdir build 
+cd build 
+cmake ..
+cmake --build . 
 
 Simulated Annealing:
     Prerequsites:
@@ -48,4 +56,4 @@ Simulated Annealing:
 
 
 Other notes:
-    There has been some issues when running on different environments which has been caused by the code running in several threads, comment out XXX to only run with one thread which should fix the issue
+   For genetic algorithm if it fails with any sort of error: There has been some issues when running on different environments which has been caused by the code running in several threads, comment out line 40 and 76 in simple_genetic_algorithm.cpp to only run with one thread which should fix the issue
