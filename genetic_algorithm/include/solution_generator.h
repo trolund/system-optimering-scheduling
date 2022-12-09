@@ -32,7 +32,7 @@ struct cmp_solution_1 {
   }
 };
 
-/*  For generating initial solution. Recombiner recombines and creates subsquent generations. 
+/*  
     Solution is vector of polling servers and pointer to vector of tt tasks also store cost in this struct
 
     solution generate_solution()
@@ -52,13 +52,14 @@ class SolutionGenerator {
         std::vector<Task> tt_tasks;
         std::vector<Task> et_tasks;
         int population_sz; 
-        std::map<int, std::vector<Task>*> separation_map; 
+        std::map<int, std::vector<Task>*> separation_map;
+        std::set<int> separation_set;
         std::vector<int> periods;
 
     public:
-        SolutionGenerator(std::vector<Task>*, int); 
+        SolutionGenerator(std::vector<Task>*); 
         void separate_et_tasks(); // separate et tasks based on the separation field. store in map
-        void distribute_et_zeros(solution*);
+        std::vector<std::vector<Task>> distribute_et_zeros(int n); // randomly partition et 0s to n vectors
         solution generate_solution(); // generate a random solution
         std::vector<solution> generate_population(); // generate sz random solutions
         std::vector<solution> recombine(solution*, solution*, double); // generate two child solutions from two parent solutions      

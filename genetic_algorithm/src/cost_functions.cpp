@@ -1,64 +1,8 @@
 #include "cost_functions.h"
 #include <iostream>
 
-/*
-
-    TODO rand thing ....
-
-*/
-
-
-double cost_function(std::vector<Task> *task_set) {
-    std::list<Task> polling_servers; 
-    std::map<std::string, double> wcrts_tt; // doubles because we want to take an average
-    std::map<std::string, double> wcrts_et; // reassigned when iterating over polling servers
-    std::tuple<bool, std::map<std::string, double>, std::vector<std::string>> is_schedulable_cost_tt;
-    std::tuple<bool, std::map<std::string, double>> is_schedulable_cost_et; 
-    double cost_tt = 0.0, cost_et = 0.0, cost = 0.0, wcrts_et_sum = 0.0, wcrts_tt_sum = 0.0;
-    bool is_schedulable;
-
-    for (auto it : *task_set) { 
-        if (it.et_subset != NULL) { polling_servers.push_back(it); };        
-    }
-
-    // get cost contribution of each polling server 
-    for(auto it : polling_servers) {
-        is_schedulable_cost_et = is_polling_server_schedulable(&it);
-        is_schedulable = std::get<0>(is_schedulable_cost_et);
-        wcrts_et_sum = 0;
-        wcrts_et = std::get<1>(is_schedulable_cost_et);
-        
-        // if polling server is schedulable sum wcrts if not sum deadline + a penalty for each
-        for (auto et_task : *it.et_subset) {
-            if (is_schedulable) { wcrts_et_sum += wcrts_et[et_task.name]; }
-            else { wcrts_et_sum += 2*et_task.deadline; }
-        }
-
-        cost_et += wcrts_et_sum / it.et_subset->size();
-    }
-
-    // do not divide by zero
-    cost_et = polling_servers.size() > 0 ? cost_et / polling_servers.size() : 0; 
-        
-    is_schedulable_cost_tt = edf(task_set);
-    is_schedulable = std::get<0>(is_schedulable_cost_tt);
-    wcrts_tt = std::get<1>(is_schedulable_cost_tt);
-
-    // same approach as for ets in a ps. wcrt or deadline + penalty
-    for(auto it : *task_set) {
-        if(is_schedulable) { wcrts_tt_sum += wcrts_tt[it.name]; }
-        else {wcrts_tt_sum += 2*it.deadline; }
-    }
-
-    cost_tt = wcrts_tt_sum / task_set->size();
-     
-    cost = cost_tt + cost_et;
-    //std::cout << "cost function cost is: " << cost << " et: " << cost_et << " tt: " << cost_tt << std::endl;
-    return cost; 
-}
-
 // also returns is_schedulable
-std::tuple<double, bool>  cost_function1(std::vector<Task> *task_set) {
+std::tuple<double, bool>  cost_function(std::vector<Task> *task_set) {
     std::list<Task> polling_servers; 
     std::map<std::string, double> wcrts_tt; // doubles because we want to take an average
     std::map<std::string, double> wcrts_et; // reassigned when iterating over polling servers
@@ -105,7 +49,7 @@ std::tuple<double, bool>  cost_function1(std::vector<Task> *task_set) {
     }
 
     cost_tt = wcrts_tt_sum;// / task_set->size();
-     
+    //std::cout << "number of tasks: " << task_set->size() + num_et_tasks << std::endl; 
     // (sum wcrt tt + sum wcrt et) 
     cost = (cost_tt + cost_et) / (task_set->size() + num_et_tasks);
     //std::cout << "cost function cost is: " << cost << " et: " << cost_et << " tt: " << cost_tt << std::endl;

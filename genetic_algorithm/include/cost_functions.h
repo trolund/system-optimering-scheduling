@@ -9,6 +9,7 @@
 #include <list>
 #include <tuple>
 #include <climits>
+#include <algorithm>
 
 #include "task.h"
 
@@ -16,6 +17,5 @@ std::tuple<bool, std::map<std::string, double>, std::vector<std::string>> edf(st
 void get_ready_list(std::vector<Task>*, std::list<Task>*, int cycle);
 int processor_demand(int t2, std::vector<Task>* periodic_tasks);
 std::tuple<bool, std::map<std::string, double>> is_polling_server_schedulable(Task*);
-double cost_function(std::vector<Task>*);
-std::tuple<double, bool> cost_function1(std::vector<Task>*);
+std::tuple<double, bool> cost_function(std::vector<Task>*);
 

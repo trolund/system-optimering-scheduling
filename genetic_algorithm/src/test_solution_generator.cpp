@@ -27,7 +27,8 @@ int main() {
             task_set_ET.push_back(task);
         }
     }
-    SolutionGenerator sg(&task_set_all, 3);
+    SolutionGenerator sg(&task_set_all);
+    sg.set_population_sz(3);
 
     /*solution s = sg.generate_solution();
 
@@ -46,8 +47,8 @@ int main() {
         std::vector<Task> task_set = *population[i].tt_tasks;
         // do not think this works?? wait yeah yeah pollling servers is vector of task
         task_set.insert(task_set.end(), population[i].polling_servers.begin(), population[i].polling_servers.end());
-        double cost = cost_function(&task_set);
-        population[i].cost = cost;
+        std::tuple<double,bool> cost = cost_function(&task_set);
+        population[i].cost = std::get<0>(cost);
         //std::cout << "cost for this solution is: " << population[i].cost << " solution is: " << std::endl;
         /*for (auto itt : population[i].polling_servers) {
             std::cout << itt.name << " " << itt.duration << " " << itt.period << " " << " " << itt.deadline << " " << std::endl;
