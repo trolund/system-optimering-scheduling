@@ -57,7 +57,7 @@ if __name__ == "__main__":
         # temperature = float(sys.argv[5])
         # alpha = float(sys.argv[6])
         # stopcriterion_sec = float(sys.argv[7])
-        stopcriterion_sec = float(sys.argv[5])
+        stopcriterion_sec = float(sys.argv[4])
         is_logging = True
     else:
         test_case = sys.argv[1]
