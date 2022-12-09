@@ -154,7 +154,7 @@ def calculate_schedulability(polling_server):
                 if tj.priority >= pi:
                     # if demand is always 0, this is unnecessary
                     # demand = demand + math.ceil(t/Tj)*Cj
-                    demand = math.ceil(t / tj.period) * tj.duration
+                    demand += math.ceil(t / tj.period) * tj.duration
 
             # According to lemma 1 of [1], we are searching for the earliest time, when the supply exceeds the demand
             if supply >= demand:
