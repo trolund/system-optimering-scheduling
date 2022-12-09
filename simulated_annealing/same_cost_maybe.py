@@ -25,7 +25,7 @@ et_subset2 = [et_map["tET3"], et_map["tET5"], et_map["tET8"], et_map["tET16"], e
 ps2 = Task("ps2", 5, 20, TaskType.TIME, 7, 12, et_subset=et_subset2)
 
 et_subset3 = [et_map["tET9"], et_map["tET17"], et_map["tET4"], et_map["tET10"]]
-ps3 = Task("ps3", 3, 40, TaskType.TIME, 7, 26, et_subset=et_subset2)
+ps3 = Task("ps3", 3, 40, TaskType.TIME, 7, 26, et_subset=et_subset3)
 
 tt_tasks = tt_tasks + [ps1, ps2, ps3]
 
