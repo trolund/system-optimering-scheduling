@@ -1,0 +1,33 @@
+---------------
+First cost is 3664.173076923077
+First solution is not schedulable.
+---------------
+ran for  600.0  seconds
+number of generated solutions:  2579
+number of visited solutions:  2129
+Best polling server configuration: 
+Cost:  820.9807692307693
+	Name:  tTTps189  Duration:  2  Period:  750  Deadline:  260
+		Name:  tET16 Separation type:  0
+		Name:  tET12 Separation type:  0
+		Name:  tET8 Separation type:  0
+		Name:  tET5 Separation type:  0
+		Name:  tET10 Separation type:  0
+		Name:  tET17 Separation type:  0
+		Name:  tET2 Separation type:  0
+		Name:  tET4 Separation type:  0
+		Name:  tET3 Separation type:  1
+		Name:  tET9 Separation type:  1
+		Name:  tET1 Separation type:  1
+		Name:  tET11 Separation type:  1
+	Name:  tTTps204  Duration:  20  Period:  600  Deadline:  600
+		Name:  tET18 Separation type:  0
+		Name:  tET14 Separation type:  0
+		Name:  tET19 Separation type:  0
+		Name:  tET13 Separation type:  0
+		Name:  tET0 Separation type:  0
+		Name:  tET6 Separation type:  0
+		Name:  tET15 Separation type:  0
+		Name:  tET7 Separation type:  2
+algorithm spent 99.55058740202229 % of time in cost_f()
+algorithm spent 597.0496354103088 seconds in cost_f and 599.744964838028 seconds in total

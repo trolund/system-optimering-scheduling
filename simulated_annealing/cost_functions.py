@@ -206,7 +206,7 @@ def cost_f(task_set):
     sum_wcrts_tt = sum([wcrts[task.name] if task.name in wcrts else 2 * task.deadline for task in task_set])
     # if not is_schedulable: # penalize. do this to avoid ending up in a "false" minimum
     # sum_wcrts_tt += 0.2*sum_wcrts_tt
-
+    #print("number of tasks: ", num_tasks)
     # print("cost et: ", wcrts_et, " cost tt: ", sum_wcrts_tt)
     # sum_avg_wcrts = (sum_wcrts_tt + wcrts_et)
     # changing how cost is calculated, dividing by number of tasks at the end
